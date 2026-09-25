@@ -13,42 +13,25 @@ jobs:
               uses: styfle/cancel-workflow-action@0.9.1
               with:
                   access_token: ${{ github.token }}
-#     e2e:
-#         runs-on: ubuntu-latest
-#         steps:
-#             - name: Checkout code
-#               uses: actions/checkout@v4
-#             # # Install npm dependencies, cache them correctly
-#             # # and run all Cypress tests
-#             - name: Cypress run
-#               uses: cypress-io/github-action@v6
-#               with:
-#                 build: yarn build --mode e2e
-#                 start: npx serve -s dist --ssl-cert=cert/cert.pem --ssl-key=cert/key.pem --ssl-pass=cert/pass
-#                 wait-on: 'https://localhost:3000'
-#                 command-prefix: 'yarn'
-#                 browser: chrome
-#                 headed: true
-#     deploy:
-#         needs: [e2e]
-#         runs-on: ubuntu-latest
-#         if: github.ref == 'refs/heads/main'
-#         timeout-minutes: 10
-#         steps:
-#             - name: Deploy to Contabo server
-#               uses: appleboy/ssh-action@v1.0.3
-#               with:
-#                   host: ${{ secrets.CONTABO_HOST }}
-#                   username: ${{ secrets.CONTABO_USERNAME }}
-#                   password: ${{ secrets.CONTABO_PASSWORD }}
-#                   port: 22
-#                   script: |
-#                       cd services/fundshare-front
-#                       git checkout main
-#                       ${{ secrets.GIT_PULL_COMMAND }}
-#                       yarn install
-#                       yarn build
-#                       rm -rf /var/www/fundshare_dist
-#                       mv dist /var/www/fundshare_dist
+    deploy:
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/main'
+        timeout-minutes: 10
+        steps:
+            - name: Deploy to Contabo server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.CONTABO_HOST }}
+                  username: ${{ secrets.CONTABO_USERNAME }}
+                  password: ${{ secrets.CONTABO_PASSWORD }}
+                  port: 22
+                  script: |
+                      cd services/hosteo-front
+                      git checkout main
+                      ${{ secrets.GIT_PULL_COMMAND }}
+                      yarn install
+                      yarn build
+                      rm -rf /var/www/hosteo_dist
+                      mv dist /var/www/hosteo_dist
 
 #git pull https://davilasanvilar:{TOKEN}@github.com/davilasanvilar/fundshare-frontend.git
