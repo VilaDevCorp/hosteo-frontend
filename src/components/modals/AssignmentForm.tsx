@@ -1,7 +1,7 @@
 import { Button, Select } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import { Assignment, Task, Worker } from '../../types/entities';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import { useCrud } from '../../hooks/useCrud';
 import { useMutation } from '@tanstack/react-query';

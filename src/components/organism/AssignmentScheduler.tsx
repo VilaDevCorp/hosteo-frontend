@@ -21,7 +21,6 @@ import { conf } from '../../../conf';
 import { SchedulerDay } from '../molecules/SchedulerDay';
 import { Button, Modal, Select } from '@mantine/core';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
-import { EventAndTaskInfo } from '../molecules/EventAndTaskInfo';
 import { SchedulerAssignWorker } from '../molecules/SchedulerAssignWorker';
 import {
     AssignmentFormFields,

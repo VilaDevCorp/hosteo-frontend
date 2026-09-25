@@ -1,7 +1,6 @@
 import { Text } from '@mantine/core';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
 import { IconAlertTriangle } from '@tabler/icons-react';
-import { ALERT } from '../../types/enums';
 import { AssignmentFormFieldsWithObjects } from '../../types/forms';
 import { EventSchedulerDto } from '../../types/entities';
 
@@ -12,11 +11,12 @@ export function EventAndTaskInfo({
     assignment?: AssignmentFormFieldsWithObjects;
     eventInfo?: Record<string, EventSchedulerDto>;
 }) {
-    const nextEvent = assignment?.nextEventId && eventInfo ? eventInfo[assignment.nextEventId] : undefined;
-    const alertColor =
-        nextEvent?.alert === ALERT.DAYS_LEFT_5_UNASSIGNED
-            ? 'var(--mantine-color-yellow-5)'
-            : 'var(--mantine-color-error-5)';
+    // const nextEvent = assignment?.nextEventId && eventInfo ? eventInfo[assignment.nextEventId] : undefined;
+    // const alertColor =
+    //     nextEvent?.alert === ALERT.DAYS_LEFT_5_UNASSIGNED
+    //         ? 'var(--mantine-color-yellow-5)'
+    //         : 'var(--mantine-color-error-5)';
+    console.log(eventInfo);
 
     return (
         <div
@@ -37,7 +37,7 @@ export function EventAndTaskInfo({
                 }}
             >
                 <IconAlertTriangle
-                    color={alertColor}
+                    color={'var(--mantine-color-yellow-5)'}
                     size={24}
                     style={{ flexShrink: 0 }}
                 />

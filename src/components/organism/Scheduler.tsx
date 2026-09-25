@@ -9,7 +9,6 @@ import {
     EventSchedulerDto,
     SchedulerInfo,
     SchedulerItem,
-    TaskDto
 } from '../../types/entities';
 import { ApiResponse } from '../../types/types';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,16 +21,15 @@ import dayjs from 'dayjs';
 import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
 import { conf } from '../../../conf';
 import { SchedulerDay } from '../molecules/SchedulerDay';
-import { AlertsIndicator } from '../atoms/AlertsIndicator';
-import { AlertsDrawer } from './AlertsDrawer';
-import { AssignmentScheduler } from './AssignmentScheduler';
+// import { AlertsIndicator } from '../atoms/AlertsIndicator';
+// import { AlertsDrawer } from './AlertsDrawer';
+// import { AssignmentScheduler } from './AssignmentScheduler';
+// import {
+//     AssignmentFormFieldsWithObjects,
+//     EventFormFields,
+//     eventToForm
+// } from '../../types/forms';
 import {
-    AssignmentFormFieldsWithObjects,
-    EventFormFields,
-    eventToForm
-} from '../../types/forms';
-import {
-    ASSIGNMENT_STATE,
     AssignmentState,
     EventState
 } from '../../types/enums';
@@ -66,35 +64,35 @@ export function Scheduler() {
             ModalBodySkeleton: EventFormSkeleton
         });
 
-    const [openedAssignmentScheduler, setOpenedAssignmentScheduler] =
-        useState<boolean>(false);
-    const [openedDrawer, setOpenedDrawer] = useState<boolean>(false);
+    // const [openedAssignmentScheduler, setOpenedAssignmentScheduler] =
+    //     useState<boolean>(false);
+    // const [openedDrawer, setOpenedDrawer] = useState<boolean>(false);
 
-    const [assignmentToModify, setAssignmentToModify] = useState<
-        AssignmentFormFieldsWithObjects | undefined
-    >(undefined);
+    // const [assignmentToModify, setAssignmentToModify] = useState<
+    //     AssignmentFormFieldsWithObjects | undefined
+    // >(undefined);
 
-    const handleCreateNewAssignment = (
-        eventSchedulerDto: EventSchedulerDto,
-        task?: TaskDto
-    ) => {
-        if (!schedulerInfo) return;
+    // const handleCreateNewAssignment = (
+    //     eventSchedulerDto: EventSchedulerDto,
+    //     task?: TaskDto
+    // ) => {
+    //     if (!schedulerInfo) return;
 
-        const prevEventId = schedulerInfo.previousEvent[eventSchedulerDto.id];
+    //     const prevEventId = schedulerInfo.previousEvent[eventSchedulerDto.id];
 
-        setAssignmentToModify({
-            id: undefined,
-            task: task,
-            apartment: undefined,
-            worker: undefined,
-            startDate: undefined,
-            endDate: undefined,
-            state: ASSIGNMENT_STATE.PENDING,
-            eventId: eventSchedulerDto.id,
-            prevEventId: prevEventId
-        });
-        setOpenedAssignmentScheduler(true);
-    };
+    //     setAssignmentToModify({
+    //         id: undefined,
+    //         task: task,
+    //         apartment: undefined,
+    //         worker: undefined,
+    //         startDate: undefined,
+    //         endDate: undefined,
+    //         state: ASSIGNMENT_STATE.PENDING,
+    //         eventId: eventSchedulerDto.id,
+    //         prevEventId: prevEventId
+    //     });
+    //     setOpenedAssignmentScheduler(true);
+    // };
 
     const searchSchedulerData = async (
         date: string
@@ -114,7 +112,6 @@ export function Scheduler() {
     const [itemsByDate, setItemsByDate] =
         useState<Map<string, SchedulerItem[]>>();
     const {
-        data: schedulerInfo,
         refetch: reloadSchedulerInfo,
         isError,
         error
@@ -231,7 +228,7 @@ export function Scheduler() {
         await removeEvent(id);
         showNotificationSuccess('Event deleted');
         queryClient.invalidateQueries({
-            queryKey: ['schedulerInfo', startOfWeek]
+            queryKey: ['schedulerInfo']
         });
         queryClient.invalidateQueries({ queryKey: ['events'] });
     };
@@ -311,13 +308,13 @@ export function Scheduler() {
                             }}
                         />
                     )}
-                    <AlertsIndicator
+                    {/* <AlertsIndicator
                         onClick={() => setOpenedDrawer(true)}
                         redAlertCount={schedulerInfo?.redAlertEvents?.length}
                         yellowAlertCount={
                             schedulerInfo?.yellowAlertEvents?.length
                         }
-                    />
+                    /> */}
                 </div>
             </div>
             <div
@@ -353,14 +350,14 @@ export function Scheduler() {
                     />
                 ))}
             </div>
-            <AlertsDrawer
+            {/* <AlertsDrawer
                 opened={openedDrawer}
                 onClose={() => setOpenedDrawer(false)}
                 redAlertEvents={schedulerInfo?.redAlertEvents || []}
                 yellowAlertEvents={schedulerInfo?.yellowAlertEvents || []}
                 eventInfo={schedulerInfo?.eventInfo || {}}
                 handleCreateNewAssignment={handleCreateNewAssignment}
-            />
+            /> */}
             {eventFormModal}
             {assignmentFormModalComponent}
             {/* <AssignmentScheduler

@@ -9,7 +9,7 @@ import {
     TextInput
 } from '@mantine/core';
 import { Apartment, Task, Template } from '../../types/entities';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { useError } from '../../hooks/useError';
 import { useReactQuery } from '../../hooks/useReactQuery';

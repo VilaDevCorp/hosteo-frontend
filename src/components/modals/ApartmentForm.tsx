@@ -1,6 +1,6 @@
 import { Button, Tabs, TextInput } from '@mantine/core';
 import { ApartmentWithTasks, Task } from '../../types/entities';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import {
     ApartmentFormFields,
