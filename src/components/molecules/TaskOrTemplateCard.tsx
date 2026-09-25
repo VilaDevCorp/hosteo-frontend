@@ -1,11 +1,11 @@
 import { Card, Text, Title } from '@mantine/core';
 import { CardControls } from '../atoms/CardControls';
-import { Template, Task } from '../../types/entities';
+import { Template, Task, TaskDto } from '../../types/entities';
 import styles from '../styles/DataTable.module.css';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
 
 interface TaskOrTemplateCardProps {
-    item: Template | Task;
+    item: Template | Task | TaskDto;
     onEdit?: () => void;
     onDelete?: () => void;
     onClick?: () => void;

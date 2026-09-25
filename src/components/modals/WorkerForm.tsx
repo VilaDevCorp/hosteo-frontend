@@ -1,10 +1,10 @@
-import { Button, NumberInput, Select, TextInput } from '@mantine/core';
+import { Button, Select, TextInput } from '@mantine/core';
 import { useCrud } from '../../hooks/useCrud';
 import { useError } from '../../hooks/useError';
 import { useEffect, useState } from 'react';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { Worker } from '../../types/entities';
-import { Language, WorkerState } from '../../types/enums';
+import { LANGUAGE, Language } from '../../types/enums';
 import {
     WorkerFormFields,
     formFieldsToCreateWorkerForm,
@@ -15,7 +15,6 @@ import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
-import { WorkerStateBadge } from '../atoms/WorkerStateBadge';
 
 export function WorkerForm({
     onClose,
@@ -38,8 +37,13 @@ export function WorkerForm({
         }
     }, [worker]);
 
-    const [nameDirty, nameError, nameMessage, nameValidate, setDirtyName] =
-        useValidator(formFields.name, [notEmptyValidator]);
+    const {
+        dirty: nameDirty,
+        error: nameError,
+        message: nameMessage,
+        validate: nameValidate,
+        activateDirty: setDirtyName
+    } = useValidator(formFields.name, [notEmptyValidator]);
 
     const createWorker = async () => {
         await create(formFieldsToCreateWorkerForm(formFields));
@@ -51,6 +55,9 @@ export function WorkerForm({
             onSuccess: () => {
                 queryClient.invalidateQueries({
                     queryKey: ['workers']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['worker', worker?.id]
                 });
                 showNotificationSuccess('Worker created');
                 onClose?.();
@@ -68,6 +75,9 @@ export function WorkerForm({
             onSuccess: () => {
                 queryClient.invalidateQueries({
                     queryKey: ['workers']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['worker', worker?.id]
                 });
                 showNotificationSuccess('Worker updated');
                 onClose?.();
@@ -109,7 +119,7 @@ export function WorkerForm({
             />
             <Select
                 label="Language"
-                data={Object.values(Language)}
+                data={Object.values(LANGUAGE)}
                 value={formFields.language}
                 onChange={(value) =>
                     setFormFields({
@@ -118,32 +128,6 @@ export function WorkerForm({
                     })
                 }
                 searchable
-            />
-            <NumberInput
-                label="Salary"
-                value={formFields.salary}
-                onChange={(value) =>
-                    setFormFields({
-                        ...formFields,
-                        salary: Number(value)
-                    })
-                }
-            />
-            <Select
-                label="State"
-                data={Object.values(WorkerState)}
-                value={formFields.state}
-                renderOption={(option) => (
-                    <WorkerStateBadge
-                        state={option.option.value as WorkerState}
-                    />
-                )}
-                onChange={(value) =>
-                    setFormFields({
-                        ...formFields,
-                        state: value as WorkerState
-                    })
-                }
             />
             <ModalButtons>
                 <Button variant="outline" onClick={onClose}>

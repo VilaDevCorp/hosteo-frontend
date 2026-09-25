@@ -1,4 +1,4 @@
-import { ApartmentState } from '../../types/enums';
+import { APARTMENT_STATE, ApartmentState } from '../../types/enums';
 import { Badge } from '@mantine/core';
 import { ExtendedCustomColors } from '../../mantine';
 
@@ -11,11 +11,11 @@ export function ApartmentStateBadge({
 }) {
     const getChipColor = (): ExtendedCustomColors => {
         switch (state) {
-            case ApartmentState.READY:
+            case APARTMENT_STATE.READY:
                 return 'success';
-            case ApartmentState.OCCUPIED:
+            case APARTMENT_STATE.OCCUPIED:
                 return 'warning';
-            case ApartmentState.USED:
+            case APARTMENT_STATE.USED:
                 return 'error';
             default:
                 return 'success';

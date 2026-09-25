@@ -16,6 +16,7 @@ import { WorkerCardSkeleton } from '../components/molecules/WorkerCardSkeleton';
 import { WorkerForm } from '../components/modals/WorkerForm';
 import { useEntityModal } from '../hooks/useEntityModal';
 import { WorkerFormSkeleton } from '../components/skeletons/WorkerFormSkeleton';
+import { showNotificationSuccess } from '../utils/notifUtils';
 
 export function WorkersScreen() {
     const { search, remove } = useCrud<Worker>('worker');
@@ -47,7 +48,6 @@ export function WorkersScreen() {
 
     const { onOpen, modalComponent: workerFormModal } = useEntityModal<Worker>({
         entityName: 'worker',
-        queryKey: 'workerToEdit',
         ModalBodyComponent: WorkerForm,
         ModalBodySkeleton: WorkerFormSkeleton
     });
@@ -65,6 +65,7 @@ export function WorkersScreen() {
 
     const onDeleteWorker = async (id: string) => {
         await remove(id);
+        showNotificationSuccess('Worker deleted');
         reloadWorkers();
     };
 

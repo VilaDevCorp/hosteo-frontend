@@ -38,7 +38,7 @@ export function useCrud<T>(entity: string): CrudOperations<T> {
     const update = async (form: unknown): Promise<T> => {
         const url = `${apiUrl}${entity}`;
         const options: RequestInit = {
-            method: 'PATCH',
+            method: 'PUT',
             body: JSON.stringify(form),
             headers: new Headers({
                 'content-type': 'application/json'

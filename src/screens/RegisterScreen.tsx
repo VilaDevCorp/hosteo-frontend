@@ -26,7 +26,7 @@ import {
     showNotificationSuccess
 } from '../utils/notifUtils';
 import { useScreen } from '../hooks/useScreen';
-import { ErrorCode } from '../types/enums';
+import { ERROR_CODE } from '../types/enums';
 
 export function RegisterScreen() {
     const { register } = useApi();
@@ -110,11 +110,11 @@ export function RegisterScreen() {
         onError: (e) => {
             if (e instanceof ApiError) {
                 if (e.statusCode === StatusCode.ClientErrorConflict) {
-                    if (e.code === ErrorCode.USERNAME_IN_USE) {
+                    if (e.code === ERROR_CODE.USERNAME_IN_USE) {
                         showNotificationError('The username is already in use');
                         return;
                     }
-                    if (e.code === ErrorCode.EMAIL_IN_USE) {
+                    if (e.code === ERROR_CODE.EMAIL_IN_USE) {
                         showNotificationError('The email is already in use');
                         return;
                     }

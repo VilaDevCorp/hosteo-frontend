@@ -21,7 +21,7 @@ import { conf } from '../../../conf';
 import { SchedulerDay } from '../molecules/SchedulerDay';
 import { Button, Modal, Select } from '@mantine/core';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
-import { BookingAndTaskInfo } from '../molecules/BookingAndTaskInfo';
+import { EventAndTaskInfo } from '../molecules/EventAndTaskInfo';
 import { SchedulerAssignWorker } from '../molecules/SchedulerAssignWorker';
 import {
     AssignmentFormFields,
@@ -36,7 +36,7 @@ import { useReactQuery } from '../../hooks/useReactQuery';
 import { useCrud } from '../../hooks/useCrud';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import { AssignmentTimePicker } from '../atoms/AssignmentTimePicker.tsx';
-import { AssignmentState } from '../../types/enums.ts';
+import { ASSIGNMENT_STATE, AssignmentState } from '../../types/enums.ts';
 import { AssignmentStateBadge } from '../atoms/AssignmentStateBadge.tsx';
 
 export function AssignmentScheduler({
@@ -56,7 +56,7 @@ export function AssignmentScheduler({
     const apiUrl = import.meta.env.VITE_REACT_APP_API_URL;
     const { fetchWithAuth } = useAuth();
     const [formFields, setFormFields] = useState<AssignmentFormFields>(
-        assignmentToForm(undefined)
+        assignmentToForm(undefined, assignmentToModify?.eventId)
     );
     const [selectedWorker, setSelectedWorker] = useState<Worker | undefined>();
 
@@ -101,7 +101,6 @@ export function AssignmentScheduler({
     const {
         data: schedulerInfo,
         refetch: reloadSchedulerInfo,
-        isLoading,
         isError,
         error
     } = useQuery<SchedulerInfo>({
@@ -109,17 +108,22 @@ export function AssignmentScheduler({
         queryFn: async () => {
             const data = await searchSchedulerData(startOfWeek);
             setItemsByDate(
-                groupItemsByDate(startOfWeek, data.bookings, data.assignments, {
-                    id: formFields?.id,
-                    startDate: formFields?.startDate,
-                    endDate: formFields?.endDate,
-                    worker: selectedWorker,
-                    state: formFields?.state,
-                    apartment: assignmentToModify?.apartment,
-                    task: assignmentToModify?.task,
-                    prevBooking: assignmentToModify?.prevBooking,
-                    nextBooking: assignmentToModify?.nextBooking
-                })
+                groupItemsByDate(
+                    startOfWeek,
+                    data.eventInfo,
+                    data.events,
+                    data.assignments,
+                    {
+                        id: formFields?.id,
+                        startDate: formFields?.startDate,
+                        endDate: formFields?.endDate,
+                        worker: selectedWorker,
+                        state: formFields?.state,
+                        apartment: assignmentToModify?.apartment,
+                        task: assignmentToModify?.task,
+                        prevEventId: assignmentToModify?.prevEventId
+                    }
+                )
             );
             return data;
         },
@@ -159,9 +163,7 @@ export function AssignmentScheduler({
 
     const createAssignment = async () => {
         if (!formFields.taskId) return;
-        await create(
-            formFieldsToCreateAssignmentForm(formFields, formFields.taskId)
-        );
+        await create(formFieldsToCreateAssignmentForm(formFields));
     };
 
     const { mutate: createAssignmentMutation, isPending: isLoadingCreate } =
@@ -247,6 +249,29 @@ export function AssignmentScheduler({
         });
     };
 
+    const getDisabledDates = (date: string): boolean => {
+        if (!schedulerInfo || !assignmentToModify) return false;
+
+        const prevEventId = assignmentToModify.prevEventId;
+        const nextEventId = assignmentToModify.eventId;
+
+        if (prevEventId && schedulerInfo.eventInfo[prevEventId]) {
+            const prevEvent = schedulerInfo.eventInfo[prevEventId];
+            if (dayjs(date).isBefore(dayjs.unix(prevEvent.endDate), 'day')) {
+                return true;
+            }
+        }
+
+        if (nextEventId && schedulerInfo.eventInfo[nextEventId]) {
+            const nextEvent = schedulerInfo.eventInfo[nextEventId];
+            if (dayjs(date).isAfter(dayjs.unix(nextEvent.endDate), 'day')) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
     return (
         <Modal
             opened={opened}
@@ -296,7 +321,10 @@ export function AssignmentScheduler({
                         date={startOfWeek}
                         setDate={setStartOfWeek}
                     />
-                    <BookingAndTaskInfo assignment={assignmentToModify} />
+                    {/* <EventAndTaskInfo
+                        assignment={assignmentToModify}
+                        eventInfo={schedulerInfo?.eventInfo}
+                    /> */}
                 </div>
                 <AssignmentTimePicker
                     formFields={formFields}
@@ -325,7 +353,7 @@ export function AssignmentScheduler({
                             });
                             setDirtyState();
                         }}
-                        data={Object.values(AssignmentState)}
+                        data={Object.values(ASSIGNMENT_STATE)}
                         renderOption={(option) => (
                             <AssignmentStateBadge
                                 state={option.option.value as AssignmentState}
@@ -362,26 +390,7 @@ export function AssignmentScheduler({
                                         .format(conf.dateUrlFormat)
                                 ) || []
                             }
-                            disabled={
-                                (assignmentToModify?.prevBooking?.endDate !==
-                                    undefined &&
-                                    dayjs(date).isBefore(
-                                        dayjs.unix(
-                                            assignmentToModify?.prevBooking
-                                                ?.endDate
-                                        ),
-                                        'day'
-                                    )) ||
-                                (assignmentToModify?.nextBooking?.endDate !==
-                                    undefined &&
-                                    dayjs(date).isAfter(
-                                        dayjs.unix(
-                                            assignmentToModify?.nextBooking
-                                                ?.endDate
-                                        ),
-                                        'day'
-                                    ))
-                            }
+                            disabled={getDisabledDates(date)}
                             isSelected={dayjs(formFields.startDate).isSame(
                                 dayjs(date),
                                 'day'

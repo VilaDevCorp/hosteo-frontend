@@ -8,7 +8,6 @@ import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useError } from '../../hooks/useError';
-import { AssignmentState } from '../../types/enums';
 import { ModalButtons } from '../molecules/ModalButtons';
 import {
     AssignmentFormFields,
@@ -21,32 +20,33 @@ import dayjs from 'dayjs';
 import { CustomTimePicker } from '../atoms/CustomTimePicker';
 import { AssignmentStateBadge } from '../atoms/AssignmentStateBadge';
 import { WorkerSelector } from '../molecules/WorkerSelector';
+import { Event } from '../../types/entities';
+import { ASSIGNMENT_STATE, AssignmentState } from '../../types/enums';
 
 export function AssignmentForm({
     onClose,
     entity: assignment,
-    relatedEntity: task
+    relatedEntity,
+    relatedEntitySecondary
 }: {
     onClose?: () => void;
     entity?: Assignment;
-    relatedEntity?: Task;
+    relatedEntity?: any;
+    relatedEntitySecondary?: any;
 }) {
     const { queryClient } = useReactQuery();
     const { handleError } = useError();
     const { create, update } = useCrud<Assignment>('assignment');
 
+    const event = relatedEntity as Event;
+    const task = relatedEntitySecondary as Task;
+
     const [formFields, setFormFields] = useState<AssignmentFormFields>(
-        assignmentToForm(assignment)
+        assignmentToForm(assignment, event?.id, task?.id)
     );
     const [selectedWorker, setSelectedWorker] = useState<Worker | undefined>(
         assignment?.worker
     );
-
-    useEffect(() => {
-        if (assignment) {
-            setFormFields(assignmentToForm(assignment));
-        }
-    }, [assignment]);
 
     const { error: startDateError, validate: startDateValidate } = useValidator(
         formFields.startDate,
@@ -66,15 +66,19 @@ export function AssignmentForm({
     } = useValidator(formFields.state, [notEmptyValidator]);
 
     const createAssignment = async () => {
-        if (!task) return;
-        await create(formFieldsToCreateAssignmentForm(formFields, task.id));
+        await create(formFieldsToCreateAssignmentForm(formFields));
     };
 
     const { mutate: createAssignmentMutation, isPending: isLoadingCreate } =
         useMutation({
             mutationFn: createAssignment,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['bookingToView'] });
+                queryClient.invalidateQueries({
+                    queryKey: ['event', event?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
+                });
                 showNotificationSuccess('Assignment created');
                 onClose?.();
             },
@@ -89,7 +93,12 @@ export function AssignmentForm({
         useMutation({
             mutationFn: updateAssignment,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['bookingToView'] });
+                queryClient.invalidateQueries({
+                    queryKey: ['event', event?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
+                });
                 showNotificationSuccess('Assignment updated');
                 onClose?.();
             },
@@ -263,7 +272,7 @@ export function AssignmentForm({
                                 });
                                 setDirtyState();
                             }}
-                            data={Object.values(AssignmentState)}
+                            data={Object.values(ASSIGNMENT_STATE)}
                             withAsterisk
                             renderOption={(option) => (
                                 <AssignmentStateBadge

@@ -1,5 +1,5 @@
 import { Badge } from '@mantine/core';
-import { AssignmentState } from '../../types/enums';
+import { ASSIGNMENT_STATE, AssignmentState } from '../../types/enums';
 import { ExtendedCustomColors } from '../../mantine';
 
 export function AssignmentStateBadge({
@@ -13,9 +13,9 @@ export function AssignmentStateBadge({
 }) {
     const getChipColor = (): ExtendedCustomColors => {
         switch (state) {
-            case AssignmentState.FINISHED:
+            case ASSIGNMENT_STATE.FINISHED:
                 return 'success';
-            case AssignmentState.PENDING:
+            case ASSIGNMENT_STATE.PENDING:
                 return 'warning';
             default:
                 return 'primary';

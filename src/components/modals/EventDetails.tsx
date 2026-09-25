@@ -1,5 +1,5 @@
 import { Divider, Image, Text, useMantineTheme } from '@mantine/core';
-import { Assignment, BookingWithAssignments, Task } from '../../types/entities';
+import { Assignment, EventWithAssignments, Task } from '../../types/entities';
 import { useScreen } from '../../hooks/useScreen';
 import { PlatformIcon } from '../atoms/PlatformIcon';
 import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
@@ -14,11 +14,12 @@ import { TaskWithAssigmentCard } from '../molecules/TaskWithAssigmentCard';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useCrud } from '../../hooks/useCrud';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
+import { showNotificationSuccess } from '../../utils/notifUtils';
 
-export function BookingDetails({
-    entity: booking
+export function EventDetails({
+    entity: event
 }: {
-    entity?: BookingWithAssignments;
+    entity?: EventWithAssignments;
 }) {
     const { isTablet } = useScreen();
     const theme = useMantineTheme();
@@ -35,8 +36,9 @@ export function BookingDetails({
         entityName: 'assignment',
         ModalBodyComponent: AssignmentForm,
         ModalBodySkeleton: WorkerCardSkeleton,
-        queryKey: 'assignment',
-        relatedEntity: selectedTask
+        relatedEntity: event,
+        relatedEntitySecondary: selectedTask
+
     });
 
     const { remove: removeAssignment } = useCrud('assignment');
@@ -45,8 +47,9 @@ export function BookingDetails({
 
     const onDeleteAssignment = async (id: string) => {
         await removeAssignment(id);
+        showNotificationSuccess('Assignment deleted');
         queryClient.invalidateQueries({
-            queryKey: ['bookingToView']
+            queryKey: ['event', event?.id]
         });
     };
 
@@ -59,7 +62,7 @@ export function BookingDetails({
             onConfirm: () => onDeleteAssignment(id)
         });
 
-    return booking ? (
+    return event ? (
         <div
             style={{
                 display: 'flex',
@@ -109,10 +112,10 @@ export function BookingDetails({
                                 alignItems: 'center'
                             }}
                         >
-                            <PlatformIcon platform={booking.source} size={24} />
-                            <Text>{booking.apartment.name}</Text>
+                            <PlatformIcon platform={event.source} size={24} />
+                            <Text>{event.apartment.name}</Text>
                         </div>
-                        <ApartmentStateBadge state={booking.apartment.state} />
+                        <ApartmentStateBadge state={event.apartment.state} />
                     </div>
                     <div
                         style={{
@@ -125,7 +128,7 @@ export function BookingDetails({
                             <IconLogin color={theme.colors.success[5]} />
                             <Text>
                                 {dayjs
-                                    .unix(booking.startDate)
+                                    .unix(event.startDate)
                                     .format(conf.dateTimeWithWeekDayAndTime)}
                             </Text>
                         </div>
@@ -133,7 +136,7 @@ export function BookingDetails({
                             <IconLogout color={theme.colors.error[5]} />
                             <Text>
                                 {dayjs
-                                    .unix(booking.endDate)
+                                    .unix(event.endDate)
                                     .format(conf.dateTimeWithWeekDayAndTime)}
                             </Text>
                         </div>
@@ -153,11 +156,11 @@ export function BookingDetails({
                     paddingRight: '0.4rem'
                 }}
             >
-                {booking?.apartment?.tasks &&
-                    booking.apartment.tasks
+                {event?.apartment?.tasks &&
+                    event.apartment.tasks
                         .filter(
                             (task) =>
-                                !booking.assignments.some(
+                                !event.assignments.some(
                                     (assignment) =>
                                         assignment.task.id === task.id
                                 )
@@ -171,7 +174,7 @@ export function BookingDetails({
                                 }}
                             />
                         ))}
-                {booking?.assignments.map((assignment) => (
+                {event?.assignments.map((assignment) => (
                     <TaskWithAssigmentCard
                         task={assignment.task}
                         assignment={assignment}

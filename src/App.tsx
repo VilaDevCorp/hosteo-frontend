@@ -23,24 +23,24 @@ function App() {
         <StrictMode>
             <ScreenProvider>
                 <ReactQueryProvider>
-                    <ApiProvider>
-                        <LibraryProvider>
-                            <ConfirmModalProvider>
-                                <ModalsProvider
-                                    labels={{
-                                        cancel: 'Cancel',
-                                        confirm: 'Confirm'
-                                    }}
-                                >
-                                    <BrowserRouter>
-                                        <AuthProvider>
+                    <LibraryProvider>
+                        <ConfirmModalProvider>
+                            <ModalsProvider
+                                labels={{
+                                    cancel: 'Cancel',
+                                    confirm: 'Confirm'
+                                }}
+                            >
+                                <BrowserRouter>
+                                    <AuthProvider>
+                                        <ApiProvider>
                                             <Body />
-                                        </AuthProvider>
-                                    </BrowserRouter>
-                                </ModalsProvider>
-                            </ConfirmModalProvider>
-                        </LibraryProvider>
-                    </ApiProvider>
+                                        </ApiProvider>
+                                    </AuthProvider>
+                                </BrowserRouter>
+                            </ModalsProvider>
+                        </ConfirmModalProvider>
+                    </LibraryProvider>
                 </ReactQueryProvider>
             </ScreenProvider>
         </StrictMode>

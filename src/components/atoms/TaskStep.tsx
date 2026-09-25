@@ -1,4 +1,4 @@
-import { ActionIcon, Textarea, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Textarea } from '@mantine/core';
 import { CardControls } from './CardControls';
 import { useState } from 'react';
 import { IconCheck, IconX } from '@tabler/icons-react';

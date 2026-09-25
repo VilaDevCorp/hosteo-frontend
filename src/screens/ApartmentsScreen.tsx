@@ -17,7 +17,7 @@ import { ApartmentStateBadge } from '../components/atoms/ApartmentStateBadge';
 import { PlatformIcon } from '../components/atoms/PlatformIcon';
 import { ApartmentCard } from '../components/molecules/ApartmentCard';
 import { useError } from '../hooks/useError';
-import { ApartmentState } from '../types/enums';
+import { APARTMENT_STATE, ApartmentState } from '../types/enums';
 import { DataTable } from '../components/organism/DataTable';
 import { ApartmentCardSkeleton } from '../components/molecules/ApartmentCardSkeleton';
 import { ApartmentDetails } from '../components/modals/ApartmentDetails';
@@ -27,6 +27,7 @@ import { ApartmentFormSkeleton } from '../components/skeletons/ApartmentFormSkel
 import { ApartmentDetailsSkeleton } from '../components/skeletons/ApartmentDetailsSkeleton';
 import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { useEntityModal } from '../hooks/useEntityModal';
+import { showNotificationSuccess } from '../utils/notifUtils';
 
 const tableStructure: TableStructure<ApartmentWithTasks> = {
     headers: [
@@ -107,7 +108,6 @@ export function ApartmentsScreen() {
     const { onOpen: onOpenFormModal, modalComponent: apartmentFormModal } =
         useEntityModal<ApartmentWithTasks>({
             entityName: 'apartment',
-            queryKey: 'apartmentToEdit',
             ModalBodyComponent: ApartmentForm,
             ModalBodySkeleton: ApartmentFormSkeleton
         });
@@ -117,7 +117,6 @@ export function ApartmentsScreen() {
         modalComponent: apartmentDetailsModal
     } = useEntityModal<ApartmentWithTasks>({
         entityName: 'apartment',
-        queryKey: 'apartmentToView',
         getTitle: (apartment) => {
             if (!apartment) return '';
             return (
@@ -154,6 +153,7 @@ export function ApartmentsScreen() {
 
     const onDeleteApartment = async (id: string) => {
         await remove(id);
+        showNotificationSuccess('Apartment deleted');
         reloadApartments();
     };
 
@@ -161,7 +161,7 @@ export function ApartmentsScreen() {
         openModal({
             title: 'Delete apartment',
             message:
-                'Deleting this apartment will delete all the associated information like bookings, assignments and tasks',
+                'Deleting this apartment will delete all the associated information like events, assignments and tasks',
             color: 'error',
             onConfirm: () => onDeleteApartment(id)
         });
@@ -199,7 +199,7 @@ export function ApartmentsScreen() {
                         }}
                         hidePickedOptions
                         label="State"
-                        data={Object.values(ApartmentState)}
+                        data={Object.values(APARTMENT_STATE)}
                         renderOption={(state) => (
                             <ApartmentStateBadge
                                 state={state.option.value as ApartmentState}

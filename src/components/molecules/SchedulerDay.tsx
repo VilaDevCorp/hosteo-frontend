@@ -1,10 +1,9 @@
 import dayjs from 'dayjs';
 import { Text } from '@mantine/core';
-import { SchedulerBookingCard } from './SchedulerBookingCard';
+import { SchedulerEventCard } from './SchedulerEventCard';
 import {
-    Assignment,
-    AssignmentInfoForScheduler,
-    BookingScheduler,
+    AssignmentDto,
+    EventSchedulerDto,
     SchedulerItem
 } from '../../types/entities';
 import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
@@ -15,15 +14,28 @@ export function SchedulerDay({
     items,
     onClick,
     disabled,
-    isSelected,
-    onAssignmentClick
+    selectedEventIds,
+    onEventClick,
+    onEventEdit,
+    onEventDelete,
+    selectedAssignmentIds,
+    onAssignmentClick,
+    onAssignmentEdit,
+    onAssignmentDelete
 }: {
     date: string;
     items: SchedulerItem[];
     onClick?: () => void;
     disabled?: boolean;
     isSelected?: boolean;
-    onAssignmentClick?: (assignment: Assignment) => void;
+    selectedEventIds?: Set<string>;
+    onEventClick?: (event: EventSchedulerDto) => void;
+    onEventEdit?: (eventId: string) => void;
+    onEventDelete?: (eventId: string) => void;
+    selectedAssignmentIds?: Set<string>;
+    onAssignmentClick?: (assignment: AssignmentDto) => void;
+    onAssignmentEdit?: (assignmentId: string) => void;
+    onAssignmentDelete?: (assignmentId: string) => void;
 }) {
     return (
         <div
@@ -73,29 +85,46 @@ export function SchedulerDay({
                 }}
             >
                 {items.map((item) => {
-                    if (item.type === 'booking') {
-                        const booking = item.item as BookingScheduler;
+                    if (item.type === 'event') {
+                        const eventSchedulerDto = item.item;
                         return (
-                            <SchedulerBookingCard
-                                key={booking.booking.id}
-                                item={booking.booking}
+                            <SchedulerEventCard
+                                key={eventSchedulerDto.id}
+                                item={eventSchedulerDto}
                                 isStart={item.isStart}
-                                alert={booking.alert}
+                                isSelected={selectedEventIds?.has(
+                                    eventSchedulerDto.id
+                                )}
+                                onClick={() =>
+                                    onEventClick?.(eventSchedulerDto)
+                                }
+                                onEdit={() =>
+                                    onEventEdit?.(eventSchedulerDto.id)
+                                }
+                                onDelete={() =>
+                                    onEventDelete?.(eventSchedulerDto.id)
+                                }
                             />
                         );
                     }
                     if (item.type === 'assignment') {
-                        const assignment = item.item as Assignment;
+                        const assignment = item.item;
                         return (
                             <SchedulerAssignmentCard
                                 key={assignment.id}
                                 item={assignment}
                                 onClick={() => onAssignmentClick?.(assignment)}
+                                isSelected={selectedAssignmentIds?.has(
+                                    assignment.id
+                                )}
+                                onEdit={() => onAssignmentEdit?.(assignment.id)}
+                                onDelete={() =>
+                                    onAssignmentDelete?.(assignment.id)
+                                }
                             />
                         );
                     }
-                    const incompleteAssignment =
-                        item.item as AssignmentInfoForScheduler;
+                    const incompleteAssignment = item.item;
                     return (
                         <IncompleteAssignmentCard
                             key={'incomplete_assignment'}

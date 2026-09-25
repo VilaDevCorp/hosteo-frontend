@@ -1,13 +1,19 @@
-import { Address, Apartment, Assignment, Booking, BookingScheduler, SimpleBookingSchedulerDto, Task, TaskWithApartment, Template } from './entities';
+import { Address, Apartment, Assignment, Event, TaskDto, Task, Template } from './entities';
 import {
-    Alert,
-    ApartmentState,
+    ASSIGNMENT_STATE,
+    CATEGORY_ENUM,
+    EVENT_SOURCE,
+    EVENT_STATE,
+    EVENT_TYPE,
+    LANGUAGE,
+    TASK_TYPE,
     AssignmentState,
-    BookingSource,
-    BookingState,
     CategoryEnum,
+    EventSource,
+    EventState,
+    EventType,
     Language,
-    WorkerState
+    TaskType,
 } from './enums';
 import { Worker } from './entities';
 import dayjs from 'dayjs';
@@ -45,7 +51,6 @@ export const apartmentToForm = (apartment: Apartment | undefined): ApartmentForm
         city: apartment.address?.city,
         zipCode: apartment.address?.zipCode,
         country: apartment.address?.country,
-        state: apartment.state
     }
 }
 
@@ -79,7 +84,6 @@ export const formFieldsToUpdateApartmentForm = (formFields: ApartmentFormFields)
             zipCode: formFields.zipCode,
             country: formFields.country
         } : undefined,
-        state: formFields.state || ApartmentState.READY,
         visible: true
     }
 }
@@ -93,7 +97,6 @@ export interface ApartmentFormFields {
     city?: string;
     zipCode?: string;
     country?: string;
-    state?: ApartmentState
 }
 
 export interface ApartmentCreateForm {
@@ -111,72 +114,81 @@ export interface ApartmentUpdateForm {
     bookingId?: string;
     address?: Address;
     visible: boolean;
-    state: ApartmentState
 }
 
 
-export interface BookingCreateForm {
+export interface EventCreateForm {
     apartmentId: string;
     startDate: number;
     endDate: number;
     name: string;
-    state: BookingState;
-    source: BookingSource;
+    state: EventState;
+    source: EventSource;
+    type: EventType;
 }
 
-export interface BookingUpdateForm {
+export interface EventUpdateForm {
     id: string;
     startDate: number;
     endDate: number;
     name: string;
-    state: BookingState;
-    source: BookingSource;
+    state: EventState;
+    source: EventSource;
+    type: EventType;
 }
 
-export interface BookingFormFields {
+export interface EventFormFields {
     id?: string;
     apartmentId?: string;
     startDate: string;
     endDate: string;
     name: string;
-    state: BookingState;
-    source: BookingSource;
+    state: EventState;
+    source: EventSource;
+    type: EventType;
 }
 
 
 
-export const bookingToForm = (booking: Booking | undefined): BookingFormFields => {
-    if (!booking) {
+export const eventToForm = (event: Event | undefined): EventFormFields => {
+    if (!event) {
         return {
             name: '',
             startDate: '',
             endDate: '',
-            state: BookingState.PENDING,
-            source: BookingSource.NONE,
+            state: EVENT_STATE.PENDING,
+            source: EVENT_SOURCE.NONE,
+            type: EVENT_TYPE.BOOKING,
         };
     }
     return {
-        id: booking.id,
-        name: booking.name,
-        startDate: dayjs.unix(booking.startDate).format(conf.dateInputFormat),
-        endDate: dayjs.unix(booking.endDate).format(conf.dateInputFormat),
-        state: booking.state,
-        source: booking.source,
+        id: event.id,
+        name: event.name,
+        startDate: dayjs.unix(event.startDate).format(conf.dateInputFormat),
+        endDate: dayjs.unix(event.endDate).format(conf.dateInputFormat),
+        state: event.state,
+        source: event.source,
+        type: event.type,
+        apartmentId: event.apartment.id
     };
 };
 
-export const formFieldsToCreateBookingForm = (formFields: BookingFormFields): BookingCreateForm => {
+export const formFieldsToCreateEventForm = (formFields: EventFormFields): EventCreateForm => {
+    if (!formFields.apartmentId) {
+        throw new Error('ApartmentId is required');
+    }
     return {
-        apartmentId: formFields.apartmentId!,
+        apartmentId: formFields.apartmentId,
         startDate: dayjs(formFields.startDate, conf.dateInputFormat).unix(),
         endDate: dayjs(formFields.endDate, conf.dateInputFormat).unix(),
         name: formFields.name,
         state: formFields.state,
         source: formFields.source,
+        type: formFields.type,
     };
 };
 
-export const formFieldsToUpdateBookingForm = (formFields: BookingFormFields): BookingUpdateForm => {
+export const formFieldsToUpdateEventForm = (formFields: EventFormFields): EventUpdateForm => {
     if (!formFields.id) {
         throw new Error('Id is required');
     }
@@ -185,6 +197,7 @@ export const formFieldsToUpdateBookingForm = (formFields: BookingFormFields): Bo
         name: formFields.name,
         state: formFields.state,
         source: formFields.source,
+        type: formFields.type,
         startDate: dayjs(formFields.startDate, conf.dateInputFormat).unix(),
         endDate: dayjs(formFields.endDate, conf.dateInputFormat).unix(),
     };
@@ -195,7 +208,7 @@ export interface TaskCreateForm {
     name: string;
     category: CategoryEnum;
     duration: number;
-    extra: boolean;
+    type: TaskType;
     steps: string[];
 }
 
@@ -204,7 +217,7 @@ export interface TaskUpdateForm {
     name: string;
     category: CategoryEnum;
     duration: number;
-    extra: boolean;
+    type: TaskType;
     steps: string[];
 }
 
@@ -214,18 +227,21 @@ export interface TaskFormFields {
     name: string;
     category: CategoryEnum;
     duration: number;
-    extra: boolean;
+    type: TaskType;
     steps: string[];
 }
 
 export const taskToForm = (task: Task | undefined, apartmentId?: string): TaskFormFields => {
     if (!task) {
+        if (!apartmentId) {
+            throw new Error('ApartmentId is required');
+        }
         return {
-            apartmentId: apartmentId!,
+            apartmentId,
             name: '',
-            category: CategoryEnum.CLEANING,
+            category: CATEGORY_ENUM.CLEANING,
             duration: 0,
-            extra: false,
+            type: TASK_TYPE.MANDATORY,
             steps: []
         };
     }
@@ -234,18 +250,21 @@ export const taskToForm = (task: Task | undefined, apartmentId?: string): TaskFo
         name: task.name,
         category: task.category,
         duration: task.duration,
-        extra: task.extra,
+        type: task.type,
         steps: task.steps
     };
 }
 
-export const formFieldsToCreateTaskForm = (formFields: TaskFormFields, apartmentId: string): TaskCreateForm => {
+export const formFieldsToCreateTaskForm = (formFields: TaskFormFields): TaskCreateForm => {
+    if (!formFields.apartmentId) {
+        throw new Error('ApartmentId is required');
+    }
     return {
-        apartmentId: apartmentId,
+        apartmentId: formFields.apartmentId,
         name: formFields.name,
         category: formFields.category,
         duration: formFields.duration,
-        extra: formFields.extra,
+        type: formFields.type,
         steps: formFields.steps
     };
 }
@@ -259,13 +278,14 @@ export const formFieldsToUpdateTaskForm = (formFields: TaskFormFields): TaskUpda
         name: formFields.name,
         category: formFields.category,
         duration: formFields.duration,
-        extra: formFields.extra,
-        steps: formFields.steps
+        type: formFields.type,
+        steps: formFields.steps,
     };
 }
 
 export interface TemplateCreateForm {
     name: string;
+    type: TaskType;
     category: CategoryEnum;
     duration: number;
     steps: string[];
@@ -274,6 +294,7 @@ export interface TemplateCreateForm {
 export interface TemplateUpdateForm {
     id: string;
     name: string;
+    type: TaskType;
     category: CategoryEnum;
     duration: number;
     steps: string[];
@@ -282,6 +303,7 @@ export interface TemplateUpdateForm {
 export interface TemplateFormFields {
     id?: string;
     name: string;
+    type: TaskType;
     category: CategoryEnum;
     duration: number;
     steps: string[];
@@ -291,7 +313,8 @@ export const templateToForm = (template: Template | undefined): TemplateFormFiel
     if (!template) {
         return {
             name: '',
-            category: CategoryEnum.CLEANING,
+            type: TASK_TYPE.MANDATORY,
+            category: CATEGORY_ENUM.CLEANING,
             duration: 0,
             steps: []
         };
@@ -299,6 +322,7 @@ export const templateToForm = (template: Template | undefined): TemplateFormFiel
     return {
         id: template.id,
         name: template.name,
+        type: template.type,
         category: template.category,
         duration: template.duration,
         steps: template.steps
@@ -308,6 +332,7 @@ export const templateToForm = (template: Template | undefined): TemplateFormFiel
 export const formFieldsToCreateTemplateForm = (formFields: TemplateFormFields): TemplateCreateForm => {
     return {
         name: formFields.name,
+        type: formFields.type,
         category: formFields.category,
         duration: formFields.duration,
         steps: formFields.steps
@@ -321,6 +346,7 @@ export const formFieldsToUpdateTemplateForm = (formFields: TemplateFormFields): 
     return {
         id: formFields.id,
         name: formFields.name,
+        type: formFields.type,
         category: formFields.category,
         duration: formFields.duration,
         steps: formFields.steps
@@ -333,6 +359,7 @@ export interface AssignmentCreateForm {
     startDate: number;
     endDate: number;
     workerId: string;
+    eventId: string;
     state: AssignmentState;
 }
 
@@ -341,27 +368,31 @@ export interface AssignmentUpdateForm {
     startDate: number;
     endDate: number;
     workerId: string;
+    eventId: string;
     state: AssignmentState;
 }
 
 export interface AssignmentFormFields {
     id?: string;
-    taskId: string;
+    taskId?: string;
+    workerId?: string;
+    eventId?: string;
     startDate: string;
     endDate: string;
-    workerId: string;
     state: AssignmentState;
 }
 
-export const assignmentToForm = (assignment: Assignment | undefined): AssignmentFormFields => {
-    console.log('assignmentToForm', assignment);
+export const assignmentToForm = (assignment: Assignment | undefined, eventId?: string, taskId?: string): AssignmentFormFields => {
     if (!assignment) {
+        if (!eventId || !taskId) {
+            throw new Error('EventId and TaskId are required');
+        }
         return {
-            taskId: '',
+            taskId,
+            eventId,
             startDate: '',
             endDate: '',
-            workerId: '',
-            state: AssignmentState.PENDING
+            state: ASSIGNMENT_STATE.PENDING
         };
     }
     return {
@@ -370,43 +401,49 @@ export const assignmentToForm = (assignment: Assignment | undefined): Assignment
         startDate: dayjs.unix(assignment.startDate).format(conf.dateInputFormat),
         endDate: dayjs.unix(assignment.endDate).format(conf.dateInputFormat),
         workerId: assignment.worker.id,
+        eventId: assignment.event.id,
         state: assignment.state
     };
 };
 
-export const formFieldsToCreateAssignmentForm = (formFields: AssignmentFormFields, taskId: string): AssignmentCreateForm => {
+export const formFieldsToCreateAssignmentForm = (formFields: AssignmentFormFields): AssignmentCreateForm => {
+    if (!formFields.taskId || !formFields.eventId || !formFields.workerId) {
+        throw new Error('TaskId, EventId, and WorkerId are required');
+    }
     return {
-        taskId: taskId,
+        taskId: formFields.taskId,
         startDate: dayjs(formFields.startDate, conf.dateInputFormat).unix(),
         endDate: dayjs(formFields.endDate, conf.dateInputFormat).unix(),
         workerId: formFields.workerId,
+        eventId: formFields.eventId,
         state: formFields.state
     };
 };
 
 export const formFieldsToUpdateAssignmentForm = (formFields: AssignmentFormFields): AssignmentUpdateForm => {
-    if (!formFields.id) {
-        throw new Error('Id is required');
+    if (!formFields.id || !formFields.workerId || !formFields.eventId) {
+        throw new Error('Id, WorkerId, and EventId are required');
     }
     return {
         id: formFields.id,
         startDate: dayjs(formFields.startDate, conf.dateInputFormat).unix(),
         endDate: dayjs(formFields.endDate, conf.dateInputFormat).unix(),
         workerId: formFields.workerId,
+        eventId: formFields.eventId,
         state: formFields.state
     };
 };
 
 export interface AssignmentFormFieldsWithObjects {
     id?: string;
-    task?: Task;
+    task?: TaskDto;
     startDate?: string;
     endDate?: string;
     worker?: Worker;
     state?: AssignmentState;
     apartment?: Apartment;
-    prevBooking?: SimpleBookingSchedulerDto;
-    nextBooking?: SimpleBookingSchedulerDto;
+    eventId?: string;
+    prevEventId?: string;
 }
 
 
@@ -417,7 +454,8 @@ export const assignmentFormFieldsWithObjectsToForm = (assignment: AssignmentForm
             startDate: '',
             endDate: '',
             workerId: '',
-            state: AssignmentState.PENDING
+            eventId: '',
+            state: ASSIGNMENT_STATE.PENDING
         };
     }
     return {
@@ -426,33 +464,28 @@ export const assignmentFormFieldsWithObjectsToForm = (assignment: AssignmentForm
         startDate: assignment.startDate ?? '',
         endDate: assignment.endDate ?? '',
         workerId: assignment.worker?.id ?? '',
-        state: assignment.state ?? AssignmentState.PENDING
+        eventId: assignment.eventId ?? '',
+        state: assignment.state ?? ASSIGNMENT_STATE.PENDING
     };
 };
 
 export interface WorkerCreateForm {
     name: string;
     language: Language;
-    salary: number;
     visible: boolean;
-    state: WorkerState;
 }
 
 export interface WorkerUpdateForm {
     id: string;
     name: string;
     language: Language;
-    salary: number;
     visible: boolean;
-    state: WorkerState;
 }
 
 export interface WorkerFormFields {
     id?: string;
     name: string;
     language: Language;
-    salary: number;
-    state: WorkerState;
 }
 
 
@@ -460,17 +493,13 @@ export const workerToForm = (worker: Worker | undefined): WorkerFormFields => {
     if (!worker) {
         return {
             name: '',
-            language: Language.EN,
-            salary: 0,
-            state: WorkerState.AVAILABLE
+            language: LANGUAGE.EN,
         };
     }
     return {
         id: worker.id,
         name: worker.name,
         language: worker.language,
-        salary: worker.salary,
-        state: worker.state
     };
 };
 
@@ -478,8 +507,6 @@ export const formFieldsToCreateWorkerForm = (formFields: WorkerFormFields): Work
     return {
         name: formFields.name,
         language: formFields.language,
-        salary: formFields.salary,
-        state: formFields.state,
         visible: true
     };
 };
@@ -492,9 +519,6 @@ export const formFieldsToUpdateWorkerForm = (formFields: WorkerFormFields): Work
         id: formFields.id,
         name: formFields.name,
         language: formFields.language,
-        salary: formFields.salary,
-        state: formFields.state,
         visible: true
     };
 };
-

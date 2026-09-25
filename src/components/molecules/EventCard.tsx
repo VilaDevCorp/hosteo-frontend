@@ -1,19 +1,19 @@
-import { Booking } from '../../types/entities';
+import { Event } from '../../types/entities';
 import { Card, Text, Title } from '@mantine/core';
-import { BookingStateBadge } from '../atoms/BookingStateBadge';
+import { EventStateBadge } from '../atoms/EventStateBadge';
 import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
 import { PlatformIcon } from '../atoms/PlatformIcon';
 import styles from '../styles/DataTable.module.css';
 import dayjs from 'dayjs';
 import { CardControls } from '../atoms/CardControls';
 
-export function BookingCard({
+export function EventCard({
     item,
     onClick,
     onEdit,
     onDelete
 }: {
-    item: Booking;
+    item: Event;
     onClick?: (id: string) => void;
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
@@ -25,7 +25,7 @@ export function BookingCard({
     return (
         <Card
             w={'100%'}
-            miw={'10rem'} // Adjust as needed
+            miw={'10rem'}
             h={'12rem'}
             className={onClick ? styles.selectableCard : undefined}
             onClick={onClick && (() => onClick(item.id))}
@@ -41,7 +41,6 @@ export function BookingCard({
                     backgroundPosition: 'center'
                 }}
             >
-                {/* Overlay content */}
                 <div
                     style={{
                         position: 'absolute',
@@ -56,7 +55,6 @@ export function BookingCard({
                         backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     }}
                 >
-                    {/* Top Row: Name and State */}
                     <div
                         style={{
                             display: 'flex',
@@ -79,7 +77,6 @@ export function BookingCard({
                         >
                             {item.apartment.name}
                         </Title>
-                        {/* Wrapper for the badge to ensure it stands out */}
                         <ApartmentStateBadge state={item.apartment.state} />
                     </div>
                 </div>
@@ -108,7 +105,7 @@ export function BookingCard({
                             {formatDate(dayjs.unix(item.startDate).toDate())} -{' '}
                             {formatDate(dayjs.unix(item.endDate).toDate())}
                         </Text>
-                        <BookingStateBadge state={item.state} />
+                        <EventStateBadge state={item.state} />
                     </div>
                 </div>
 

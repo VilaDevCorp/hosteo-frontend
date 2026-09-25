@@ -1,6 +1,5 @@
 import { Worker } from '../../types/entities';
 import { ActionIcon, Button, Image, Text, Title } from '@mantine/core';
-import { WorkerStateBadge } from '../atoms/WorkerStateBadge';
 import { Flag } from '../atoms/Flag';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
 import { useState } from 'react';
@@ -90,7 +89,6 @@ export function WorkerSelector({
                                     alignItems: 'center'
                                 }}
                             >
-                                <WorkerStateBadge state={worker.state} />
                                 <ActionIcon
                                     variant="transparent"
                                     onClick={() => {

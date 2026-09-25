@@ -1,6 +1,6 @@
 import { Card, Skeleton } from '@mantine/core';
 
-export function BookingCardSkeleton() {
+export function EventCardSkeleton() {
     return (
         <Card w={'100%'} miw={'10rem'} h={'12rem'} padding="0" radius="md">
             <Card.Section>

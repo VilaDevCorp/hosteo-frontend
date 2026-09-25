@@ -1,20 +1,20 @@
 import { Accordion, Text } from '@mantine/core';
-import { BookingScheduler, Task } from '../../types/entities';
-import { Alert } from '../../types/enums';
+import { EventSchedulerDto, TaskDto } from '../../types/entities';
+import { ALERT } from '../../types/enums';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { conf } from '../../../conf';
 import dayjs from 'dayjs';
 import { TaskOrTemplateCard } from './TaskOrTemplateCard';
 
-export function AlertBooking({
-    booking,
+export function AlertEvent({
+    eventSchedulerDto,
     handleCreateNewAssignment
 }: {
-    booking: BookingScheduler;
-    handleCreateNewAssignment: (booking: BookingScheduler, task?: Task) => void;
+    eventSchedulerDto: EventSchedulerDto;
+    handleCreateNewAssignment: (eventSchedulerDto: EventSchedulerDto, task?: TaskDto) => void;
 }) {
     return (
-        <Accordion.Item key={booking.booking.id} value={booking.booking.id}>
+        <Accordion.Item key={eventSchedulerDto.id} value={eventSchedulerDto.id}>
             <Accordion.Control>
                 <div
                     style={{
@@ -29,7 +29,7 @@ export function AlertBooking({
                             gap: '0.5rem'
                         }}
                     >
-                        {booking.alert === Alert.DAYS_LEFT_5_UNASSIGNED ? (
+                        {eventSchedulerDto.alert === ALERT.DAYS_LEFT_5_UNASSIGNED ? (
                             <IconAlertTriangle
                                 color="var(--mantine-color-yellow-5)"
                                 size={24}
@@ -43,12 +43,12 @@ export function AlertBooking({
                             />
                         )}
                         <Text lineClamp={1}>
-                            {booking.booking.apartment.name}
+                            {eventSchedulerDto.name}
                         </Text>
                     </div>
                     <Text fw={'bold'}>
                         {dayjs
-                            .unix(booking.booking.startDate)
+                            .unix(eventSchedulerDto.startDate)
                             .format(conf.dateTimeFormat)}
                     </Text>
                 </div>
@@ -63,12 +63,12 @@ export function AlertBooking({
                     }
                 }}
             >
-                {booking.unassignedTasks.map((task) => (
+                {eventSchedulerDto.mandatoryUnassignedTasks.map((task) => (
                     <TaskOrTemplateCard
                         key={task.id}
                         item={task}
                         onClick={() => {
-                            handleCreateNewAssignment(booking, task);
+                            handleCreateNewAssignment(eventSchedulerDto, task);
                         }}
                     />
                 ))}

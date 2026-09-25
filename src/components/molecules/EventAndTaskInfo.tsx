@@ -1,14 +1,23 @@
 import { Text } from '@mantine/core';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
 import { IconAlertTriangle } from '@tabler/icons-react';
-import { Alert } from '../../types/enums';
+import { ALERT } from '../../types/enums';
 import { AssignmentFormFieldsWithObjects } from '../../types/forms';
+import { EventSchedulerDto } from '../../types/entities';
 
-export function BookingAndTaskInfo({
-    assignment
+export function EventAndTaskInfo({
+    assignment,
+    eventInfo
 }: {
     assignment?: AssignmentFormFieldsWithObjects;
+    eventInfo?: Record<string, EventSchedulerDto>;
 }) {
+    const nextEvent = assignment?.nextEventId && eventInfo ? eventInfo[assignment.nextEventId] : undefined;
+    const alertColor =
+        nextEvent?.alert === ALERT.DAYS_LEFT_5_UNASSIGNED
+            ? 'var(--mantine-color-yellow-5)'
+            : 'var(--mantine-color-error-5)';
+
     return (
         <div
             style={{
@@ -28,12 +37,7 @@ export function BookingAndTaskInfo({
                 }}
             >
                 <IconAlertTriangle
-                    color={
-                        assignment?.nextBooking?.alert ===
-                        Alert.DAYS_LEFT_5_UNASSIGNED
-                            ? 'var(--mantine-color-yellow-5)'
-                            : 'var(--mantine-color-error-5)'
-                    }
+                    color={alertColor}
                     size={24}
                     style={{ flexShrink: 0 }}
                 />

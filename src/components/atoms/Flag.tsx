@@ -1,5 +1,5 @@
-export function Flag({ country }: { country: string }) {
-    switch (country.toLowerCase()) {
+export function Flag({ country }: { country: string | undefined }) {
+    switch (country?.toLowerCase()) {
         case 'fr':
             return (
                 <svg width={20} height={20} fill="none" viewBox="0 0 24 24">

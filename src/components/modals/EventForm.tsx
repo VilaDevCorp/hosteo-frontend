@@ -10,7 +10,7 @@ import {
     RadioGroup
 } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
-import { Booking, Apartment } from '../../types/entities';
+import { Event, Apartment } from '../../types/entities';
 import { useEffect, useState } from 'react';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import { useCrud } from '../../hooks/useCrud';
@@ -18,19 +18,26 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useError } from '../../hooks/useError';
-import { BookingState, BookingSource } from '../../types/enums';
-import { BookingStateBadge } from '../atoms/BookingStateBadge';
+import {
+    EVENT_SOURCE,
+    EVENT_STATE,
+    EVENT_TYPE,
+    EventSource,
+    EventState,
+    EventType
+} from '../../types/enums';
+import { EventStateBadge } from '../atoms/EventStateBadge';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { DataTable } from '../organism/DataTable';
 import { ApartmentSimpleCard } from '../molecules/ApartmentSimpleCard';
 import { ApartmentSimpleCardSkeleton } from '../skeletons/ApartmentSimpleCardSkeleton';
 import { IconArrowLeft, IconSearch } from '@tabler/icons-react';
-import { Page as PageType } from '../../types/types'; // Correct Page import if different
+import { Page as PageType } from '../../types/types';
 import {
-    BookingFormFields,
-    bookingToForm,
-    formFieldsToCreateBookingForm,
-    formFieldsToUpdateBookingForm
+    EventFormFields,
+    eventToForm,
+    formFieldsToCreateEventForm,
+    formFieldsToUpdateEventForm
 } from '../../types/forms';
 import { conf } from '../../../conf';
 import { TopControls } from '../molecules/TopControls';
@@ -39,26 +46,26 @@ import dayjs from 'dayjs';
 import { CustomTimePicker } from '../atoms/CustomTimePicker';
 import { PlatformIcon } from '../atoms/PlatformIcon';
 
-export function BookingForm({
+export function EventForm({
     onClose,
-    entity: booking
+    entity: event
 }: {
     onClose?: () => void;
-    entity?: Booking;
+    entity?: Event;
 }) {
     const { queryClient } = useReactQuery();
     const { handleError } = useError();
     const { search: searchApartments } = useCrud<Apartment>('apartment');
-    const { create, update } = useCrud<Booking>('booking');
+    const { create, update } = useCrud<Event>('event');
     const { isTablet } = useScreen();
 
-    const [step, setStep] = useState<number>(booking ? 2 : 1);
+    const [step, setStep] = useState<number>(event ? 2 : 1);
     const [selectedApartment, setSelectedApartment] = useState<
         Apartment | undefined
     >(undefined);
 
-    const [formFields, setFormFields] = useState<BookingFormFields>(
-        bookingToForm(booking)
+    const [formFields, setFormFields] = useState<EventFormFields>(
+        eventToForm(event)
     );
 
     const [pageNumber, setPageNumber] = useState<number>(1);
@@ -70,23 +77,20 @@ export function BookingForm({
     >({
         queryKey: [
             'apartments',
-            'booking-selection',
+            'event-selection',
             pageNumber,
             debouncedNameSearch
         ],
         queryFn: () =>
-            searchApartments(pageNumber - 1, 10, { name: debouncedNameSearch }) // Small page size for modal
+            searchApartments(pageNumber - 1, 10, { name: debouncedNameSearch })
     });
 
     useEffect(() => {
-        if (!booking) {
-            setFormFields(bookingToForm(undefined)); // Reset form for new entity or when entity is cleared
-            setStep(1); // Reset step for new booking
-            setSelectedApartment(undefined); // Clear selected apartment
-        } else {
-            setFormFields(bookingToForm(booking));
+        if (!event) {
+            setStep(1);
+            setSelectedApartment(undefined);
         }
-    }, [booking]);
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -131,31 +135,43 @@ export function BookingForm({
         message: stateMessage
     } = useValidator(formFields.state, [notEmptyValidator]);
 
-    const createBooking = async () => {
-        await create(formFieldsToCreateBookingForm(formFields));
+    const createEvent = async () => {
+        await create(formFieldsToCreateEventForm(formFields));
     };
 
-    const { mutate: createBookingMutation, isPending: isLoadingCreate } =
+    const { mutate: createEventMutation, isPending: isLoadingCreate } =
         useMutation({
-            mutationFn: createBooking,
+            mutationFn: createEvent,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['bookings'] });
-                showNotificationSuccess('Booking created');
+                queryClient.invalidateQueries({ queryKey: ['events'] });
+                queryClient.invalidateQueries({
+                    queryKey: ['event', event?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
+                });
+                showNotificationSuccess('Event created');
                 onClose?.();
             },
             onError: handleError
         });
 
-    const updateBooking = async () => {
-        await update(formFieldsToUpdateBookingForm(formFields));
+    const updateEvent = async () => {
+        await update(formFieldsToUpdateEventForm(formFields));
     };
 
-    const { mutate: updateBookingMutation, isPending: isLoadingUpdate } =
+    const { mutate: updateEventMutation, isPending: isLoadingUpdate } =
         useMutation({
-            mutationFn: updateBooking,
+            mutationFn: updateEvent,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['bookings'] });
-                showNotificationSuccess('Booking updated');
+                queryClient.invalidateQueries({ queryKey: ['events'] });
+                queryClient.invalidateQueries({
+                    queryKey: ['event', event?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
+                });
+                showNotificationSuccess('Event updated');
                 onClose?.();
             },
             onError: handleError
@@ -171,10 +187,10 @@ export function BookingForm({
         )
             return;
 
-        if (booking) {
-            updateBookingMutation();
+        if (event) {
+            updateEventMutation();
         } else {
-            createBookingMutation();
+            createEventMutation();
         }
     };
 
@@ -220,7 +236,7 @@ export function BookingForm({
                                 gap: '1rem'
                             }}
                         >
-                            {!booking && (
+                            {!event && (
                                 <ActionIcon
                                     variant="subtle"
                                     onClick={() => setStep(1)}
@@ -228,9 +244,9 @@ export function BookingForm({
                                     <IconArrowLeft size={18} />
                                 </ActionIcon>
                             )}
-                            Booking
-                            {booking
-                                ? booking.apartment.name
+                            Event
+                            {event
+                                ? event.apartment.name
                                 : selectedApartment?.name}
                         </div>
                     )}
@@ -385,7 +401,7 @@ export function BookingForm({
                                 onChange={(val) => {
                                     setFormFields({
                                         ...formFields,
-                                        source: val as BookingSource
+                                        source: val as EventSource
                                     });
                                     setDirtySource();
                                 }}
@@ -396,7 +412,7 @@ export function BookingForm({
                                         gap: '1.5rem'
                                     }}
                                 >
-                                    {Object.values(BookingSource).map((src) => (
+                                    {Object.values(EVENT_SOURCE).map((src) => (
                                         <Radio
                                             key={src}
                                             value={src}
@@ -411,21 +427,34 @@ export function BookingForm({
                                 </div>
                             </RadioGroup>
                             <Select
+                                label="Type"
+                                value={formFields.type}
+                                onChange={(val) => {
+                                    setFormFields({
+                                        ...formFields,
+                                        type: val as EventType
+                                    });
+                                }}
+                                data={Object.values(EVENT_TYPE)}
+                                withAsterisk
+                                allowDeselect={false}
+                            />
+                            <Select
                                 label="State"
                                 value={formFields.state}
                                 onChange={(val) => {
                                     setFormFields({
                                         ...formFields,
-                                        state: val as BookingState
+                                        state: val as EventState
                                     });
                                     setDirtyState();
                                 }}
-                                data={Object.values(BookingState)}
+                                data={Object.values(EVENT_STATE)}
                                 withAsterisk
                                 renderOption={(option) => (
-                                    <BookingStateBadge
+                                    <EventStateBadge
                                         state={
-                                            option.option.value as BookingState
+                                            option.option.value as EventState
                                         }
                                     />
                                 )}
@@ -462,7 +491,7 @@ export function BookingForm({
                             type="submit"
                             loading={isLoadingCreate || isLoadingUpdate}
                         >
-                            {booking ? 'Update' : 'Save'}
+                            {event ? 'Update' : 'Save'}
                         </Button>
                     </ModalButtons>
                 </form>

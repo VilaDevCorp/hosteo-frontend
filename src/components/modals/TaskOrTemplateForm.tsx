@@ -8,7 +8,7 @@ import {
     Textarea,
     TextInput
 } from '@mantine/core';
-import { Task, Template } from '../../types/entities';
+import { Apartment, Task, Template } from '../../types/entities';
 import { useEffect, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { useError } from '../../hooks/useError';
@@ -28,35 +28,59 @@ import {
     taskToForm,
     templateToForm
 } from '../../types/forms';
-import { CategoryEnum } from '../../types/enums';
+import {
+    CATEGORY_ENUM,
+    TASK_TYPE,
+    CategoryEnum,
+    TaskType
+} from '../../types/enums';
 import { TaskStep } from '../atoms/TaskStep';
 
 export function TaskOrTemplateForm({
     onClose,
     entity,
-    relatedEntityId: apartmentId
+    relatedEntity
 }: {
     onClose?: () => void;
     entity?: Template | Task;
-    relatedEntityId?: string;
+    relatedEntity?: any;
 }) {
+    const apartment = relatedEntity as Apartment | undefined;
     const { handleError } = useError();
     const { queryClient } = useReactQuery();
     const { create: createTask, update: updateTask } = useCrud<Task>('task');
     const { create: createTemplate, update: updateTemplate } =
         useCrud<Template>('template');
 
+    const IS_TASK = apartment?.id;
+
+    const invalidateQueries = () => {
+        if (IS_TASK) {
+            queryClient.invalidateQueries({
+                queryKey: ['task', entity?.id]
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['apartment', apartment?.id]
+            });
+        } else {
+            queryClient.invalidateQueries({
+                queryKey: ['template', entity?.id]
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['templates']
+            });
+        }
+    };
+
     const [formFields, setFormFields] = useState<
         TemplateFormFields | TaskFormFields
-    >(apartmentId ? taskToForm(entity as Task) : templateToForm(entity));
+    >(
+        IS_TASK
+            ? taskToForm(entity as Task, apartment?.id)
+            : templateToForm(entity)
+    );
 
     const [newStepValue, setNewStepValue] = useState<string>('');
-
-    useEffect(() => {
-        setFormFields(
-            apartmentId ? taskToForm(entity as Task) : templateToForm(entity)
-        );
-    }, [entity]);
 
     const {
         dirty: nameDirty,
@@ -67,12 +91,9 @@ export function TaskOrTemplateForm({
     } = useValidator(formFields.name, [notEmptyValidator]);
 
     const createEntity = async () => {
-        if (apartmentId) {
+        if (IS_TASK) {
             await createTask(
-                formFieldsToCreateTaskForm(
-                    formFields as TaskFormFields,
-                    apartmentId
-                )
+                formFieldsToCreateTaskForm(formFields as TaskFormFields)
             );
         } else {
             await createTemplate(
@@ -85,17 +106,9 @@ export function TaskOrTemplateForm({
         useMutation({
             mutationFn: createEntity,
             onSuccess: () => {
-                if (apartmentId) {
-                    queryClient.invalidateQueries({
-                        queryKey: ['apartmentToEdit']
-                    });
-                } else {
-                    queryClient.invalidateQueries({
-                        queryKey: ['templates']
-                    });
-                }
+                invalidateQueries();
                 showNotificationSuccess(
-                    `${apartmentId ? 'Task' : 'Template'} created`
+                    `${apartment?.id ? 'Task' : 'Template'} created`
                 );
                 onClose?.();
             },
@@ -104,13 +117,13 @@ export function TaskOrTemplateForm({
 
     const updateEntity = async () => {
         if (!entity) return;
-        if (!apartmentId) {
-            await updateTemplate(
-                formFieldsToUpdateTemplateForm(formFields as TemplateFormFields)
-            );
-        } else {
+        if (IS_TASK) {
             await updateTask(
                 formFieldsToUpdateTaskForm(formFields as TaskFormFields)
+            );
+        } else {
+            await updateTemplate(
+                formFieldsToUpdateTemplateForm(formFields as TemplateFormFields)
             );
         }
     };
@@ -119,17 +132,9 @@ export function TaskOrTemplateForm({
         useMutation({
             mutationFn: updateEntity,
             onSuccess: () => {
-                if (apartmentId) {
-                    queryClient.invalidateQueries({
-                        queryKey: ['apartmentToEdit']
-                    });
-                } else {
-                    queryClient.invalidateQueries({
-                        queryKey: ['templates']
-                    });
-                }
+                invalidateQueries();
                 showNotificationSuccess(
-                    `${apartmentId ? 'Task' : 'Template'} updated`
+                    `${IS_TASK ? 'Task' : 'Template'} updated`
                 );
                 onClose?.();
             },
@@ -179,7 +184,7 @@ export function TaskOrTemplateForm({
 
                 <Select
                     label="Category"
-                    data={Object.values(CategoryEnum)}
+                    data={Object.values(CATEGORY_ENUM)}
                     value={formFields.category}
                     onChange={(value) =>
                         setFormFields({
@@ -201,6 +206,22 @@ export function TaskOrTemplateForm({
                     }
                     min={0}
                 />
+
+                {'type' in formFields && (
+                    <Select
+                        label="Type"
+                        data={Object.values(TASK_TYPE)}
+                        value={(formFields as TaskFormFields).type}
+                        onChange={(value) =>
+                            setFormFields({
+                                ...formFields,
+                                type: value as TaskType
+                            })
+                        }
+                        withAsterisk
+                        allowDeselect={false}
+                    />
+                )}
 
                 <Stack gap="xs">
                     <Text size="sm" fw={500}>

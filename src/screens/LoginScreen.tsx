@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useValidator, notEmptyValidator } from '../hooks/useValidator';
 import { ApiError } from '../types/types';
-import { ErrorCode } from '../types/enums';
+import { ERROR_CODE } from '../types/enums';
 import { PublicFormLayout } from '../components/organism/publicformlayout/PublicFormLayout';
 import { Layout } from '../components/organism/layout/Layout';
 import StatusCode from 'status-code-enum';
@@ -56,7 +56,7 @@ export function LoginScreen() {
             if (e instanceof ApiError) {
                 if (
                     e.statusCode === StatusCode.ClientErrorUnauthorized &&
-                    e.code === ErrorCode.INVALID_CREDENTIALS
+                    e.code === ERROR_CODE.INVALID_CREDENTIALS
                 ) {
                     showNotificationError('Wrong credentials');
                     return;

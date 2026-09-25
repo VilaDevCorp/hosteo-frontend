@@ -1,6 +1,6 @@
 import { Button, MultiSelect, Switch, TextInput, Title } from '@mantine/core';
 import { Layout } from '../components/organism/layout/Layout';
-import { BookingForm } from '../components/modals/BookingForm';
+import { EventForm } from '../components/modals/EventForm';
 import { useEffect, useState } from 'react';
 import {
     IconLayoutGrid,
@@ -9,17 +9,17 @@ import {
     IconSearch
 } from '@tabler/icons-react';
 import { useCrud } from '../hooks/useCrud';
-import { Booking, BookingWithAssignments } from '../types/entities';
+import { Event, EventWithAssignments } from '../types/entities';
 import { Page, TableStructure } from '../types/types';
 import { useQuery } from '@tanstack/react-query';
-import { BookingStateBadge } from '../components/atoms/BookingStateBadge';
+import { EventStateBadge } from '../components/atoms/EventStateBadge';
 import { ApartmentStateBadge } from '../components/atoms/ApartmentStateBadge';
-import { BookingCard } from '../components/molecules/BookingCard';
+import { EventCard } from '../components/molecules/EventCard';
 import { useError } from '../hooks/useError';
-import { BookingState } from '../types/enums';
+import { EVENT_STATE, EventState } from '../types/enums';
 import { DataTable } from '../components/organism/DataTable';
-import { BookingFormSkeleton } from '../components/skeletons/BookingFormSkeleton';
-import { BookingDetailsSkeleton } from '../components/skeletons/BookingDetailsSkeleton';
+import { EventFormSkeleton } from '../components/skeletons/EventFormSkeleton';
+import { EventDetailsSkeleton } from '../components/skeletons/EventDetailsSkeleton';
 import { useScreen } from '../hooks/useScreen';
 import { TopControls } from '../components/molecules/TopControls';
 import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
@@ -28,10 +28,11 @@ import { DatePickerInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { conf } from '../../conf';
 import { PlatformIcon } from '../components/atoms/PlatformIcon';
-import { BookingDetails } from '../components/modals/BookingDetails';
-import { BookingCardSkeleton } from '../components/molecules/BookingCardSkeleton';
+import { EventDetails } from '../components/modals/EventDetails';
+import { EventCardSkeleton } from '../components/molecules/EventCardSkeleton';
+import { showNotificationSuccess } from '../utils/notifUtils';
 
-const tableStructure: TableStructure<Booking> = {
+const tableStructure: TableStructure<Event> = {
     headers: [
         'Apartment',
         'Source',
@@ -42,24 +43,24 @@ const tableStructure: TableStructure<Booking> = {
         'Ap. status'
     ],
     accesorMethods: [
-        (booking: Booking) => booking.apartment.name,
-        (booking: Booking) => (
-            <PlatformIcon platform={booking.source} size={20} />
+        (event: Event) => event.apartment.name,
+        (event: Event) => (
+            <PlatformIcon platform={event.source} size={20} />
         ),
-        (booking: Booking) =>
-            dayjs.unix(booking.startDate).format(conf.dateTimeFormat),
-        (booking: Booking) =>
-            dayjs.unix(booking.endDate).format(conf.dateTimeFormat),
-        (booking: Booking) => booking.name,
-        (booking: Booking) => <BookingStateBadge state={booking.state} />,
-        (booking: Booking) => (
-            <ApartmentStateBadge state={booking.apartment.state} />
+        (event: Event) =>
+            dayjs.unix(event.startDate).format(conf.dateTimeFormat),
+        (event: Event) =>
+            dayjs.unix(event.endDate).format(conf.dateTimeFormat),
+        (event: Event) => event.name,
+        (event: Event) => <EventStateBadge state={event.state} />,
+        (event: Event) => (
+            <ApartmentStateBadge state={event.apartment.state} />
         )
     ]
 };
 
-export function BookingsScreen() {
-    const { search, remove } = useCrud<Booking>('booking');
+export function EventsScreen() {
+    const { search, remove } = useCrud<Event>('event');
     const { handleError } = useError();
     const { isTablet } = useScreen();
     const { openModal } = useConfirmModalWithContext();
@@ -75,14 +76,14 @@ export function BookingsScreen() {
     const [cardViewMode, setCardViewMode] = useState<boolean>(true);
 
     const {
-        data: bookingPage,
-        refetch: reloadBookings,
+        data: eventPage,
+        refetch: reloadEvents,
         isLoading,
         isError,
         error
-    } = useQuery<Page<Booking>>({
+    } = useQuery<Page<Event>>({
         queryKey: [
-            'bookings',
+            'events',
             pageNumber,
             debouncedApartmentSearch,
             stateSearch,
@@ -110,21 +111,19 @@ export function BookingsScreen() {
         }
     }, [isError, error]);
 
-    const { onOpen: onOpenFormModal, modalComponent: bookingFormModal } =
-        useEntityModal<Booking>({
-            entityName: 'booking',
-            queryKey: 'bookingToEdit',
+    const { onOpen: onOpenFormModal, modalComponent: eventFormModal } =
+        useEntityModal<Event>({
+            entityName: 'event',
             removeHeader: true,
-            ModalBodyComponent: BookingForm,
-            ModalBodySkeleton: BookingFormSkeleton
+            ModalBodyComponent: EventForm,
+            ModalBodySkeleton: EventFormSkeleton
         });
 
-    const { onOpen: onOpenDetailsModal, modalComponent: bookingDetailsModal } =
-        useEntityModal<BookingWithAssignments>({
-            entityName: 'booking',
-            queryKey: 'bookingToView',
-            getTitle: (booking: Booking | undefined) => {
-                if (!booking) return '';
+    const { onOpen: onOpenDetailsModal, modalComponent: eventDetailsModal } =
+        useEntityModal<EventWithAssignments>({
+            entityName: 'event',
+            getTitle: (event: Event | undefined) => {
+                if (!event) return '';
                 return (
                     <div
                         style={{
@@ -142,14 +141,14 @@ export function BookingsScreen() {
                                 overflow: 'hidden'
                             }}
                         >
-                            {booking.name}
+                            {event.name}
                         </Title>
-                        <BookingStateBadge state={booking.state} />
+                        <EventStateBadge state={event.state} />
                     </div>
                 );
             },
-            ModalBodyComponent: BookingDetails,
-            ModalBodySkeleton: BookingDetailsSkeleton
+            ModalBodyComponent: EventDetails,
+            ModalBodySkeleton: EventDetailsSkeleton
         });
 
     useEffect(() => {
@@ -160,17 +159,18 @@ export function BookingsScreen() {
         return () => clearTimeout(timer);
     }, [apartmentSearch]);
 
-    const onDeleteBooking = async (id: string) => {
+    const onDeleteEvent = async (id: string) => {
         await remove(id);
-        reloadBookings();
+        showNotificationSuccess('Event deleted');
+        reloadEvents();
     };
 
     const openDeleteModal = (id: string) =>
         openModal({
-            title: 'Delete booking',
-            message: 'Deleting this booking will remove it permanently.',
+            title: 'Delete event',
+            message: 'Deleting this event will remove it permanently.',
             color: 'error',
-            onConfirm: () => onDeleteBooking(id)
+            onConfirm: () => onDeleteEvent(id)
         });
 
     return (
@@ -209,10 +209,10 @@ export function BookingsScreen() {
                             }}
                             hidePickedOptions
                             label="State"
-                            data={Object.values(BookingState)}
+                            data={Object.values(EVENT_STATE)}
                             renderOption={(state) => (
-                                <BookingStateBadge
-                                    state={state.option.value as BookingState}
+                                <EventStateBadge
+                                    state={state.option.value as EventState}
                                     noBg
                                 />
                             )}
@@ -272,7 +272,7 @@ export function BookingsScreen() {
                         leftSection={<IconPlus />}
                         onClick={() => onOpenFormModal()}
                     >
-                        {'Add booking'}
+                        {'Add event'}
                     </Button>
                 }
                 filtersOnModalActivated={
@@ -281,11 +281,11 @@ export function BookingsScreen() {
             />
             <DataTable
                 cardViewMode={cardViewMode}
-                CardComponent={BookingCard}
-                SkeletonComponent={BookingCardSkeleton}
+                CardComponent={EventCard}
+                SkeletonComponent={EventCardSkeleton}
                 tableStructure={tableStructure}
                 isLoading={isLoading}
-                page={bookingPage!}
+                page={eventPage!}
                 pageNumber={pageNumber}
                 setPageNumber={setPageNumber}
                 onClick={onOpenDetailsModal}
@@ -293,8 +293,8 @@ export function BookingsScreen() {
                 onDelete={openDeleteModal}
                 cardMinWidth="15rem"
             />
-            {bookingFormModal}
-            {bookingDetailsModal}
+            {eventFormModal}
+            {eventDetailsModal}
         </Layout>
     );
 }

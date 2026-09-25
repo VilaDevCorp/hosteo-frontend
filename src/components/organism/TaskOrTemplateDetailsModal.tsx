@@ -9,7 +9,6 @@ export function useTaskOrTemplateDetailsModal(type: 'task' | 'template') {
     const { onOpen: onOpenDetailsModal, modalComponent: detailsModal } =
         useEntityModal<Template>({
             entityName: type,
-            queryKey: type + 'ToView',
             getTitle: (entity?: Task | Template) => {
                 if (!entity) return '';
                 return (

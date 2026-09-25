@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { ComponentType, useState } from 'react';
 import { EntityModal } from '../components/molecules/EntityModal';
 import { BaseEntity } from '../types/entities';
@@ -7,17 +7,16 @@ import { useCrud } from './useCrud';
 interface EntityModalBodyProps<T extends BaseEntity> {
     entity?: T;
     onClose?: () => void;
-    relatedEntityId?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntity?: any;
+    relatedEntitySecondary?: any;
 }
 
 interface UseEntityModalProps<T extends BaseEntity> {
     entityName: string;
-    queryKey: string;
-    relatedEntityId?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntity?: any;
+    relatedEntitySecondary?: any;
     getTitle?: (entity: T | undefined) => React.ReactNode;
     removeHeader?: boolean;
     ModalBodyComponent: ComponentType<EntityModalBodyProps<T>>;
@@ -32,20 +31,21 @@ interface UseEntityModalReturn {
 
 export const useEntityModal = <T extends BaseEntity>({
     entityName,
-    queryKey,
     getTitle,
-    relatedEntityId,
     relatedEntity,
+    relatedEntitySecondary,
     removeHeader,
     ModalBodyComponent,
     ModalBodySkeleton
 }: UseEntityModalProps<T>): UseEntityModalReturn => {
     const [entityId, setEntityId] = useState<string | undefined>(undefined);
 
+    const queryClient = useQueryClient();
+
     const { get } = useCrud<T>(entityName);
 
     const { data: entity, isLoading } = useQuery<T | undefined>({
-        queryKey: [queryKey, entityId],
+        queryKey: [entityName, entityId],
         queryFn: () => (entityId ? get(entityId) : undefined),
         enabled: !!entityId
     });
@@ -55,13 +55,15 @@ export const useEntityModal = <T extends BaseEntity>({
     const onOpenModal = (id?: string) => {
         if (id) {
             setEntityId(id);
+        } else {
+            setEntityId(undefined);
         }
         setOpened(true);
     };
 
     const onCloseModal = () => {
         setOpened(false);
-        setEntityId(undefined);
+        queryClient.invalidateQueries({ queryKey: [entityName, entityId] });
     };
 
     const defaultTitle = entityId
@@ -90,8 +92,8 @@ export const useEntityModal = <T extends BaseEntity>({
                     <ModalBodyComponent
                         onClose={onCloseModal}
                         entity={entity}
-                        relatedEntityId={relatedEntityId}
                         relatedEntity={relatedEntity}
+                        relatedEntitySecondary={relatedEntitySecondary}
                     />
                 )}
             </EntityModal>

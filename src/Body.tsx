@@ -23,9 +23,9 @@ const LazyWorkersScreen = lazy(() =>
     }))
 );
 
-const LazyBookingsScreen = lazy(() =>
-    import('./screens/BookingsScreen').then((module) => ({
-        default: module.BookingsScreen
+const LazyEventsScreen = lazy(() =>
+    import('./screens/EventsScreen').then((module) => ({
+        default: module.EventsScreen
     }))
 );
 
@@ -81,10 +81,10 @@ function Body() {
                         }
                     />
                     <Route
-                        path="/bookings"
+                        path="/events"
                         element={
                             <Suspense fallback={<LoadingScreen />}>
-                                <LazyBookingsScreen />
+                                <LazyEventsScreen />
                             </Suspense>
                         }
                     />

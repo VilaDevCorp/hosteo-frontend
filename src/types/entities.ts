@@ -2,13 +2,13 @@ import {
     Alert,
     ApartmentState,
     AssignmentState,
-    BookingSource,
-    BookingState,
+    EventSource,
+    EventState,
+    EventType,
     CategoryEnum,
     Language,
-    WorkerState
+    TaskType,
 } from './enums';
-import { AssignmentFormFields } from './forms';
 
 export interface Address {
     street?: string;
@@ -56,7 +56,7 @@ export interface Task extends BaseEntity {
     name: string;
     category: CategoryEnum;
     duration: number;
-    extra: boolean;
+    type: TaskType;
     steps: string[];
 }
 
@@ -65,13 +65,14 @@ export interface TaskWithApartment extends BaseEntity {
     name: string;
     category: CategoryEnum;
     duration: number;
-    extra: boolean;
+    type: TaskType;
     steps: string[];
     apartment: Apartment;
 }
 
 export interface Template extends BaseEntity {
     name: string;
+    type: TaskType;
     category: CategoryEnum;
     duration: number;
     steps: string[];
@@ -84,9 +85,7 @@ export interface ApartmentWithTasks extends Apartment {
 export interface Worker extends BaseEntity {
     name: string;
     language: Language;
-    salary: number;
     visible: boolean;
-    state: WorkerState;
 }
 
 export interface Assignment extends BaseEntity {
@@ -95,54 +94,102 @@ export interface Assignment extends BaseEntity {
     endDate: number;
     worker: Worker;
     state: AssignmentState;
+    event: Event;
 }
 
-export interface Booking extends BaseEntity {
+export interface Event extends BaseEntity {
     apartment: Apartment;
     startDate: number;
     endDate: number;
     name: string;
-    state: BookingState;
-    source: BookingSource;
+    state: EventState;
+    source: EventSource;
+    type: EventType;
 }
 
-export interface BookingWithAssignments extends Omit<Booking, 'apartment'> {
+export interface EventWithAssignments extends Omit<Event, 'apartment'> {
     apartment: ApartmentWithTasks;
     assignments: Assignment[];
 }
 
-export interface BookingScheduler {
-    booking: Booking;
-    alert: Alert;
-    assignedTasks: Task[];
-    unassignedTasks: Task[];
-    hasUnfinishedTasks: boolean;
-    apartmentReady: boolean;
-    prevBooking?: SimpleBookingSchedulerDto;
+export interface TaskDto {
+    id: string;
+    name: string;
+    category: CategoryEnum;
+    duration: number;
+    type: TaskType;
+    steps: string[];
 }
 
-export interface SchedulerItem {
-    type: 'booking' | 'assignment' | 'incompleteAssignment';
-    item: BookingScheduler | Assignment | AssignmentInfoForScheduler;
-    isStart: boolean;
-    date: number
+export interface AssignmentDto {
+    id: string;
+    task: TaskWithApartment;
+    startDate: number;
+    endDate: number;
+    worker: Worker;
+    state: AssignmentState;
+    eventId: string;
 }
+
+export interface EventSchedulerDto {
+    id: string;
+    type: EventType;
+    startDate: number;
+    endDate: number;
+    name: string;
+    source: EventSource;
+    nMandatoryAssignedTasks: number;
+    nExtraAssignedTasks: number;
+    mandatoryUnassignedTasks: TaskDto[];
+    nCompletedAssignments: number;
+    uncompletedAssignments: AssignmentDto[];
+    alert?: Alert;
+    overdue: boolean;
+}
+
+interface SchedulerEventItem {
+    type: 'event';
+    item: EventSchedulerDto;
+    isStart: boolean;
+    date: number;
+}
+
+interface SchedulerAssignmentItem {
+    type: 'assignment';
+    item: AssignmentDto;
+    isStart: boolean;
+    date: number;
+}
+
+interface SchedulerIncompleteAssignmentItem {
+    type: 'incompleteAssignment';
+    item: AssignmentInfoForScheduler;
+    isStart: boolean;
+    date: number;
+}
+
+export type SchedulerItem =
+    | SchedulerEventItem
+    | SchedulerAssignmentItem
+    | SchedulerIncompleteAssignmentItem;
 
 export interface SchedulerInfo {
-    bookings: BookingScheduler[];
-    redAlertBookings: BookingScheduler[];
-    yellowAlertBookings: BookingScheduler[];
-    assignments: AssignmentForSchedulerDto[];
-    extraTasks: Task[];
+    eventInfo: Record<string, EventSchedulerDto>;
+    previousEvent: Record<string, string>;
+    events: string[];
+    redAlertEvents: string[];
+    yellowAlertEvents: string[];
+    assignments: AssignmentDto[];
 }
 
-export interface ImpBooking {
+export interface ImpEvent {
     apartment: Apartment;
     startDate: Date;
     endDate: Date;
     name: string;
-    state: BookingState;
-    source: BookingSource;
+    state: EventState;
+    source: EventSource;
+    type: EventType;
     conflict: Conflict;
     creationError: string;
 }
@@ -152,40 +199,24 @@ export interface ImportResult {
     failureCount: number;
 }
 
-export interface AssignmentForSchedulerDto extends Assignment {
-    prevBooking?: SimpleBookingSchedulerDto;
-    nextBooking?: SimpleBookingSchedulerDto;
-}
-
-
 export interface AssignmentInfoForScheduler {
     id?: string;
-    task?: Task;
+    task?: Task | TaskDto;
     startDate?: string;
     endDate?: string;
     worker?: Worker;
     state?: AssignmentState;
     apartment?: Apartment;
-    prevBooking?: SimpleBookingSchedulerDto;
-    nextBooking?: SimpleBookingSchedulerDto;
+    prevEventId?: string;
+    nextEventId?: string;
 }
 
-export interface SimpleBookingSchedulerDto {
-    id: string;
-    startDate: number;
-    endDate: number;
-    name: string;
-    source: BookingSource;
-    alert?: Alert;
+export interface AssignmentUpdateError {
+    assignment: Assignment;
+    error: string;
 }
 
-export const bookingSchedulerToSimpleBookingSchedulerDto = (booking: BookingScheduler): SimpleBookingSchedulerDto => {
-    return {
-        id: booking.booking.id,
-        alert: booking.alert,
-        endDate: booking.booking.endDate,
-        startDate: booking.booking.startDate,
-        name: booking.booking.name,
-        source: booking.booking.source
-    }
+export interface EventUpdateError {
+    event: Event;
+    error: string;
 }

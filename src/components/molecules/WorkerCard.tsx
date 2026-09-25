@@ -1,6 +1,5 @@
 import { Worker } from '../../types/entities';
 import { Card, Image, Text, Title } from '@mantine/core';
-import { WorkerStateBadge } from '../atoms/WorkerStateBadge';
 import styles from '../styles/DataTable.module.css';
 import { CardControls } from '../atoms/CardControls';
 import { Flag } from '../atoms/Flag';
@@ -72,7 +71,6 @@ export function WorkerCard({
                         alignItems: 'center'
                     }}
                 >
-                    <WorkerStateBadge state={item.state} />
                     <CardControls
                         onEdit={onEdit && (() => onEdit(item.id))}
                         onDelete={onDelete && (() => onDelete(item.id))}

@@ -19,6 +19,7 @@ import { TaskOrTemplateForm } from '../components/modals/TaskOrTemplateForm';
 import { TaskOrTemplateFormSkeleton } from '../components/skeletons/TaskOrTemplateFormSkeleton';
 import { TaskOrTemplateCardSkeleton } from '../components/molecules/TaskOrTemplateCardSkeleton';
 import { useTaskOrTemplateDetailsModal } from '../components/organism/TaskOrTemplateDetailsModal';
+import { showNotificationSuccess } from '../utils/notifUtils';
 
 const tableStructure: TableStructure<Template> = {
     headers: [],
@@ -67,7 +68,6 @@ export function TemplatesScreen() {
     const { onOpen: onOpenFormModal, modalComponent: templateFormModal } =
         useEntityModal<Template>({
             entityName: 'template',
-            queryKey: 'templateToEdit',
             ModalBodyComponent: TaskOrTemplateForm,
             ModalBodySkeleton: TaskOrTemplateFormSkeleton
         });
@@ -77,6 +77,7 @@ export function TemplatesScreen() {
 
     const onDeleteTemplate = async (id: string) => {
         await remove(id);
+        showNotificationSuccess('Template deleted');
         reloadTemplates();
     };
 

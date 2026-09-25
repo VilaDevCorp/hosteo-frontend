@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
-import { Address, Assignment, AssignmentInfoForScheduler, BookingScheduler, SchedulerItem } from '../types/entities';
+import { Address, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { conf } from '../../conf';
-import { AssignmentFormFields } from '../types/forms';
+
 
 export const checkResponseException = (
     res: Response,
@@ -34,8 +34,9 @@ export function getEndOfWeek(date: string | null) {
 
 export const groupItemsByDate = (
     startOfWeek: string,
-    bookings: BookingScheduler[],
-    assignments: Assignment[],
+    eventInfo: Record<string, EventSchedulerDto>,
+    events: string[],
+    assignments: AssignmentDto[],
     assignmentBeingModified?: AssignmentInfoForScheduler,
 ) => {
     const map = new Map<string, SchedulerItem[]>();
@@ -45,24 +46,26 @@ export const groupItemsByDate = (
             .format(conf.dateUrlFormat);
         map.set(dateToAdd, []);
     });
-    bookings.forEach((booking) => {
+    events.forEach((eventId) => {
+        const eventSchedulerDto = eventInfo[eventId];
+        if (!eventSchedulerDto) return;
         const startDate = dayjs
-            .unix(booking.booking.startDate)
+            .unix(eventSchedulerDto.startDate)
             .format(conf.dateUrlFormat);
         const endDate = dayjs
-            .unix(booking.booking.endDate)
+            .unix(eventSchedulerDto.endDate)
             .format(conf.dateUrlFormat);
         map.get(startDate)?.push({
-            type: 'booking',
-            item: booking,
+            type: 'event',
+            item: eventSchedulerDto,
             isStart: true,
-            date: booking.booking.startDate
+            date: eventSchedulerDto.startDate
         });
         map.get(endDate)?.push({
-            type: 'booking',
-            item: booking,
+            type: 'event',
+            item: eventSchedulerDto,
             isStart: false,
-            date: booking.booking.endDate
+            date: eventSchedulerDto.endDate
         });
     });
     assignments.forEach((assignment) => {
@@ -89,4 +92,4 @@ export const groupItemsByDate = (
         dayItems.sort((a, b) => a.date - b.date);
     }
     return map;
-}; 
+};

@@ -1,4 +1,4 @@
-import { Button, Select, Tabs, TextInput } from '@mantine/core';
+import { Button, Tabs, TextInput } from '@mantine/core';
 import { ApartmentWithTasks, Task } from '../../types/entities';
 import { useEffect, useState } from 'react';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
@@ -13,8 +13,6 @@ import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useError } from '../../hooks/useError';
-import { ApartmentState } from '../../types/enums';
-import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
 import { useScreen } from '../../hooks/useScreen';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { IconPlus } from '@tabler/icons-react';
@@ -41,22 +39,16 @@ export function ApartmentForm({
     const { onOpen: onOpenFormModal, modalComponent: taskFormModal } =
         useEntityModal<Task>({
             entityName: 'task',
-            queryKey: 'taskToEdit',
             ModalBodyComponent: TaskOrTemplateForm,
             ModalBodySkeleton: TaskOrTemplateFormSkeleton,
-            relatedEntityId: apartment?.id
+            relatedEntity: apartment
         });
-
-    useEffect(() => {
-        if (apartment) {
-            setFormFields(apartmentToForm(apartment));
-        }
-    }, [apartment?.id]);
 
     const onDeleteTask = async (id: string) => {
         await removeTask(id);
+        showNotificationSuccess('Task deleted');
         queryClient.invalidateQueries({
-            queryKey: ['apartmentToEdit']
+            queryKey: ['apartments']
         });
     };
 
@@ -96,6 +88,9 @@ export function ApartmentForm({
                 queryClient.invalidateQueries({
                     queryKey: ['apartments']
                 });
+                queryClient.invalidateQueries({
+                    queryKey: ['apartment', apartment?.id]
+                });
                 showNotificationSuccess('Apartment created');
                 onClose?.();
             },
@@ -112,6 +107,9 @@ export function ApartmentForm({
             onSuccess: () => {
                 queryClient.invalidateQueries({
                     queryKey: ['apartments']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['apartment', apartment?.id]
                 });
                 showNotificationSuccess('Apartment updated');
                 onClose?.();
@@ -154,7 +152,9 @@ export function ApartmentForm({
                         <Tabs.Tab value="apartmentInfo">
                             Apartment info
                         </Tabs.Tab>
-                        <Tabs.Tab value="tasks">Tasks</Tabs.Tab>
+                        {apartment?.id && (
+                            <Tabs.Tab value="tasks">Tasks</Tabs.Tab>
+                        )}
                     </div>
                     {section === 'tasks' && (
                         <Button
@@ -202,30 +202,6 @@ export function ApartmentForm({
                                             : undefined
                                     }
                                 />
-
-                                {apartment && (
-                                    <Select
-                                        style={{ maxWidth: '8rem' }}
-                                        label="State"
-                                        variant="filled"
-                                        value={formFields.state}
-                                        renderOption={(option) => (
-                                            <ApartmentStateBadge
-                                                state={
-                                                    option.option
-                                                        .value as ApartmentState
-                                                }
-                                            />
-                                        )}
-                                        onChange={(value) =>
-                                            setFormFields({
-                                                ...formFields,
-                                                state: value as ApartmentState
-                                            })
-                                        }
-                                        data={Object.values(ApartmentState)}
-                                    />
-                                )}
                             </div>
                             <TextInput
                                 label="Airbnb ID"
