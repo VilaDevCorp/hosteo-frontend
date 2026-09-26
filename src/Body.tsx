@@ -49,7 +49,9 @@ function Body() {
             style={{
                 width: '100vw',
                 height: '100%',
-                position: 'relative'
+                position: 'relative',
+                display: 'flex',
+                overflow: 'hidden'
             }}
         >
             <Suspense fallback={<LoadingScreen />}>
@@ -61,6 +63,14 @@ function Body() {
                         element={
                             <Suspense fallback={<LoadingScreen />}>
                                 <LazyRegisterScreen />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="/"
+                        element={
+                            <Suspense fallback={<LoadingScreen />}>
+                                <LazySchedulerScreen />
                             </Suspense>
                         }
                     />
@@ -93,14 +103,6 @@ function Body() {
                         element={
                             <Suspense fallback={<LoadingScreen />}>
                                 <LazyTemplatesScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/scheduler"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazySchedulerScreen />
                             </Suspense>
                         }
                     />

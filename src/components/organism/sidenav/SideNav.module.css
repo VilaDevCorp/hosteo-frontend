@@ -1,0 +1,40 @@
+.sideNav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+    width: 4rem;
+    padding: 1rem 0;
+    background-color: var(--mantine-color-gray-0);
+    border-right: 1px solid var(--mantine-color-gray-3);
+}
+
+.sideNav ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.navItem:hover {
+    color: var(--mantine-color-gray-6);
+}
+
+.navItem {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mantine-color-gray-5);
+}
+
+.isActive {
+    color: var(--mantine-color-primary-5) !important;
+    
+}

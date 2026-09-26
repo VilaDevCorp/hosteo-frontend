@@ -43,9 +43,9 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
                 ],
                 primary: [
                     '#e1eaff',
+                    '#b9d2fe',
                     '#5385F9',
-                    '#5385F9',
-                    '#5385F9',
+                    '#97bafc',
                     '#5385F9',
                     '#5385F9',
                     '#5385F9',
@@ -91,6 +91,18 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
                     '#FAB005',
                     '#FAB005',
                     '#FAB005'
+                ],
+                remark: [
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF',
+                    '#6324CF'
                 ]
             },
             primaryColor: 'primary',

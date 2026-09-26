@@ -4,6 +4,7 @@ import logo from '/logo.svg';
 import styles from './Layout.module.css';
 import { Button, Title } from '@mantine/core';
 import { useScreen } from '../../../hooks/useScreen';
+import { SideNav } from '../sidenav/SideNav';
 
 export function Layout({
     children,
@@ -26,9 +27,12 @@ export function Layout({
             </main>
         ) : (
             //Private layout
-            <main className={styles.privateMain} style={customStyles}>
-                {children}
-            </main>
+            <>
+                <SideNav />
+                <main className={styles.privateMain} style={customStyles}>
+                    {children}
+                </main>
+            </>
         )
     ) : (
         //Not logged in layout
