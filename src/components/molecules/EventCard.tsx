@@ -6,6 +6,7 @@ import { PlatformIcon } from '../atoms/PlatformIcon';
 import styles from '../styles/DataTable.module.css';
 import dayjs from 'dayjs';
 import { CardControls } from '../atoms/CardControls';
+import { conf } from '../../../conf';
 
 export function EventCard({
     item,
@@ -102,8 +103,13 @@ export function EventCard({
                         }}
                     >
                         <Text size="sm" fw={500}>
-                            {formatDate(dayjs.unix(item.startDate).toDate())} -{' '}
-                            {formatDate(dayjs.unix(item.endDate).toDate())}
+                            {dayjs
+                                .unix(item.startDate)
+                                .format(conf.dateTimeFormat)}{' '}
+                            -{' '}
+                            {dayjs
+                                .unix(item.endDate)
+                                .format(conf.dateTimeFormat)}
                         </Text>
                         <EventStateBadge state={item.state} />
                     </div>

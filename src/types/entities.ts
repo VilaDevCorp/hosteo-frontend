@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import {
     Alert,
     ApartmentState,
@@ -60,7 +61,6 @@ export interface Task extends BaseEntity {
     steps: string[];
 }
 
-
 export interface TaskWithApartment extends BaseEntity {
     name: string;
     category: CategoryEnum;
@@ -105,6 +105,7 @@ export interface Event extends BaseEntity {
     state: EventState;
     source: EventSource;
     type: EventType;
+    nextEvent?: Event;
 }
 
 export interface EventWithAssignments extends Omit<Event, 'apartment'> {
@@ -112,17 +113,17 @@ export interface EventWithAssignments extends Omit<Event, 'apartment'> {
     assignments: Assignment[];
 }
 
-export interface TaskDto {
-    id: string;
-    name: string;
-    category: CategoryEnum;
-    duration: number;
-    type: TaskType;
-    steps: string[];
+export interface AssignmentWithNextEventDto extends BaseEntity {
+    task: Task;
+    startDate: number;
+    endDate: number;
+    worker: Worker;
+    state: AssignmentState;
+    event: Event;
+    nextEvent: Event;
 }
 
-export interface AssignmentDto {
-    id: string;
+export interface AssignmentDto extends BaseEntity {
     task: TaskWithApartment;
     startDate: number;
     endDate: number;
@@ -131,38 +132,48 @@ export interface AssignmentDto {
     eventId: string;
 }
 
+
 export interface EventSchedulerDto {
     id: string;
     type: EventType;
     startDate: number;
     endDate: number;
     name: string;
+    apartmentName: string;
     source: EventSource;
     nMandatoryAssignedTasks: number;
     nExtraAssignedTasks: number;
-    mandatoryUnassignedTasks: TaskDto[];
+    mandatoryUnassignedTasks: Task[];
     nCompletedAssignments: number;
     uncompletedAssignments: AssignmentDto[];
     alert?: Alert;
     overdue: boolean;
 }
 
+export const ITEM_TYPE = {
+    EVENT: 'event',
+    ASSIGNMENT: 'assignment',
+    INCOMPLETE_ASSIGNMENT: 'incompleteAssignment'
+} as const;
+
+export type ItemType = typeof ITEM_TYPE[keyof typeof ITEM_TYPE];
+
 interface SchedulerEventItem {
-    type: 'event';
+    type: typeof ITEM_TYPE.EVENT;
     item: EventSchedulerDto;
     isStart: boolean;
     date: number;
 }
 
 interface SchedulerAssignmentItem {
-    type: 'assignment';
+    type: typeof ITEM_TYPE.ASSIGNMENT;
     item: AssignmentDto;
     isStart: boolean;
     date: number;
 }
 
 interface SchedulerIncompleteAssignmentItem {
-    type: 'incompleteAssignment';
+    type: typeof ITEM_TYPE.INCOMPLETE_ASSIGNMENT;
     item: AssignmentInfoForScheduler;
     isStart: boolean;
     date: number;
@@ -174,12 +185,20 @@ export type SchedulerItem =
     | SchedulerIncompleteAssignmentItem;
 
 export interface SchedulerInfo {
-    eventInfo: Record<string, EventSchedulerDto>;
-    previousEvent: Record<string, string>;
-    events: string[];
-    redAlertEvents: string[];
-    yellowAlertEvents: string[];
+    events: EventSchedulerDto[];
     assignments: AssignmentDto[];
+}
+
+export interface AlertsInfo {
+    alerts: AlertItem[];
+    nRedAlerts: number;
+    nYellowAlerts: number;
+}
+
+export interface AlertItem {
+    alertType: Alert;
+    event: Event;
+    prevEvent: EventSchedulerDto;
 }
 
 export interface ImpEvent {
@@ -199,16 +218,53 @@ export interface ImportResult {
     failureCount: number;
 }
 
+export const eventSchedulerDtoToEventForAssignment = (event?: EventSchedulerDto, nextEvent?: Event)
+    : EventForAssignment | undefined => {
+    if (!event) {
+        return undefined;
+    }
+    return {
+        id: event.id,
+        name: event.name,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        apartmentName: event.apartmentName,
+        source: event.source,
+        nextEvent: nextEvent
+    };
+};
+
+export const eventToEventForAssignment = (event: Event): EventForAssignment => {
+    return {
+        id: event.id,
+        name: event.name,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        apartmentName: event.apartment.name,
+        source: event.source,
+        nextEvent: event.nextEvent
+    };
+};
+
+export interface EventForAssignment {
+    id: string;
+    name: string;
+    startDate: number;
+    endDate: number;
+    apartmentName: string;
+    source: EventSource;
+    nextEvent?: Event;
+}
+
 export interface AssignmentInfoForScheduler {
     id?: string;
-    task?: Task | TaskDto;
+    task?: Task;
     startDate?: string;
     endDate?: string;
     worker?: Worker;
     state?: AssignmentState;
     apartment?: Apartment;
-    prevEventId?: string;
-    nextEventId?: string;
+    event?: EventForAssignment
 }
 
 export interface AssignmentUpdateError {

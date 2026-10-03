@@ -1,22 +1,26 @@
 import { Text } from '@mantine/core';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
-import { IconAlertTriangle } from '@tabler/icons-react';
-import { AssignmentFormFieldsWithObjects } from '../../types/forms';
-import { EventSchedulerDto } from '../../types/entities';
+import { AlertsInfo, Task } from '../../types/entities';
+import { useQuery } from '@tanstack/react-query';
+import { AlertIcon } from '../atoms/AlertIcon';
 
 export function EventAndTaskInfo({
-    assignment,
-    eventInfo
+    eventId,
+    task,
+    apartmentName
 }: {
-    assignment?: AssignmentFormFieldsWithObjects;
-    eventInfo?: Record<string, EventSchedulerDto>;
+    eventId: string;
+    task?: Task;
+    apartmentName?: string;
 }) {
-    // const nextEvent = assignment?.nextEventId && eventInfo ? eventInfo[assignment.nextEventId] : undefined;
-    // const alertColor =
-    //     nextEvent?.alert === ALERT.DAYS_LEFT_5_UNASSIGNED
-    //         ? 'var(--mantine-color-yellow-5)'
-    //         : 'var(--mantine-color-error-5)';
-    console.log(eventInfo);
+    const { data: alertsInfo } = useQuery<AlertsInfo>({
+        queryKey: ['schedulerInfo', 'alerts'],
+        enabled: false
+    });
+
+    const alert = alertsInfo?.alerts?.find(
+        (alert) => alert.event.id === eventId
+    )?.alertType;
 
     return (
         <div
@@ -36,13 +40,15 @@ export function EventAndTaskInfo({
                     height: '100%'
                 }}
             >
-                <IconAlertTriangle
-                    color={'var(--mantine-color-yellow-5)'}
-                    size={24}
-                    style={{ flexShrink: 0 }}
-                />
+                {alert && (
+                    <AlertIcon
+                        alertType={alert}
+                        size={16}
+                        style={{ marginRight: '0.5rem' }}
+                    />
+                )}
                 <Text c="dimmed" lineClamp={1}>
-                    {assignment?.apartment?.name ?? ''}
+                    {apartmentName ?? ''}
                 </Text>
             </span>
             <div
@@ -53,15 +59,13 @@ export function EventAndTaskInfo({
                     height: '100%'
                 }}
             >
-                {assignment?.task?.name && (
-                    <Text lineClamp={1}>{assignment?.task?.name}</Text>
+                {task?.name && <Text lineClamp={1}>{task?.name}</Text>}
+                {task?.category && (
+                    <TaskCategoryBadge category={task.category} />
                 )}
-                {assignment?.task?.category && (
-                    <TaskCategoryBadge category={assignment?.task.category} />
-                )}
-                {assignment?.task && assignment.task.duration > 0 && (
+                {task && task.duration > 0 && (
                     <Text lineClamp={1} style={{ flexShrink: 0 }}>
-                        {assignment?.task?.duration} min
+                        {task?.duration} min
                     </Text>
                 )}
             </div>

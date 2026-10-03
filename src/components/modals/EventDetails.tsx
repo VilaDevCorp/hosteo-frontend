@@ -1,20 +1,21 @@
 import { Divider, Image, Text, useMantineTheme } from '@mantine/core';
-import { Assignment, EventWithAssignments, Task } from '../../types/entities';
+import {
+    eventToEventForAssignment,
+    EventWithAssignments,
+    Task
+} from '../../types/entities';
 import { useScreen } from '../../hooks/useScreen';
 import { PlatformIcon } from '../atoms/PlatformIcon';
 import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
 import dayjs from 'dayjs';
 import { conf } from '../../../conf';
 import { IconLogin, IconLogout } from '@tabler/icons-react';
-import { useEntityModal } from '../../hooks/useEntityModal';
-import { AssignmentForm } from './AssignmentForm';
-import { WorkerCardSkeleton } from '../molecules/WorkerCardSkeleton';
-import { useState } from 'react';
 import { TaskWithAssigmentCard } from '../molecules/TaskWithAssigmentCard';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useCrud } from '../../hooks/useCrud';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { showNotificationSuccess } from '../../utils/notifUtils';
+import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
 
 export function EventDetails({
     entity: event
@@ -23,23 +24,7 @@ export function EventDetails({
 }) {
     const { isTablet } = useScreen();
     const theme = useMantineTheme();
-    const [selectedTask, setSelectedTask] = useState<Task | undefined>(
-        undefined
-    );
-
     const { openModal } = useConfirmModalWithContext();
-
-    const {
-        onOpen: openAssignmentFormModal,
-        modalComponent: assignmentFormModalComponent
-    } = useEntityModal<Assignment>({
-        entityName: 'assignment',
-        ModalBodyComponent: AssignmentForm,
-        ModalBodySkeleton: WorkerCardSkeleton,
-        relatedEntity: event,
-        relatedEntitySecondary: selectedTask
-
-    });
 
     const { remove: removeAssignment } = useCrud('assignment');
 
@@ -61,6 +46,9 @@ export function EventDetails({
             color: 'red',
             onConfirm: () => onDeleteAssignment(id)
         });
+
+    const { assignmentScheduler, onCreateAssignment, onUpdateAssignment } =
+        useAssignmentScheduler();
 
     return event ? (
         <div
@@ -156,7 +144,7 @@ export function EventDetails({
                     paddingRight: '0.4rem'
                 }}
             >
-                {event?.apartment?.tasks &&
+                {event.apartment?.tasks &&
                     event.apartment.tasks
                         .filter(
                             (task) =>
@@ -169,24 +157,25 @@ export function EventDetails({
                             <TaskWithAssigmentCard
                                 task={task}
                                 onAssign={() => {
-                                    setSelectedTask(task);
-                                    openAssignmentFormModal();
+                                    onCreateAssignment(
+                                        eventToEventForAssignment(event),
+                                        task
+                                    );
                                 }}
                             />
                         ))}
-                {event?.assignments.map((assignment) => (
+                {event.assignments.map((assignment) => (
                     <TaskWithAssigmentCard
                         task={assignment.task}
                         assignment={assignment}
                         onAssign={() => {
-                            setSelectedTask(assignment.task);
-                            openAssignmentFormModal(assignment.id);
+                            onUpdateAssignment(assignment.id);
                         }}
                         onDelete={() => openDeleteModal(assignment.id)}
                     />
                 ))}
             </div>
-            {assignmentFormModalComponent}
+            {assignmentScheduler}
         </div>
     ) : (
         <></>

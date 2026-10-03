@@ -6,6 +6,7 @@ import { conf } from '../../../conf';
 import { ALERT, Alert } from '../../types/enums';
 import { useMemo, useState } from 'react';
 import { IconAlertTriangle, IconEdit, IconTrash } from '@tabler/icons-react';
+import { AlertIcon } from '../atoms/AlertIcon';
 
 const getAlertColor = (alert: Alert | undefined) => {
     if (!alert) {
@@ -56,8 +57,8 @@ export function SchedulerEventCard({
                 borderBottomLeftRadius: `${isStart ? '0' : '0.5rem'}`,
                 borderBottomRightRadius: `${isStart ? '0' : '0.5rem'}`
             }}
-            onMouseEnter={() => setShowContextMenu(true)}
-            onMouseLeave={() => setShowContextMenu(false)}
+            onMouseEnter={onClick ? () => setShowContextMenu(true) : undefined}
+            onMouseLeave={onClick ? () => setShowContextMenu(false) : undefined}
         >
             <Card.Section
                 style={{
@@ -91,11 +92,7 @@ export function SchedulerEventCard({
                         }}
                     >
                         {item.alert && (
-                            <IconAlertTriangle
-                                color={alertColor}
-                                size={16}
-                                style={{ flexShrink: 0 }}
-                            />
+                            <AlertIcon alertType={item.alert} size={16} />
                         )}
                         <Title
                             order={4}
@@ -109,7 +106,7 @@ export function SchedulerEventCard({
                             fw={'lighter'}
                             c="black"
                         >
-                            {item.name}
+                            {item.apartmentName}
                         </Title>
                     </div>
                     {showContextMenu && (

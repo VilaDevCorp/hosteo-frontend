@@ -24,7 +24,7 @@ export function AssignmentTimePicker({
         >
             <CustomTimePicker
                 isStart={true}
-                date={formFields.startDate}
+                date={formFields.startDate || undefined}
                 updateDate={(value: string) =>
                     setFormFields((oldValue) => {
                         return {
@@ -40,7 +40,7 @@ export function AssignmentTimePicker({
 
             <CustomTimePicker
                 isStart={false}
-                date={formFields.endDate}
+                date={formFields.endDate || undefined}
                 updateDate={(value: string) =>
                     setFormFields((oldValue) => {
                         const startDate = dayjs(oldValue.startDate);

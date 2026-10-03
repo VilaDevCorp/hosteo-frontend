@@ -1,4 +1,4 @@
-import { Address, Apartment, Assignment, Event, TaskDto, Task, Template } from './entities';
+import { Address, Apartment, Assignment, Event, Task, Template, EventSchedulerDto, AssignmentWithNextEventDto, EventForAssignment } from './entities';
 import {
     ASSIGNMENT_STATE,
     CATEGORY_ENUM,
@@ -377,34 +377,10 @@ export interface AssignmentFormFields {
     taskId?: string;
     workerId?: string;
     eventId?: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
     state: AssignmentState;
 }
-
-export const assignmentToForm = (assignment: Assignment | undefined, eventId?: string, taskId?: string): AssignmentFormFields => {
-    if (!assignment) {
-        if (!eventId || !taskId) {
-            throw new Error('EventId and TaskId are required');
-        }
-        return {
-            taskId,
-            eventId,
-            startDate: '',
-            endDate: '',
-            state: ASSIGNMENT_STATE.PENDING
-        };
-    }
-    return {
-        id: assignment.id,
-        taskId: assignment.task.id,
-        startDate: dayjs.unix(assignment.startDate).format(conf.dateInputFormat),
-        endDate: dayjs.unix(assignment.endDate).format(conf.dateInputFormat),
-        workerId: assignment.worker.id,
-        eventId: assignment.event.id,
-        state: assignment.state
-    };
-};
 
 export const formFieldsToCreateAssignmentForm = (formFields: AssignmentFormFields): AssignmentCreateForm => {
     if (!formFields.taskId || !formFields.eventId || !formFields.workerId) {
@@ -436,36 +412,34 @@ export const formFieldsToUpdateAssignmentForm = (formFields: AssignmentFormField
 
 export interface AssignmentFormFieldsWithObjects {
     id?: string;
-    task?: TaskDto;
+    task?: Task;
     startDate?: string;
     endDate?: string;
     worker?: Worker;
     state?: AssignmentState;
     apartment?: Apartment;
-    eventId?: string;
-    prevEventId?: string;
+    event: EventSchedulerDto
+    alertedEvent: Event
 }
 
 
-export const assignmentFormFieldsWithObjectsToForm = (assignment: AssignmentFormFieldsWithObjects | undefined): AssignmentFormFields => {
-    if (!assignment) {
-        return {
-            taskId: '',
-            startDate: '',
-            endDate: '',
-            workerId: '',
-            eventId: '',
-            state: ASSIGNMENT_STATE.PENDING
-        };
-    }
+export const assignmentToForm = (assignment: AssignmentWithNextEventDto): AssignmentFormFields => {
     return {
-        id: assignment.id ?? '',
-        taskId: assignment.task?.id ?? '',
-        startDate: assignment.startDate ?? '',
-        endDate: assignment.endDate ?? '',
-        workerId: assignment.worker?.id ?? '',
-        eventId: assignment.eventId ?? '',
-        state: assignment.state ?? ASSIGNMENT_STATE.PENDING
+        id: assignment.id,
+        taskId: assignment.task?.id,
+        startDate: dayjs.unix(assignment.startDate).format(conf.dateInputFormat),
+        endDate: dayjs.unix(assignment.endDate).format(conf.dateInputFormat),
+        workerId: assignment.worker?.id,
+        eventId: assignment.event.id,
+        state: assignment.state
+    };
+};
+
+export const eventAndTaskToAssignmentForm = (event: EventForAssignment, task: Task): AssignmentFormFields => {
+    return {
+        taskId: task.id,
+        state: ASSIGNMENT_STATE.PENDING,
+        eventId: event.id,
     };
 };
 

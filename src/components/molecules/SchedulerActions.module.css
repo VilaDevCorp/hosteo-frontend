@@ -1,0 +1,13 @@
+.schedulerActionsContainer {
+    background-color: var(--mantine-color-gray-0);
+    border-radius: 0.5rem;
+}
+
+.deselectButton:hover {
+    background-color: transparent !important;
+    color: var(--mantine-color-red-4);
+}
+
+.schedulerActionsContainer button:hover {
+    background-color: var(--mantine-color-blue-0);
+}

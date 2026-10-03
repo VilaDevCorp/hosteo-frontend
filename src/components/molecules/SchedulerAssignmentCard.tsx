@@ -34,8 +34,8 @@ export function SchedulerAssignmentCard({
                     ? 'var(--mantine-color-blue-0)'
                     : 'white'
             }}
-            onMouseEnter={() => setShowContextMenu(true)}
-            onMouseLeave={() => setShowContextMenu(false)}
+            onMouseEnter={onClick ? () => setShowContextMenu(true) : undefined}
+            onMouseLeave={onClick ? () => setShowContextMenu(false) : undefined}
         >
             <Card.Section
                 style={{

@@ -1,11 +1,7 @@
 import dayjs from 'dayjs';
 import { Text } from '@mantine/core';
 import { SchedulerEventCard } from './SchedulerEventCard';
-import {
-    AssignmentDto,
-    EventSchedulerDto,
-    SchedulerItem
-} from '../../types/entities';
+import { SchedulerItem } from '../../types/entities';
 import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
 import { IncompleteAssignmentCard } from './IncompleteAssignmentCard.tsx';
 
@@ -29,11 +25,11 @@ export function SchedulerDay({
     disabled?: boolean;
     isSelected?: boolean;
     selectedEventIds?: Set<string>;
-    onEventClick?: (event: EventSchedulerDto) => void;
+    onEventClick?: (eventId: string) => void;
     onEventEdit?: (eventId: string) => void;
     onEventDelete?: (eventId: string) => void;
     selectedAssignmentIds?: Set<string>;
-    onAssignmentClick?: (assignment: AssignmentDto) => void;
+    onAssignmentClick?: (assignmentId: string) => void;
     onAssignmentEdit?: (assignmentId: string) => void;
     onAssignmentDelete?: (assignmentId: string) => void;
 }) {
@@ -95,14 +91,25 @@ export function SchedulerDay({
                                 isSelected={selectedEventIds?.has(
                                     eventSchedulerDto.id
                                 )}
-                                onClick={() =>
-                                    onEventClick?.(eventSchedulerDto)
+                                onClick={
+                                    onEventClick
+                                        ? () =>
+                                              onEventClick(eventSchedulerDto.id)
+                                        : undefined
                                 }
-                                onEdit={() =>
-                                    onEventEdit?.(eventSchedulerDto.id)
+                                onEdit={
+                                    onEventEdit
+                                        ? () =>
+                                              onEventEdit(eventSchedulerDto.id)
+                                        : undefined
                                 }
-                                onDelete={() =>
-                                    onEventDelete?.(eventSchedulerDto.id)
+                                onDelete={
+                                    onEventDelete
+                                        ? () =>
+                                              onEventDelete(
+                                                  eventSchedulerDto.id
+                                              )
+                                        : undefined
                                 }
                             />
                         );
@@ -113,7 +120,9 @@ export function SchedulerDay({
                             <SchedulerAssignmentCard
                                 key={assignment.id}
                                 item={assignment}
-                                onClick={() => onAssignmentClick?.(assignment)}
+                                onClick={() =>
+                                    onAssignmentClick?.(assignment.id)
+                                }
                                 isSelected={selectedAssignmentIds?.has(
                                     assignment.id
                                 )}

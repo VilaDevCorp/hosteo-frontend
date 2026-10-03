@@ -1,7 +1,9 @@
 import { createContext, ReactNode } from 'react';
 import {
+    AlertsInfo,
     AssignmentUpdateError,
     EventUpdateError,
+    SchedulerInfo,
     User
 } from '../types/entities';
 import { ApiResponse } from '../types/types';
@@ -9,6 +11,8 @@ import { checkResponseException } from '../utils/utilFunctions';
 import { RegisterUserForm } from '../types/forms';
 import { AssignmentState, EventState } from '../types/enums';
 import { useAuth } from '../hooks/useAuth';
+import dayjs from 'dayjs';
+import { conf } from '../../conf';
 
 export interface ApiContext {
     register: (user: RegisterUserForm) => void;
@@ -26,6 +30,8 @@ export interface ApiContext {
         assignmentIds: string[],
         state: AssignmentState
     ) => Promise<AssignmentUpdateError[]>;
+    searchSchedulerData: (date: string) => Promise<SchedulerInfo>;
+    getAlertsInfo: () => Promise<AlertsInfo>;
 }
 
 export const ApiContext = createContext<ApiContext>({} as ApiContext);
@@ -113,12 +119,44 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         return resObject.data;
     };
 
+    const searchSchedulerData = async (
+        date: string
+    ): Promise<SchedulerInfo> => {
+        const url = `${apiUrl}scheduler/${dayjs(date).format(conf.dateUrlFormat)}`;
+        const options: RequestInit = {
+            method: 'GET',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<SchedulerInfo> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const getAlertsInfo = async (): Promise<AlertsInfo> => {
+        const url = `${apiUrl}alerts`;
+        const options: RequestInit = {
+            method: 'GET',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<AlertsInfo> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
     const value: ApiContext = {
         register,
         forgottenPassword,
         resetPassword,
         eventBulkStateUpdate,
-        assignmentBulkStateUpdate
+        assignmentBulkStateUpdate,
+        searchSchedulerData,
+        getAlertsInfo
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

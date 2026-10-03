@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Address, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
+import { Address, AlertItem, AlertsInfo, Assignment, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { conf } from '../../conf';
 
@@ -32,11 +32,11 @@ export function getEndOfWeek(date: string | null) {
     return dayjs(date).endOf('week').toISOString();
 }
 
-export const groupItemsByDate = (
+export const groupItemsByDateAndAddAlerts = (
     startOfWeek: string,
-    eventInfo: Record<string, EventSchedulerDto>,
-    events: string[],
-    assignments: AssignmentDto[],
+    events?: EventSchedulerDto[],
+    assignments?: AssignmentDto[],
+    alerts?: AlertItem[],
     assignmentBeingModified?: AssignmentInfoForScheduler,
 ) => {
     const map = new Map<string, SchedulerItem[]>();
@@ -46,29 +46,32 @@ export const groupItemsByDate = (
             .format(conf.dateUrlFormat);
         map.set(dateToAdd, []);
     });
-    events.forEach((eventId) => {
-        const eventSchedulerDto = eventInfo[eventId];
-        if (!eventSchedulerDto) return;
+
+    events && events.forEach((event) => {
+        event.alert = alerts?.find(
+            (alert) => alert.event.id === event.id
+        )?.alertType;
         const startDate = dayjs
-            .unix(eventSchedulerDto.startDate)
+            .unix(event.startDate)
             .format(conf.dateUrlFormat);
         const endDate = dayjs
-            .unix(eventSchedulerDto.endDate)
+            .unix(event.endDate)
             .format(conf.dateUrlFormat);
         map.get(startDate)?.push({
             type: 'event',
-            item: eventSchedulerDto,
+            item: event,
             isStart: true,
-            date: eventSchedulerDto.startDate
+            date: event.startDate
         });
         map.get(endDate)?.push({
             type: 'event',
-            item: eventSchedulerDto,
+            item: event,
             isStart: false,
-            date: eventSchedulerDto.endDate
+            date: event.endDate
         });
     });
-    assignments.forEach((assignment) => {
+
+    assignments && assignments.forEach((assignment) => {
         if (assignment.id === assignmentBeingModified?.id) return;
         const startDate = dayjs
             .unix(assignment.startDate)
@@ -80,6 +83,7 @@ export const groupItemsByDate = (
             date: assignment.startDate
         });
     });
+
     if (assignmentBeingModified?.startDate) {
         map.get(dayjs(assignmentBeingModified.startDate).format(conf.dateUrlFormat))?.push({
             type: 'incompleteAssignment',
@@ -89,7 +93,11 @@ export const groupItemsByDate = (
         });
     }
     for (const dayItems of map.values()) {
-        dayItems.sort((a, b) => a.date - b.date);
+        dayItems.sort((a, b) => {
+            const aLabel = a.type === 'event' ? a.item.name : a.item?.task?.name;
+            const bLabel = b.type === 'event' ? b.item.name : b.item?.task?.name;
+            return (a.date - b.date) - (a.isStart ? 0 : 1) - ((aLabel ?? 0) < (bLabel ?? 0) ? 1 : -1)
+        });
     }
     return map;
 };

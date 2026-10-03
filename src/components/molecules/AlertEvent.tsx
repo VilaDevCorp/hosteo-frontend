@@ -1,20 +1,29 @@
 import { Accordion, Text } from '@mantine/core';
-import { EventSchedulerDto, TaskDto } from '../../types/entities';
-import { ALERT } from '../../types/enums';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { Event, EventSchedulerDto, Task } from '../../types/entities';
+import { ALERT, Alert } from '../../types/enums';
 import { conf } from '../../../conf';
 import dayjs from 'dayjs';
 import { TaskOrTemplateCard } from './TaskOrTemplateCard';
+import { AlertIcon } from '../atoms/AlertIcon';
+import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
 
 export function AlertEvent({
-    eventSchedulerDto,
+    alertType,
+    event,
+    prevEvent,
     handleCreateNewAssignment
 }: {
-    eventSchedulerDto: EventSchedulerDto;
-    handleCreateNewAssignment: (eventSchedulerDto: EventSchedulerDto, task?: TaskDto) => void;
+    alertType: Alert;
+    event: Event;
+    prevEvent: EventSchedulerDto;
+    handleCreateNewAssignment: (
+        event: EventSchedulerDto,
+        alertedEvent: Event,
+        task: Task
+    ) => void;
 }) {
     return (
-        <Accordion.Item key={eventSchedulerDto.id} value={eventSchedulerDto.id}>
+        <Accordion.Item key={event.id} value={event.id}>
             <Accordion.Control>
                 <div
                     style={{
@@ -29,26 +38,12 @@ export function AlertEvent({
                             gap: '0.5rem'
                         }}
                     >
-                        {eventSchedulerDto.alert === ALERT.DAYS_LEFT_5_UNASSIGNED ? (
-                            <IconAlertTriangle
-                                color="var(--mantine-color-yellow-5)"
-                                size={24}
-                                style={{ flexShrink: 0 }}
-                            />
-                        ) : (
-                            <IconAlertTriangle
-                                color="var(--mantine-color-error-5)"
-                                size={24}
-                                style={{ flexShrink: 0 }}
-                            />
-                        )}
-                        <Text lineClamp={1}>
-                            {eventSchedulerDto.name}
-                        </Text>
+                        <AlertIcon alertType={alertType} size={24} />
+                        <Text lineClamp={1}>{event.name}</Text>
                     </div>
                     <Text fw={'bold'}>
                         {dayjs
-                            .unix(eventSchedulerDto.startDate)
+                            .unix(event.startDate)
                             .format(conf.dateTimeFormat)}
                     </Text>
                 </div>
@@ -63,15 +58,26 @@ export function AlertEvent({
                     }
                 }}
             >
-                {eventSchedulerDto.mandatoryUnassignedTasks.map((task) => (
-                    <TaskOrTemplateCard
-                        key={task.id}
-                        item={task}
-                        onClick={() => {
-                            handleCreateNewAssignment(eventSchedulerDto, task);
-                        }}
-                    />
-                ))}
+                {alertType === ALERT.DAYS_LEFT_2_NOT_COMPLETED
+                    ? prevEvent.uncompletedAssignments.map((assignment) => (
+                          <SchedulerAssignmentCard
+                              key={assignment.id}
+                              item={assignment}
+                          />
+                      ))
+                    : prevEvent.mandatoryUnassignedTasks.map((task) => (
+                          <TaskOrTemplateCard
+                              key={task.id}
+                              item={task}
+                              onClick={() => {
+                                  handleCreateNewAssignment(
+                                      prevEvent,
+                                      event,
+                                      task
+                                  );
+                              }}
+                          />
+                      ))}
             </Accordion.Panel>
         </Accordion.Item>
     );

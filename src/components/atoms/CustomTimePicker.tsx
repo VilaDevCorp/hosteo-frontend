@@ -10,7 +10,7 @@ export function CustomTimePicker({
     updateDate
 }: {
     isStart: boolean;
-    date: string;
+    date: string | undefined;
     updateDate: (value: string) => void;
 }) {
     const theme = useMantineTheme();

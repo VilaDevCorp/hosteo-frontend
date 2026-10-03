@@ -1,11 +1,14 @@
 import { Text } from '@mantine/core';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { AlertsInfo } from '../../types/entities';
+import { useQuery } from '@tanstack/react-query';
+import { AlertIcon } from './AlertIcon';
+import { ALERT, Alert } from '../../types/enums';
 
-function AlertElement({
+function AlertCounter({
     alertType,
     count
 }: {
-    alertType: 'red' | 'yellow';
+    alertType: Alert;
     count: number;
 }) {
     return (
@@ -16,29 +19,14 @@ function AlertElement({
                 gap: '0.25rem'
             }}
         >
-            <IconAlertTriangle
-                color={
-                    alertType === 'red'
-                        ? 'var(--mantine-color-error-5)'
-                        : 'var(--mantine-color-yellow-6)'
-                }
-                size={32}
-            />
+            <AlertIcon alertType={alertType} size={32} />
             <Text size="xl" c={'var(--mantine-color-gray-9)'}>
                 {count ?? 0}
             </Text>
         </div>
     );
 }
-export function AlertsIndicator({
-    onClick,
-    redAlertCount,
-    yellowAlertCount
-}: {
-    onClick?: () => void;
-    redAlertCount?: number;
-    yellowAlertCount?: number;
-}) {
+export function AlertsIndicator({ onClick }: { onClick?: () => void }) {
     const containerStyles = {
         display: 'flex',
         alignItems: 'center',
@@ -48,14 +36,25 @@ export function AlertsIndicator({
         cursor: onClick ? 'pointer' : 'default'
     };
 
+    const { data: alertsInfo } = useQuery<AlertsInfo>({
+        queryKey: ['schedulerInfo', 'alerts'],
+        enabled: false
+    });
+
     const content = (
         <>
-            <AlertElement alertType="red" count={redAlertCount ?? 0} />
-            <AlertElement alertType="yellow" count={yellowAlertCount ?? 0} />
+            <AlertCounter
+                alertType={ALERT.DAYS_LEFT_2_NOT_COMPLETED}
+                count={alertsInfo?.nRedAlerts ?? 0}
+            />
+            <AlertCounter
+                alertType={ALERT.DAYS_LEFT_5_UNASSIGNED}
+                count={alertsInfo?.nYellowAlerts ?? 0}
+            />
         </>
     );
 
-    if (!redAlertCount && !yellowAlertCount) {
+    if (!alertsInfo?.nRedAlerts && !alertsInfo?.nYellowAlerts) {
         return null;
     }
     return onClick ? (

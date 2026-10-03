@@ -44,10 +44,7 @@ export const ConfirmationModal = ({
                         alignItems: 'center'
                     }}
                 >
-                    <IconAlertTriangle
-                        color="var(--mantine-color-red-6)"
-                        size={16}
-                    />
+                    <IconAlertTriangle color={color} size={24} />
                     <Text fw={700}>{title}</Text>
                 </div>
             }
