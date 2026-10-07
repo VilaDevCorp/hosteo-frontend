@@ -40,6 +40,7 @@ export function SchedulerDay({
                 flexDirection: 'column',
                 gap: '0.5rem',
                 height: '100%',
+                maxHeight: '100%',
                 flex: 1,
                 justifyContent: 'center',
                 minWidth: '170px',
@@ -76,7 +77,8 @@ export function SchedulerDay({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.5rem',
-                    overflow: 'hidden',
+                    overflow: 'auto',
+                    scrollbarWidth: 'thin',
                     borderRadius: 'var(--mantine-radius-md)'
                 }}
             >

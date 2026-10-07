@@ -84,6 +84,14 @@ export function AssignmentScheduler({
         message: stateMessage
     } = useValidator(formFields.state, [notEmptyValidator]);
 
+    const invalidateQueries = () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        queryClient.invalidateQueries({ queryKey: ['event'] });
+        queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+        queryClient.invalidateQueries({ queryKey: ['apartments'] });
+        queryClient.invalidateQueries({ queryKey: ['apartment'] });
+    };
+
     const createAssignment = async () => {
         if (!formFields.taskId) return;
         await create(formFieldsToCreateAssignmentForm(formFields));
@@ -93,7 +101,7 @@ export function AssignmentScheduler({
         useMutation({
             mutationFn: createAssignment,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+                invalidateQueries();
                 showNotificationSuccess('Assignment created');
                 onClose?.();
             },
@@ -108,7 +116,7 @@ export function AssignmentScheduler({
         useMutation({
             mutationFn: updateAssignment,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+                invalidateQueries();
                 showNotificationSuccess('Assignment updated');
                 onClose?.();
             },

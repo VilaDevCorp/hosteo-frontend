@@ -1,15 +1,16 @@
-import { Button, TextInput } from '@mantine/core';
+import { Button, Switch, TextInput } from '@mantine/core';
 import { Layout } from '../components/organism/layout/Layout';
 import { useEffect, useState } from 'react';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { useCrud } from '../hooks/useCrud';
 import { Worker } from '../types/entities';
 import { Page } from '../types/types';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useError } from '../hooks/useError';
+import { useApi } from '../hooks/useApi';
+import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { useScreen } from '../hooks/useScreen';
 import { TopControls } from '../components/molecules/TopControls';
-import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { DataTable } from '../components/organism/DataTable';
 import { WorkerCard } from '../components/molecules/WorkerCard';
 import { WorkerCardSkeleton } from '../components/molecules/WorkerCardSkeleton';
@@ -19,7 +20,8 @@ import { WorkerFormSkeleton } from '../components/skeletons/WorkerFormSkeleton';
 import { showNotificationSuccess } from '../utils/notifUtils';
 
 export function WorkersScreen() {
-    const { search, remove } = useCrud<Worker>('worker');
+    const { search } = useCrud<Worker>('worker');
+    const { hide, unhide } = useApi();
     const { handleError } = useError();
     const { isTablet } = useScreen();
     const { openModal } = useConfirmModalWithContext();
@@ -27,6 +29,7 @@ export function WorkersScreen() {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [nameSearch, setNameSearch] = useState<string>('');
     const [debouncedNameSearch, setDebouncedNameSearch] = useState<string>('');
+    const [showHidden, setShowHidden] = useState<boolean>(false);
 
     const {
         data: workerPage,
@@ -35,10 +38,11 @@ export function WorkersScreen() {
         isError,
         error
     } = useQuery<Page<Worker>>({
-        queryKey: ['workers', pageNumber, debouncedNameSearch],
+        queryKey: ['workers', pageNumber, debouncedNameSearch, showHidden],
         queryFn: () =>
             search(pageNumber - 1, 15, {
-                name: debouncedNameSearch
+                name: debouncedNameSearch,
+                visible: !showHidden
             }),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -63,20 +67,43 @@ export function WorkersScreen() {
         return () => clearTimeout(timer);
     }, [nameSearch]);
 
-    const onDeleteWorker = async (id: string) => {
-        await remove(id);
-        showNotificationSuccess('Worker deleted');
-        reloadWorkers();
-    };
+    const queryClient = useQueryClient();
 
-    const openDeleteModal = (id: string) =>
+    const { mutateAsync: toggleWorkerVisibility } = useMutation({
+        mutationFn: async ({
+            id,
+            visible
+        }: {
+            id: string;
+            visible: boolean;
+        }) => {
+            if (visible) {
+                await hide('worker', id);
+            } else {
+                await unhide('worker', id);
+            }
+        },
+        onSuccess: (_, variables) => {
+            reloadWorkers();
+            queryClient.invalidateQueries({ queryKey: ['worker'] });
+            showNotificationSuccess(
+                variables.visible ? 'Worker hidden' : 'Worker shown'
+            );
+        },
+        onError: handleError
+    });
+
+    const onToggleWorkerVisibility = (id: string, visible: boolean) => {
+        const isHiding = visible;
         openModal({
-            title: 'Delete worker',
-            message:
-                'Deleting this worker will delete all the associated information like assignments.',
-            color: 'error',
-            onConfirm: () => onDeleteWorker(id)
+            title: isHiding ? 'Hide worker' : 'Show worker',
+            message: isHiding
+                ? 'Are you sure you want to hide this worker? It will no longer appear in the default lists or selectors.'
+                : 'Are you sure you want to show this worker?',
+            color: isHiding ? 'error' : 'primary',
+            onConfirm: () => toggleWorkerVisibility({ id, visible })
         });
+    };
 
     return (
         <Layout>
@@ -94,6 +121,17 @@ export function WorkersScreen() {
                         label={isTablet ? 'Search by name' : undefined}
                     />
                 }
+                filters={
+                    <Switch
+                        label="Show hidden"
+                        checked={showHidden}
+                        onChange={(e) => {
+                            setPageNumber(1);
+                            setShowHidden(e.currentTarget.checked);
+                        }}
+                    />
+                }
+                filtersOnModalActivated={showHidden}
                 addButton={
                     <Button leftSection={<IconPlus />} onClick={() => onOpen()}>
                         {'Add worker'}
@@ -111,7 +149,8 @@ export function WorkersScreen() {
                 pageNumber={pageNumber}
                 setPageNumber={setPageNumber}
                 onEdit={onOpen}
-                onDelete={openDeleteModal}
+                onToggleVisibility={onToggleWorkerVisibility}
+                isVisible={(worker) => worker.visible}
             />
             {workerFormModal}
         </Layout>

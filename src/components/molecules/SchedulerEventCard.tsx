@@ -3,21 +3,11 @@ import { ActionIcon, Card, Text, Title } from '@mantine/core';
 import styles from '../styles/DataTable.module.css';
 import dayjs from 'dayjs';
 import { conf } from '../../../conf';
-import { ALERT, Alert } from '../../types/enums';
-import { useMemo, useState } from 'react';
-import { IconAlertTriangle, IconEdit, IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
+import { IconBed, IconEdit, IconTrash } from '@tabler/icons-react';
 import { AlertIcon } from '../atoms/AlertIcon';
+import { StateIndicator } from '../atoms/StateIndicator';
 
-const getAlertColor = (alert: Alert | undefined) => {
-    if (!alert) {
-        return 'hsla(210, 10%, 40%, 1.00)';
-    }
-    if (alert === ALERT.DAYS_LEFT_5_UNASSIGNED) {
-        return 'var(--mantine-color-yellow-6)';
-    } else {
-        return 'var(--mantine-color-error-5)';
-    }
-};
 export function SchedulerEventCard({
     item,
     isStart,
@@ -33,32 +23,52 @@ export function SchedulerEventCard({
     onEdit?: () => void;
     onDelete?: () => void;
 }) {
-    const alertColor = useMemo(() => getAlertColor(item.alert), [item.alert]);
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+
+    const isFrozen = item.frozen;
 
     return (
         <Card
             w={'100%'}
-            className={onClick ? styles.selectableCard : undefined}
-            onClick={onClick && (() => onClick(item.id))}
+            className={
+                onClick && !isFrozen ? styles.selectableCard : undefined
+            }
+            onClick={
+                onClick && !isFrozen ? () => onClick(item.id) : undefined
+            }
             padding="0"
             shadow="sm"
             radius={'0'}
             style={{
+                flexShrink: 0,
+                opacity: isFrozen ? 0.5 : 1,
+                cursor: onClick && !isFrozen ? 'pointer' : 'default',
                 backgroundColor: isSelected
                     ? 'var(--mantine-color-blue-0)'
                     : 'white',
-                borderLeft: '3px solid ' + alertColor,
-                borderRight: '3px solid ' + alertColor,
-                borderTop: isStart ? '3px solid ' + alertColor : 'none',
-                borderBottom: isStart ? 'none' : '3px solid ' + alertColor,
+                borderLeft: '3px solid var(--mantine-color-gray-5)',
+                borderRight: '3px solid var(--mantine-color-gray-5)',
+                borderTop: isStart
+                    ? '3px solid var(--mantine-color-gray-5)'
+                    : 'none',
+                borderBottom: isStart
+                    ? 'none'
+                    : '3px solid var(--mantine-color-gray-5)',
                 borderTopLeftRadius: `${isStart ? '0.5rem' : '0'}`,
                 borderTopRightRadius: `${isStart ? '0.5rem' : '0'}`,
                 borderBottomLeftRadius: `${isStart ? '0' : '0.5rem'}`,
                 borderBottomRightRadius: `${isStart ? '0' : '0.5rem'}`
             }}
-            onMouseEnter={onClick ? () => setShowContextMenu(true) : undefined}
-            onMouseLeave={onClick ? () => setShowContextMenu(false) : undefined}
+            onMouseEnter={
+                onClick && !isFrozen
+                    ? () => setShowContextMenu(true)
+                    : undefined
+            }
+            onMouseLeave={
+                onClick && !isFrozen
+                    ? () => setShowContextMenu(false)
+                    : undefined
+            }
         >
             <Card.Section
                 style={{
@@ -91,8 +101,10 @@ export function SchedulerEventCard({
                             gap: '0.5rem'
                         }}
                     >
-                        {item.alert && (
-                            <AlertIcon alertType={item.alert} size={16} />
+                        {item.alert ? (
+                            <AlertIcon alertType={item.alert} size={24} />
+                        ) : (
+                            <IconBed size={16} />
                         )}
                         <Title
                             order={4}
@@ -109,7 +121,7 @@ export function SchedulerEventCard({
                             {item.apartmentName}
                         </Title>
                     </div>
-                    {showContextMenu && (
+                    {showContextMenu && !isFrozen && (
                         <div
                             style={{
                                 position: 'absolute',
@@ -180,12 +192,16 @@ export function SchedulerEventCard({
                         <Text size="sm" fw={'bold'}>
                             {dayjs.unix(item.startDate).format(conf.timeFormat)}
                         </Text>
+                        <StateIndicator state={item.state} size="md" />
                         {item.overdue && (
                             <Text size="xs" c="red" fw="bold">
                                 Overdue
                             </Text>
                         )}
                     </div>
+                    <Text size="sm" fw={'normal'}>
+                        {item.name}
+                    </Text>
                 </div>
             </Card.Section>
         </Card>

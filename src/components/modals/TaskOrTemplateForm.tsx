@@ -43,6 +43,7 @@ export function TaskOrTemplateForm({
 }: {
     onClose?: () => void;
     entity?: Template | Task;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntity?: any;
 }) {
     const apartment = relatedEntity as Apartment | undefined;
@@ -57,10 +58,19 @@ export function TaskOrTemplateForm({
     const invalidateQueries = () => {
         if (IS_TASK) {
             queryClient.invalidateQueries({
-                queryKey: ['task', entity?.id]
+                queryKey: ['apartment', apartment?.id]
             });
             queryClient.invalidateQueries({
-                queryKey: ['apartment', apartment?.id]
+                queryKey: ['apartments']
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['event']
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['events']
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['schedulerInfo']
             });
         } else {
             queryClient.invalidateQueries({

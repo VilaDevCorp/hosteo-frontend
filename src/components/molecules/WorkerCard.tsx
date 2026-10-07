@@ -8,12 +8,14 @@ export function WorkerCard({
     item,
     onClick,
     onEdit,
-    onDelete
+    onDelete,
+    onToggleVisibility
 }: {
     item: Worker;
     onClick?: (id: string) => void;
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
+    onToggleVisibility?: () => void;
 }) {
     return (
         <Card
@@ -67,13 +69,17 @@ export function WorkerCard({
                     style={{
                         display: 'flex',
                         justifyContent:
-                            onEdit || onDelete ? 'space-between' : 'center',
+                            onEdit || onDelete || onToggleVisibility
+                                ? 'space-between'
+                                : 'center',
                         alignItems: 'center'
                     }}
                 >
                     <CardControls
                         onEdit={onEdit && (() => onEdit(item.id))}
                         onDelete={onDelete && (() => onDelete(item.id))}
+                        onToggleVisibility={onToggleVisibility}
+                        visible={item.visible}
                     />
                 </div>
             </Card.Section>

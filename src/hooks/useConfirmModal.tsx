@@ -6,7 +6,8 @@ export interface ConfirmModalProperties {
     title: string;
     message: string;
     color: ExtendedCustomColors;
-    onConfirm: () => void;
+    onConfirm: () => Promise<void>;
+    isLoading?: boolean;
 }
 
 export interface IUseConfirmModal {

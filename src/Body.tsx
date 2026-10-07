@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { LoginScreen } from './screens/LoginScreen';
 import { Suspense, lazy } from 'react';
-import { HomeScreen } from './screens/HomeScreen';
 import { LoadingScreen } from './screens/LoadingScreen';
 
 const LazyRegisterScreen = lazy(() =>

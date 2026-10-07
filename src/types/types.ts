@@ -17,6 +17,7 @@ export interface Card<T> {
     onClick?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
+    onToggleVisibility?: () => void;
 }
 
 export interface TableStructure<T> {

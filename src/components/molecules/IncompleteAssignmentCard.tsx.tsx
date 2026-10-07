@@ -1,8 +1,8 @@
 import { Card, Text, Title } from '@mantine/core';
 import dayjs from 'dayjs';
 import { conf } from '../../../conf';
-import { AssignmentStateBadge } from '../atoms/AssignmentStateBadge';
 import { AssignmentInfoForScheduler } from '../../types/entities';
+import { StateIndicator } from '../atoms/StateIndicator';
 
 export function IncompleteAssignmentCard({
     assignment
@@ -95,9 +95,9 @@ export function IncompleteAssignmentCard({
                             {dayjs(assignment.endDate).format(conf.timeFormat)}
                         </Text>
                         {assignment.state && (
-                            <AssignmentStateBadge
+                            <StateIndicator
                                 state={assignment.state}
-                                size="sm"
+                                size="md"
                             />
                         )}
                     </div>

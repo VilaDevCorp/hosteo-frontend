@@ -16,7 +16,7 @@ export function AssignmentStateBadge({
             case ASSIGNMENT_STATE.FINISHED:
                 return 'success';
             case ASSIGNMENT_STATE.PENDING:
-                return 'warning';
+                return 'primary';
             default:
                 return 'primary';
         }

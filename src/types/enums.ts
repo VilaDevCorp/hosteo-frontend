@@ -16,6 +16,13 @@ export const EVENT_SOURCE = {
 
 export type EventSource = (typeof EVENT_SOURCE)[keyof typeof EVENT_SOURCE];
 
+export const IMPORT_SOURCE = {
+    BOOKING: 'BOOKING',
+    AIRBNB: 'AIRBNB'
+} as const;
+
+export type ImportSource = (typeof IMPORT_SOURCE)[keyof typeof IMPORT_SOURCE];
+
 export const TASK_TYPE = {
     MANDATORY: 'MANDATORY',
     EXTRA: 'EXTRA'

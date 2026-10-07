@@ -87,13 +87,15 @@ export function ApartmentDetails({
                 }}
             >
                 {apartment?.tasks &&
-                    apartment.tasks.map((task) => (
-                        <TaskOrTemplateCard
-                            key={task.id}
-                            item={task}
-                            onClick={() => onOpenTaskDetailsModal(task.id)}
-                        />
-                    ))}
+                    apartment.tasks
+                        .filter((task) => task.visible !== false)
+                        .map((task) => (
+                            <TaskOrTemplateCard
+                                key={task.id}
+                                item={task}
+                                onClick={() => onOpenTaskDetailsModal(task.id)}
+                            />
+                        ))}
             </div>
             {taskDetailsModal}
         </div>

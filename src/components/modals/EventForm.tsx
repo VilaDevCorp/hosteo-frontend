@@ -139,17 +139,20 @@ export function EventForm({
         await create(formFieldsToCreateEventForm(formFields));
     };
 
+    const invalidateQueries = () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        queryClient.invalidateQueries({
+            queryKey: ['schedulerInfo']
+        });
+        queryClient.invalidateQueries({ queryKey: ['apartments'] });
+        queryClient.invalidateQueries({ queryKey: ['apartment'] });
+    };
+
     const { mutate: createEventMutation, isPending: isLoadingCreate } =
         useMutation({
             mutationFn: createEvent,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['events'] });
-                queryClient.invalidateQueries({
-                    queryKey: ['event', event?.id]
-                });
-                queryClient.invalidateQueries({
-                    queryKey: ['schedulerInfo']
-                });
+                invalidateQueries();
                 showNotificationSuccess('Event created');
                 onClose?.();
             },
@@ -164,12 +167,9 @@ export function EventForm({
         useMutation({
             mutationFn: updateEvent,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['events'] });
+                invalidateQueries();
                 queryClient.invalidateQueries({
                     queryKey: ['event', event?.id]
-                });
-                queryClient.invalidateQueries({
-                    queryKey: ['schedulerInfo']
                 });
                 showNotificationSuccess('Event updated');
                 onClose?.();

@@ -38,6 +38,9 @@ export const useError = () => {
                 case StatusCode.ClientErrorNotFound:
                     showNotificationError('Resource not found');
                     return;
+                case StatusCode.ClientErrorConflict:
+                    showNotificationError(error.message);
+                    return;
             }
         }
         showNotificationError('An internal error occurred');

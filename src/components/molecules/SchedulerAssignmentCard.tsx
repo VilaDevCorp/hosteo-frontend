@@ -3,9 +3,9 @@ import { ActionIcon, Card, Text, Title } from '@mantine/core';
 import styles from '../styles/DataTable.module.css';
 import dayjs from 'dayjs';
 import { conf } from '../../../conf';
-import { AssignmentStateBadge } from '../atoms/AssignmentStateBadge';
 import { useState } from 'react';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { StateIndicator } from '../atoms/StateIndicator';
 
 export function SchedulerAssignmentCard({
     item,
@@ -21,26 +21,40 @@ export function SchedulerAssignmentCard({
     isSelected?: boolean;
 }) {
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+
+    const isFrozen = item.frozen;
+
     return (
         <Card
             w={'100%'}
-            className={onClick ? styles.selectableCard : undefined}
-            onClick={onClick && (() => onClick())}
+            className={onClick && !isFrozen ? styles.selectableCard : undefined}
+            onClick={onClick && !isFrozen ? () => onClick() : undefined}
             padding="0"
             radius="md"
             shadow="sm"
             style={{
+                flexShrink: 0,
+                cursor: onClick && !isFrozen ? 'pointer' : 'default',
+                opacity: isFrozen ? 0.5 : 1,
                 backgroundColor: isSelected
                     ? 'var(--mantine-color-blue-0)'
                     : 'white'
             }}
-            onMouseEnter={onClick ? () => setShowContextMenu(true) : undefined}
-            onMouseLeave={onClick ? () => setShowContextMenu(false) : undefined}
+            onMouseEnter={
+                onClick && !isFrozen
+                    ? () => setShowContextMenu(true)
+                    : undefined
+            }
+            onMouseLeave={
+                onClick && !isFrozen
+                    ? () => setShowContextMenu(false)
+                    : undefined
+            }
         >
             <Card.Section
                 style={{
                     position: 'relative',
-                    height: '36px',
+                    minHeight: '36px',
                     backgroundImage: 'url(apartment_placeholder.svg)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -67,7 +81,7 @@ export function SchedulerAssignmentCard({
                             WebkitBoxOrient: 'vertical',
                             WebkitLineClamp: 1,
                             overflow: 'hidden',
-                            fontSize: '1rem'
+                            fontSize: '0.875rem'
                         }}
                         fw={'lighter'}
                         c="black"
@@ -88,6 +102,20 @@ export function SchedulerAssignmentCard({
                 <div
                     style={{
                         display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}
+                >
+                    <Text size="sm" fw={'bold'}>
+                        {dayjs.unix(item.startDate).format(conf.timeFormat)}
+                        {' - '}
+                        {dayjs.unix(item.endDate).format(conf.timeFormat)}
+                    </Text>
+                    <StateIndicator state={item.state} size="md" />
+                </div>
+                <div
+                    style={{
+                        display: 'flex',
                         flexDirection: 'column',
                         gap: '0.25rem'
                     }}
@@ -104,17 +132,10 @@ export function SchedulerAssignmentCard({
                             justifyContent: 'space-between',
                             alignItems: 'center'
                         }}
-                    >
-                        <Text size="sm" fw={'bold'}>
-                            {dayjs.unix(item.startDate).format(conf.timeFormat)}
-                            {' - '}
-                            {dayjs.unix(item.endDate).format(conf.timeFormat)}
-                        </Text>
-                        <AssignmentStateBadge state={item.state} size="sm" />
-                    </div>
+                    ></div>
                 </div>
             </Card.Section>
-            {showContextMenu && (
+            {showContextMenu && !isFrozen && (
                 <div
                     style={{
                         position: 'absolute',

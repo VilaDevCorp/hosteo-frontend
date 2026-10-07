@@ -1,5 +1,5 @@
 import { Button, TextInput } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IconPlus, IconSearch } from '@tabler/icons-react'; // Removed IconLayoutGrid, IconLayoutList as layout is fixed
 import { useState, useEffect } from 'react';
 
@@ -75,18 +75,30 @@ export function TemplatesScreen() {
     const { onOpenDetailsModal, detailsModal } =
         useTaskOrTemplateDetailsModal('template');
 
-    const onDeleteTemplate = async (id: string) => {
+    const deleteTemplate = async (id: string) => {
         await remove(id);
-        showNotificationSuccess('Template deleted');
-        reloadTemplates();
     };
+
+    const queryClient = useQueryClient();
+
+    const { mutateAsync: deleteTemplateMutation } = useMutation({
+        mutationFn: deleteTemplate,
+        onSuccess: (_, variables) => {
+            reloadTemplates();
+            queryClient.invalidateQueries({
+                queryKey: ['template', variables]
+            });
+            showNotificationSuccess('Template deleted');
+        },
+        onError: handleError
+    });
 
     const openDeleteModal = (id: string) =>
         openModal({
             title: 'Delete template',
             message: `Are you sure you want to delete this template? This action cannot be undone.`,
             color: 'red',
-            onConfirm: () => onDeleteTemplate(id)
+            onConfirm: () => deleteTemplateMutation(id)
         });
 
     return (

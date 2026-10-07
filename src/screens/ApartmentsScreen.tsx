@@ -11,12 +11,14 @@ import {
 import { useCrud } from '../hooks/useCrud';
 import { ApartmentWithTasks } from '../types/entities';
 import { Page, TableStructure } from '../types/types';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addressToString } from '../utils/utilFunctions';
 import { ApartmentStateBadge } from '../components/atoms/ApartmentStateBadge';
 import { PlatformIcon } from '../components/atoms/PlatformIcon';
 import { ApartmentCard } from '../components/molecules/ApartmentCard';
 import { useError } from '../hooks/useError';
+import { useApi } from '../hooks/useApi';
+import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { APARTMENT_STATE, ApartmentState } from '../types/enums';
 import { DataTable } from '../components/organism/DataTable';
 import { ApartmentCardSkeleton } from '../components/molecules/ApartmentCardSkeleton';
@@ -25,7 +27,6 @@ import { useScreen } from '../hooks/useScreen';
 import { TopControls } from '../components/molecules/TopControls';
 import { ApartmentFormSkeleton } from '../components/skeletons/ApartmentFormSkeleton';
 import { ApartmentDetailsSkeleton } from '../components/skeletons/ApartmentDetailsSkeleton';
-import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { useEntityModal } from '../hooks/useEntityModal';
 import { showNotificationSuccess } from '../utils/notifUtils';
 
@@ -69,7 +70,8 @@ const tableStructure: TableStructure<ApartmentWithTasks> = {
 };
 
 export function ApartmentsScreen() {
-    const { search, remove } = useCrud<ApartmentWithTasks>('apartment');
+    const { search } = useCrud<ApartmentWithTasks>('apartment');
+    const { hide, unhide } = useApi();
     const { handleError } = useError();
     const { isTablet } = useScreen();
     const { openModal } = useConfirmModalWithContext();
@@ -79,6 +81,7 @@ export function ApartmentsScreen() {
     const [debouncedNameSearch, setDebouncedNameSearch] = useState<string>('');
     const [stateSearch, setStateSearch] = useState<string[]>([]);
     const [cardViewMode, setCardViewMode] = useState<boolean>(true);
+    const [showHidden, setShowHidden] = useState<boolean>(false);
 
     const {
         data: apartmentPage,
@@ -87,11 +90,18 @@ export function ApartmentsScreen() {
         isError,
         error
     } = useQuery<Page<ApartmentWithTasks>>({
-        queryKey: ['apartments', pageNumber, debouncedNameSearch, stateSearch],
+        queryKey: [
+            'apartments',
+            pageNumber,
+            debouncedNameSearch,
+            stateSearch,
+            showHidden
+        ],
         queryFn: () =>
             search(pageNumber - 1, 15, {
                 name: debouncedNameSearch,
-                states: stateSearch.length > 0 ? stateSearch : undefined
+                states: stateSearch.length > 0 ? stateSearch : undefined,
+                visible: !showHidden
             }),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -151,20 +161,48 @@ export function ApartmentsScreen() {
         return () => clearTimeout(timer);
     }, [nameSearch]);
 
-    const onDeleteApartment = async (id: string) => {
-        await remove(id);
-        showNotificationSuccess('Apartment deleted');
-        reloadApartments();
-    };
+    const queryClient = useQueryClient();
 
-    const openDeleteModal = (id: string) =>
+    const { mutateAsync: toggleApartmentVisibility } = useMutation({
+        mutationFn: async ({
+            id,
+            visible
+        }: {
+            id: string;
+            visible: boolean;
+        }) => {
+            if (visible) {
+                await hide('apartment', id);
+            } else {
+                await unhide('apartment', id);
+            }
+        },
+        onSuccess: (_, variables) => {
+            reloadApartments();
+            queryClient.invalidateQueries({
+                queryKey: ['apartment', variables.id]
+            });
+            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({ queryKey: ['event'] });
+            showNotificationSuccess(
+                variables.visible ? 'Apartment hidden' : 'Apartment shown'
+            );
+        },
+        onError: handleError
+    });
+
+    const onToggleApartmentVisibility = (id: string, visible: boolean) => {
+        const isHiding = visible;
         openModal({
-            title: 'Delete apartment',
-            message:
-                'Deleting this apartment will delete all the associated information like events, assignments and tasks',
-            color: 'error',
-            onConfirm: () => onDeleteApartment(id)
+            title: isHiding ? 'Hide apartment' : 'Show apartment',
+            message: isHiding
+                ? 'Are you sure you want to hide this apartment? It will no longer appear in the default lists.'
+                : 'Are you sure you want to show this apartment?',
+            color: isHiding ? 'error' : 'primary',
+            onConfirm: () => toggleApartmentVisibility({ id, visible })
         });
+    };
 
     return (
         <Layout>
@@ -186,27 +224,37 @@ export function ApartmentsScreen() {
                     />
                 }
                 filters={
-                    <MultiSelect
-                        variant="outlined"
-                        value={stateSearch}
-                        onChange={(e) => {
-                            setPageNumber(1);
-                            setStateSearch(e);
-                        }}
-                        style={{
-                            minWidth: isTablet ? '8rem' : 'auto',
-                            width: isTablet ? 'auto' : '100%'
-                        }}
-                        hidePickedOptions
-                        label="State"
-                        data={Object.values(APARTMENT_STATE)}
-                        renderOption={(state) => (
-                            <ApartmentStateBadge
-                                state={state.option.value as ApartmentState}
-                                noBg
-                            />
-                        )}
-                    />
+                    <>
+                        <MultiSelect
+                            variant="outlined"
+                            value={stateSearch}
+                            onChange={(e) => {
+                                setPageNumber(1);
+                                setStateSearch(e);
+                            }}
+                            style={{
+                                minWidth: isTablet ? '8rem' : 'auto',
+                                width: isTablet ? 'auto' : '100%'
+                            }}
+                            hidePickedOptions
+                            label="State"
+                            data={Object.values(APARTMENT_STATE)}
+                            renderOption={(state) => (
+                                <ApartmentStateBadge
+                                    state={state.option.value as ApartmentState}
+                                    noBg
+                                />
+                            )}
+                        />
+                        <Switch
+                            label="Show hidden"
+                            checked={showHidden}
+                            onChange={(e) => {
+                                setPageNumber(1);
+                                setShowHidden(e.currentTarget.checked);
+                            }}
+                        />
+                    </>
                 }
                 cardViewModeComponent={
                     <Switch
@@ -235,7 +283,7 @@ export function ApartmentsScreen() {
                         {'Add apartment'}
                     </Button>
                 }
-                filtersOnModalActivated={stateSearch.length > 0}
+                filtersOnModalActivated={stateSearch.length > 0 || showHidden}
             />
             <DataTable
                 cardViewMode={cardViewMode}
@@ -248,7 +296,8 @@ export function ApartmentsScreen() {
                 setPageNumber={setPageNumber}
                 onClick={onOpenDetailsModal}
                 onEdit={onOpenFormModal}
-                onDelete={openDeleteModal}
+                onToggleVisibility={onToggleApartmentVisibility}
+                isVisible={(apartment) => apartment.visible}
             />
             {apartmentFormModal}
             {apartmentDetailsModal}

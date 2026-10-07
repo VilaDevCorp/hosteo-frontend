@@ -3,7 +3,6 @@ import { AssignmentScheduler } from '../components/organism/AssignmentScheduler'
 import { useQuery } from '@tanstack/react-query';
 import {
     AssignmentWithNextEventDto,
-    Event,
     EventForAssignment,
     Task
 } from '../types/entities';

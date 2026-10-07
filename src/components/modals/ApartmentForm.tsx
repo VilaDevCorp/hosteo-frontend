@@ -1,4 +1,4 @@
-import { Button, Tabs, TextInput } from '@mantine/core';
+import { Button, Switch, Tabs, TextInput } from '@mantine/core';
 import { ApartmentWithTasks, Task } from '../../types/entities';
 import { useState } from 'react';
 import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
@@ -13,6 +13,8 @@ import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
 import { useError } from '../../hooks/useError';
+import { useApi } from '../../hooks/useApi';
+import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { useScreen } from '../../hooks/useScreen';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { IconPlus } from '@tabler/icons-react';
@@ -20,7 +22,6 @@ import { useEntityModal } from '../../hooks/useEntityModal';
 import { TaskOrTemplateForm } from './TaskOrTemplateForm';
 import { TaskOrTemplateFormSkeleton } from '../skeletons/TaskOrTemplateFormSkeleton';
 import { TasksSection } from '../molecules/TasksSection';
-import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 
 export function ApartmentForm({
     onClose,
@@ -31,10 +32,11 @@ export function ApartmentForm({
 }) {
     const { queryClient } = useReactQuery();
     const { handleError } = useError();
+    const { hide, unhide } = useApi();
+    const { openModal } = useConfirmModalWithContext();
     const [formFields, setFormFields] = useState<ApartmentFormFields>(
         apartmentToForm(apartment)
     );
-    const { openModal } = useConfirmModalWithContext();
 
     const { onOpen: onOpenFormModal, modalComponent: taskFormModal } =
         useEntityModal<Task>({
@@ -44,24 +46,49 @@ export function ApartmentForm({
             relatedEntity: apartment
         });
 
-    const onDeleteTask = async (id: string) => {
-        await removeTask(id);
-        showNotificationSuccess('Task deleted');
-        queryClient.invalidateQueries({
-            queryKey: ['apartments']
+    const [section, setSection] = useState<string | null>('apartmentInfo');
+    const [showHiddenTasks, setShowHiddenTasks] = useState<boolean>(false);
+
+    const { mutateAsync: toggleTaskVisibility } = useMutation({
+        mutationFn: async ({
+            id,
+            visible
+        }: {
+            id: string;
+            visible: boolean;
+        }) => {
+            if (visible) {
+                await hide('task', id);
+            } else {
+                await unhide('task', id);
+            }
+        },
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: ['apartment', apartment?.id]
+            });
+            queryClient.invalidateQueries({ queryKey: ['apartments'] });
+            queryClient.invalidateQueries({ queryKey: ['event'] });
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+            showNotificationSuccess(
+                variables.visible ? 'Task hidden' : 'Task shown'
+            );
+        },
+        onError: handleError
+    });
+
+    const onToggleTaskVisibility = (id: string, visible: boolean) => {
+        const isHiding = visible;
+        openModal({
+            title: isHiding ? 'Hide task' : 'Show task',
+            message: isHiding
+                ? 'Are you sure you want to hide this task? It will no longer appear in the default lists.'
+                : 'Are you sure you want to show this task?',
+            color: isHiding ? 'error' : 'primary',
+            onConfirm: () => toggleTaskVisibility({ id, visible })
         });
     };
-
-    const openDeleteModal = (id: string) =>
-        openModal({
-            title: 'Delete template',
-            message:
-                'Are you sure you want to delete this task? This action cannot be undone',
-            color: 'red',
-            onConfirm: () => onDeleteTask(id)
-        });
-
-    const [section, setSection] = useState<string | null>('apartmentInfo');
 
     const {
         dirty: nameDirty,
@@ -73,8 +100,6 @@ export function ApartmentForm({
 
     const { create, update: updateApartment } =
         useCrud<ApartmentWithTasks>('apartment');
-    const { remove: removeTask } = useCrud<Task>('task');
-
     const { isTablet } = useScreen();
 
     const createApartment = async () => {
@@ -90,6 +115,9 @@ export function ApartmentForm({
                 });
                 queryClient.invalidateQueries({
                     queryKey: ['apartment', apartment?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
                 });
                 showNotificationSuccess('Apartment created');
                 onClose?.();
@@ -110,6 +138,9 @@ export function ApartmentForm({
                 });
                 queryClient.invalidateQueries({
                     queryKey: ['apartment', apartment?.id]
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['schedulerInfo']
                 });
                 showNotificationSuccess('Apartment updated');
                 onClose?.();
@@ -157,13 +188,30 @@ export function ApartmentForm({
                         )}
                     </div>
                     {section === 'tasks' && (
-                        <Button
-                            onClick={() => onOpenFormModal()}
-                            leftSection={<IconPlus />}
-                            variant="transparent"
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                alignItems: 'center'
+                            }}
                         >
-                            Add task
-                        </Button>
+                            <Switch
+                                label="Show hidden"
+                                checked={showHiddenTasks}
+                                onChange={(e) =>
+                                    setShowHiddenTasks(
+                                        e.currentTarget.checked
+                                    )
+                                }
+                            />
+                            <Button
+                                onClick={() => onOpenFormModal()}
+                                leftSection={<IconPlus />}
+                                variant="transparent"
+                            >
+                                Add task
+                            </Button>
+                        </div>
                     )}
                 </Tabs.List>
                 <Tabs.Panel
@@ -307,8 +355,9 @@ export function ApartmentForm({
                 </Tabs.Panel>
                 <TasksSection
                     tasks={apartment?.tasks || []}
+                    showHidden={showHiddenTasks}
                     onEdit={onOpenFormModal}
-                    onDelete={openDeleteModal}
+                    onToggleVisibility={onToggleTaskVisibility}
                 />
             </Tabs>
 

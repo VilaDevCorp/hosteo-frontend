@@ -186,6 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error('Logout failed', error);
         } finally {
             cleanUserParams();
+            queryClient.clear();
         }
     };
 

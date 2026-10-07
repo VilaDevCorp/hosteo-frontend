@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import {
     Alert,
     ApartmentState,
@@ -7,6 +6,7 @@ import {
     EventState,
     EventType,
     CategoryEnum,
+    ImportSource,
     Language,
     TaskType,
 } from './enums';
@@ -59,6 +59,7 @@ export interface Task extends BaseEntity {
     duration: number;
     type: TaskType;
     steps: string[];
+    visible: boolean;
 }
 
 export interface TaskWithApartment extends BaseEntity {
@@ -68,6 +69,7 @@ export interface TaskWithApartment extends BaseEntity {
     type: TaskType;
     steps: string[];
     apartment: Apartment;
+    visible: boolean;
 }
 
 export interface Template extends BaseEntity {
@@ -130,12 +132,14 @@ export interface AssignmentDto extends BaseEntity {
     worker: Worker;
     state: AssignmentState;
     eventId: string;
+    frozen: boolean;
 }
 
 
 export interface EventSchedulerDto {
     id: string;
     type: EventType;
+    state: EventState;
     startDate: number;
     endDate: number;
     name: string;
@@ -148,6 +152,7 @@ export interface EventSchedulerDto {
     uncompletedAssignments: AssignmentDto[];
     alert?: Alert;
     overdue: boolean;
+    frozen: boolean;
 }
 
 export const ITEM_TYPE = {
@@ -201,21 +206,28 @@ export interface AlertItem {
     prevEvent: EventSchedulerDto;
 }
 
-export interface ImpEvent {
-    apartment: Apartment;
-    startDate: Date;
-    endDate: Date;
-    name: string;
-    state: EventState;
-    source: EventSource;
-    type: EventType;
-    conflict: Conflict;
-    creationError: string;
+export interface FailedImportedEvent extends BaseEntity {
+    apartmentId?: string;
+    name?: string;
+    startDate?: number;
+    endDate?: number;
+    source: ImportSource;
+    error: string;
 }
 
-export interface ImportResult {
+export interface ImportBatchResult {
     successCount: number;
-    failureCount: number;
+    failedEvents: FailedImportedEvent[];
+}
+
+export interface EventCardItem {
+    id: string;
+    name?: string;
+    startDate?: number;
+    endDate?: number;
+    source?: EventSource | ImportSource;
+    state?: EventState;
+    apartment?: Apartment;
 }
 
 export const eventSchedulerDtoToEventForAssignment = (event?: EventSchedulerDto, nextEvent?: Event)
@@ -267,12 +279,12 @@ export interface AssignmentInfoForScheduler {
     event?: EventForAssignment
 }
 
-export interface AssignmentUpdateError {
+export interface AssignmentOperationError {
     assignment: Assignment;
     error: string;
 }
 
-export interface EventUpdateError {
+export interface EventOperationError {
     event: Event;
     error: string;
 }

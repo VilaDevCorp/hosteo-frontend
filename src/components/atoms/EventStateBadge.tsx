@@ -16,11 +16,11 @@ export function EventStateBadge({
             case EVENT_STATE.FINISHED:
                 return 'success';
             case EVENT_STATE.PENDING:
-                return 'warning';
+                return 'primary';
             case EVENT_STATE.CANCELLED:
                 return 'error';
             case EVENT_STATE.IN_PROGRESS:
-                return 'primary';
+                return 'warning';
             default:
                 return 'primary';
         }

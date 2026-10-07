@@ -1,4 +1,4 @@
-import { Event } from '../../types/entities';
+import { EventCardItem } from '../../types/entities';
 import { Card, Text, Title } from '@mantine/core';
 import { EventStateBadge } from '../atoms/EventStateBadge';
 import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
@@ -14,15 +14,11 @@ export function EventCard({
     onEdit,
     onDelete
 }: {
-    item: Event;
+    item: EventCardItem;
     onClick?: (id: string) => void;
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
 }) {
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString();
-    };
-
     return (
         <Card
             w={'100%'}
@@ -76,9 +72,11 @@ export function EventCard({
                             }}
                             c="black"
                         >
-                            {item.apartment.name}
+                            {item.apartment?.name ?? ''}
                         </Title>
-                        <ApartmentStateBadge state={item.apartment.state} />
+                        {item.apartment?.state && (
+                            <ApartmentStateBadge state={item.apartment.state} />
+                        )}
                     </div>
                 </div>
             </Card.Section>
@@ -103,15 +101,19 @@ export function EventCard({
                         }}
                     >
                         <Text size="sm" fw={500}>
-                            {dayjs
-                                .unix(item.startDate)
-                                .format(conf.dateTimeFormat)}{' '}
+                            {item.startDate != null
+                                ? dayjs
+                                      .unix(item.startDate)
+                                      .format(conf.dateTimeFormat)
+                                : ''}{' '}
                             -{' '}
-                            {dayjs
-                                .unix(item.endDate)
-                                .format(conf.dateTimeFormat)}
+                            {item.endDate != null
+                                ? dayjs
+                                      .unix(item.endDate)
+                                      .format(conf.dateTimeFormat)
+                                : ''}
                         </Text>
-                        <EventStateBadge state={item.state} />
+                        {item.state && <EventStateBadge state={item.state} />}
                     </div>
                 </div>
 
@@ -131,7 +133,7 @@ export function EventCard({
                             overflow: 'hidden'
                         }}
                     >
-                        <PlatformIcon platform={item.source} />
+                        <PlatformIcon platform={item.source ?? ''} />
                         <Text
                             fw={500}
                             style={{
@@ -142,7 +144,7 @@ export function EventCard({
                                 wordBreak: 'break-all'
                             }}
                         >
-                            {item.name}
+                            {item.name ?? ''}
                         </Text>
                     </div>
                     <CardControls

@@ -53,9 +53,7 @@ export function WorkerForm({
         useMutation({
             mutationFn: createWorker,
             onSuccess: () => {
-                queryClient.invalidateQueries({
-                    queryKey: ['workers']
-                });
+                queryClient.invalidateQueries({ queryKey: ['workers'] });
                 queryClient.invalidateQueries({
                     queryKey: ['worker', worker?.id]
                 });
@@ -73,12 +71,13 @@ export function WorkerForm({
         useMutation({
             mutationFn: updateWorker,
             onSuccess: () => {
-                queryClient.invalidateQueries({
-                    queryKey: ['workers']
-                });
+                queryClient.invalidateQueries({ queryKey: ['workers'] });
                 queryClient.invalidateQueries({
                     queryKey: ['worker', worker?.id]
                 });
+                queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+                queryClient.invalidateQueries({ queryKey: ['event'] });
+
                 showNotificationSuccess('Worker updated');
                 onClose?.();
             },

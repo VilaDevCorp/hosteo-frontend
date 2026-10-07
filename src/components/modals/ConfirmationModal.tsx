@@ -2,6 +2,7 @@ import { Button, Modal, Text } from '@mantine/core';
 import { ExtendedCustomColors } from '../../mantine';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { IconAlertTriangle } from '@tabler/icons-react';
+import { useState } from 'react';
 
 export interface ConfirmModalProperties {
     title: string;
@@ -19,9 +20,19 @@ export const ConfirmationModal = ({
     onClose: () => void;
     confirmModalProperties: ConfirmModalProperties | undefined;
 }) => {
-    const onConfirmAndClose = () => {
-        onConfirm && onConfirm();
-        onClose();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const onConfirmAndClose = async () => {
+        if (!onConfirm) return;
+        try {
+            setIsLoading(true);
+            await onConfirm();
+            onClose();
+        } catch (e) {
+            // Intentionally ignored
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const { title, message, color, onConfirm } = confirmModalProperties || {};
@@ -60,6 +71,7 @@ export const ConfirmationModal = ({
                     onClick={onConfirmAndClose}
                     color={color}
                     variant="filled"
+                    loading={isLoading}
                 >
                     Confirm
                 </Button>

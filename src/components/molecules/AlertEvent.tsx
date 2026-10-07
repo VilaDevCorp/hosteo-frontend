@@ -1,27 +1,74 @@
 import { Accordion, Text } from '@mantine/core';
-import { Event, EventSchedulerDto, Task } from '../../types/entities';
-import { ALERT, Alert } from '../../types/enums';
+import {
+    Event,
+    EventSchedulerDto,
+    eventSchedulerDtoToEventForAssignment,
+    Task
+} from '../../types/entities';
+import { ALERT, Alert, ASSIGNMENT_STATE } from '../../types/enums';
 import { conf } from '../../../conf';
 import dayjs from 'dayjs';
 import { TaskOrTemplateCard } from './TaskOrTemplateCard';
 import { AlertIcon } from '../atoms/AlertIcon';
 import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
+import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
+import { useApi } from '../../hooks/useApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useError } from '../../hooks/useError';
 
 export function AlertEvent({
     alertType,
     event,
-    prevEvent,
-    handleCreateNewAssignment
+    prevEvent
 }: {
     alertType: Alert;
     event: Event;
     prevEvent: EventSchedulerDto;
-    handleCreateNewAssignment: (
+}) {
+    const { onCreateAssignment } = useAssignmentScheduler();
+
+    const onCreateNewAssignment = (
         event: EventSchedulerDto,
         alertedEvent: Event,
         task: Task
-    ) => void;
-}) {
+    ) => {
+        const eventForAssignment = eventSchedulerDtoToEventForAssignment(
+            event,
+            alertedEvent
+        );
+        if (!eventForAssignment) {
+            return;
+        }
+        onCreateAssignment(eventForAssignment, task);
+    };
+
+    const { handleError } = useError();
+
+    const { assignmentBulkStateUpdate } = useApi();
+
+    const onAssignmentComplete = async (assignmentId: string) => {
+        const errors = await assignmentBulkStateUpdate(
+            [assignmentId],
+            ASSIGNMENT_STATE.FINISHED
+        );
+        if (errors.length > 0) {
+            handleError(errors);
+        }
+    };
+
+    const queryClient = useQueryClient();
+
+    const { mutate: mutateAssignmentComplete } = useMutation({
+        mutationFn: onAssignmentComplete,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({ queryKey: ['event'] });
+            queryClient.invalidateQueries({ queryKey: ['apartments'] });
+            queryClient.invalidateQueries({ queryKey: ['apartment'] });
+        }
+    });
+
     return (
         <Accordion.Item key={event.id} value={event.id}>
             <Accordion.Control>
@@ -63,6 +110,9 @@ export function AlertEvent({
                           <SchedulerAssignmentCard
                               key={assignment.id}
                               item={assignment}
+                              onClick={() =>
+                                  mutateAssignmentComplete(assignment.id)
+                              }
                           />
                       ))
                     : prevEvent.mandatoryUnassignedTasks.map((task) => (
@@ -70,11 +120,7 @@ export function AlertEvent({
                               key={task.id}
                               item={task}
                               onClick={() => {
-                                  handleCreateNewAssignment(
-                                      prevEvent,
-                                      event,
-                                      task
-                                  );
+                                  onCreateNewAssignment(prevEvent, event, task);
                               }}
                           />
                       ))}

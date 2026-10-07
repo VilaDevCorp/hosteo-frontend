@@ -1,8 +1,7 @@
 import { Divider, Image, Text, useMantineTheme } from '@mantine/core';
 import {
     eventToEventForAssignment,
-    EventWithAssignments,
-    Task
+    EventWithAssignments
 } from '../../types/entities';
 import { useScreen } from '../../hooks/useScreen';
 import { PlatformIcon } from '../atoms/PlatformIcon';
@@ -16,6 +15,8 @@ import { useCrud } from '../../hooks/useCrud';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
+import { useMutation } from '@tanstack/react-query';
+import { useError } from '../../hooks/useError';
 
 export function EventDetails({
     entity: event
@@ -30,13 +31,24 @@ export function EventDetails({
 
     const { queryClient } = useReactQuery();
 
-    const onDeleteAssignment = async (id: string) => {
+    const { handleError } = useError();
+
+    const deleteAssignment = async (id: string) => {
         await removeAssignment(id);
-        showNotificationSuccess('Assignment deleted');
-        queryClient.invalidateQueries({
-            queryKey: ['event', event?.id]
-        });
     };
+
+    const { mutateAsync: deleteAssignmentMutation } = useMutation({
+        mutationFn: deleteAssignment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({ queryKey: ['event'] });
+            queryClient.invalidateQueries({ queryKey: ['apartments'] });
+            queryClient.invalidateQueries({ queryKey: ['apartment'] });
+            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+            showNotificationSuccess('Assignment deleted');
+        },
+        onError: handleError
+    });
 
     const openDeleteModal = (id: string) =>
         openModal({
@@ -44,7 +56,7 @@ export function EventDetails({
             message:
                 'Are you sure you want to delete this assignment? This action cannot be undone',
             color: 'red',
-            onConfirm: () => onDeleteAssignment(id)
+            onConfirm: () => deleteAssignmentMutation(id)
         });
 
     const { assignmentScheduler, onCreateAssignment, onUpdateAssignment } =

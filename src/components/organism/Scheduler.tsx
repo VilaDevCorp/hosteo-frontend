@@ -1,27 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Badge, Button } from '@mantine/core';
+import { IconUpload } from '@tabler/icons-react';
 
-import { useError } from '../../hooks/useError';
-import {
-    Event,
-    EventSchedulerDto,
-    eventSchedulerDtoToEventForAssignment,
-    SchedulerInfo,
-    Task
-} from '../../types/entities';
+import { Event, FailedImportedEvent } from '../../types/entities';
 import { getStartOfWeek } from '../../utils/utilFunctions';
 import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
 import { AlertsIndicator } from '../atoms/AlertsIndicator';
 import { AlertsDrawer } from './AlertsDrawer';
-import { AssignmentFormFieldsWithObjects } from '../../types/forms';
-import {
-    ASSIGNMENT_STATE,
-    AssignmentState,
-    EventState
-} from '../../types/enums';
-import { useApi } from '../../hooks/useApi';
 import { SchedulerActions } from '../molecules/SchedulerActions';
 import { EventForm } from '../modals/EventForm';
+import { ImportModal } from '../modals/ImportModal';
+import { ImportIssuesModal } from '../modals/ImportIssuesModal';
 import { useEntityModal } from '../../hooks/useEntityModal';
 import { EventFormSkeleton } from '../skeletons/EventFormSkeleton';
 import { useCrud } from '../../hooks/useCrud';
@@ -29,10 +19,10 @@ import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { WeeklyCalendar } from './WeeklyCalendar';
 import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
+import { useError } from '../../hooks/useError';
+import { useApi } from '../../hooks/useApi';
 
 export function Scheduler() {
-    const { handleError } = useError();
-
     const [startOfWeek, setStartOfWeek] = useState<string>(
         getStartOfWeek(new Date().toISOString())
     );
@@ -48,42 +38,11 @@ export function Scheduler() {
         });
 
     const [openedDrawer, setOpenedDrawer] = useState<boolean>(false);
+    const [importModalOpened, setImportModalOpened] = useState<boolean>(false);
+    const [issuesModalOpened, setIssuesModalOpened] = useState<boolean>(false);
 
-    const { assignmentScheduler, onCreateAssignment, onUpdateAssignment } =
+    const { assignmentScheduler, onUpdateAssignment } =
         useAssignmentScheduler();
-
-    const onCreateNewAssignment = (
-        event: EventSchedulerDto,
-        alertedEvent: Event,
-        task: Task
-    ) => {
-        const eventForAssignment = eventSchedulerDtoToEventForAssignment(
-            event,
-            alertedEvent
-        );
-        if (!eventForAssignment) {
-            return;
-        }
-        onCreateAssignment(eventForAssignment, task);
-    };
-
-    // const onEditAssignment = (assignment: AssignmentDto) => {
-    //     setAssignmentForm({
-    //         id: assignment.id,
-    //         task: assignment.task,
-    //         startDate: dayjs
-    //             .unix(assignment.startDate)
-    //             .format(conf.dateInputFormat),
-    //         endDate: dayjs
-    //             .unix(assignment.endDate)
-    //             .format(conf.dateInputFormat),
-    //         worker: assignment.worker,
-    //         state: assignment.state,
-    //         event: assignment.,
-    //         alertedEvent: assignment.event
-    //     });
-    //     setOpenedAssignmentScheduler(true);
-    // };
 
     const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(
         new Set()
@@ -91,6 +50,15 @@ export function Scheduler() {
     const [selectedAssignmentIds, setSelectedAssignmentIds] = useState<
         Set<string>
     >(new Set());
+
+    const [nSuccessItems, setNSuccessItems] = useState<number | undefined>(
+        undefined
+    );
+
+    const onOpenIssuesModal = (nSuccessItems: number) => {
+        setNSuccessItems(nSuccessItems);
+        setIssuesModalOpened(true);
+    };
 
     const onSelectEvent = (eventId: string) => {
         if (selectedAssignmentIds.size > 0) {
@@ -135,31 +103,56 @@ export function Scheduler() {
 
     const queryClient = useQueryClient();
 
+    const { handleError } = useError();
+
+    const { getFailedImportedEvents } = useApi();
+
+    const { data: failedImportedEvents } = useQuery<FailedImportedEvent[]>({
+        queryKey: ['failedImportedEvents'],
+        queryFn: getFailedImportedEvents
+    });
+
     const deleteEvent = async (id: string) => {
         await removeEvent(id);
-        showNotificationSuccess('Event deleted');
-        queryClient.invalidateQueries({
-            queryKey: ['schedulerInfo']
-        });
-        queryClient.invalidateQueries({ queryKey: ['events'] });
     };
 
-    const onDeleteEvent = (id: string) => {
+    const invalidateQueries = () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        queryClient.invalidateQueries({ queryKey: ['event'] });
+        queryClient.invalidateQueries({ queryKey: ['apartments'] });
+        queryClient.invalidateQueries({ queryKey: ['apartment'] });
+        queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+    };
+
+    const { mutateAsync: deleteEventMutation } = useMutation({
+        mutationFn: deleteEvent,
+        onSuccess: () => {
+            invalidateQueries();
+            showNotificationSuccess('Event deleted');
+        },
+        onError: handleError
+    });
+
+    const onDeleteEvent = (id: string) =>
         openModal({
             title: 'Delete event',
             message: 'Deleting this event will remove it permanently.',
             color: 'error',
-            onConfirm: () => deleteEvent(id)
+            onConfirm: () => deleteEventMutation(id)
         });
-    };
 
     const deleteAssignment = async (id: string) => {
         await removeAssignment(id);
-        showNotificationSuccess('Assignment deleted');
-        queryClient.invalidateQueries({
-            queryKey: ['schedulerInfo']
-        });
     };
+
+    const { mutateAsync: deleteAssignmentMutation } = useMutation({
+        mutationFn: deleteAssignment,
+        onSuccess: () => {
+            invalidateQueries();
+            showNotificationSuccess('Assignment deleted');
+        },
+        onError: handleError
+    });
 
     const onDeleteAssignment = (id: string) => {
         openModal({
@@ -167,7 +160,7 @@ export function Scheduler() {
             message:
                 'Are you sure you want to delete this assignment? This action cannot be undone',
             color: 'red',
-            onConfirm: () => deleteAssignment(id)
+            onConfirm: () => deleteAssignmentMutation(id)
         });
     };
 
@@ -197,6 +190,25 @@ export function Scheduler() {
                         selectedAssignmentIds={selectedAssignmentIds}
                         setSelectedAssignmentIds={setSelectedAssignmentIds}
                     />
+                    <Button
+                        variant="filled"
+                        leftSection={<IconUpload size={18} />}
+                        onClick={() => setImportModalOpened(true)}
+                    >
+                        Import Reservations
+                    </Button>
+                    {failedImportedEvents?.length &&
+                        failedImportedEvents.length > 0 && (
+                            <Badge
+                                variant="filled"
+                                color="warning"
+                                size="lg"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setIssuesModalOpened(true)}
+                            >
+                                Pending Issues ({failedImportedEvents.length})
+                            </Badge>
+                        )}
                     <AlertsIndicator onClick={() => setOpenedDrawer(true)} />
                 </div>
             </div>
@@ -213,10 +225,19 @@ export function Scheduler() {
             <AlertsDrawer
                 opened={openedDrawer}
                 onClose={() => setOpenedDrawer(false)}
-                onCreateNewAssignment={onCreateNewAssignment}
             />
             {eventFormModal}
             {assignmentScheduler}
+            <ImportModal
+                opened={importModalOpened}
+                onClose={() => setImportModalOpened(false)}
+                onOpenIssuesModal={onOpenIssuesModal}
+            />
+            <ImportIssuesModal
+                opened={issuesModalOpened}
+                onClose={() => setIssuesModalOpened(false)}
+                nSuccessItems={nSuccessItems}
+            />
         </>
     );
 }

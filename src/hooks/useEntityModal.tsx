@@ -9,6 +9,7 @@ interface EntityModalBodyProps<T extends BaseEntity> {
     onClose?: () => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntity?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntitySecondary?: any;
 }
 
@@ -16,6 +17,7 @@ interface UseEntityModalProps<T extends BaseEntity> {
     entityName: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntity?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relatedEntitySecondary?: any;
     getTitle?: (entity: T | undefined) => React.ReactNode;
     removeHeader?: boolean;

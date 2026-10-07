@@ -9,12 +9,14 @@ export function ApartmentCard({
     item,
     onClick,
     onEdit,
-    onDelete
+    onDelete,
+    onToggleVisibility
 }: {
     item: Apartment;
     onClick?: (id: string) => void;
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
+    onToggleVisibility?: () => void;
 }) {
     return (
         <Card
@@ -80,6 +82,8 @@ export function ApartmentCard({
                     <CardControls
                         onEdit={onEdit && (() => onEdit(item.id))}
                         onDelete={onDelete && (() => onDelete(item.id))}
+                        onToggleVisibility={onToggleVisibility}
+                        visible={item.visible}
                     />
                 </div>
             </Card.Section>

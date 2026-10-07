@@ -8,6 +8,7 @@ interface TaskOrTemplateCardProps {
     item: Template | Task;
     onEdit?: () => void;
     onDelete?: () => void;
+    onToggleVisibility?: () => void;
     onClick?: () => void;
     onAssign?: () => void;
 }
@@ -16,6 +17,7 @@ export function TaskOrTemplateCard({
     item,
     onEdit,
     onDelete,
+    onToggleVisibility,
     onClick
 }: TaskOrTemplateCardProps) {
     return (
@@ -66,7 +68,12 @@ export function TaskOrTemplateCard({
                     </Text>
                     <TaskCategoryBadge category={item.category} />
                 </div>
-                <CardControls onEdit={onEdit} onDelete={onDelete} />
+                <CardControls
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleVisibility={onToggleVisibility}
+                    visible={'visible' in item ? item.visible : undefined}
+                />
             </div>
         </Card>
     );

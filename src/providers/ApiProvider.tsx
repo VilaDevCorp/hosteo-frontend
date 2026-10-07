@@ -1,15 +1,17 @@
 import { createContext, ReactNode } from 'react';
 import {
     AlertsInfo,
-    AssignmentUpdateError,
-    EventUpdateError,
+    AssignmentOperationError,
+    EventOperationError,
+    ImportBatchResult,
+    FailedImportedEvent,
     SchedulerInfo,
     User
 } from '../types/entities';
 import { ApiResponse } from '../types/types';
 import { checkResponseException } from '../utils/utilFunctions';
-import { RegisterUserForm } from '../types/forms';
-import { AssignmentState, EventState } from '../types/enums';
+import { FailedImportedEventUpdateForm, RegisterUserForm } from '../types/forms';
+import { AssignmentState, EventState, ImportSource } from '../types/enums';
 import { useAuth } from '../hooks/useAuth';
 import dayjs from 'dayjs';
 import { conf } from '../../conf';
@@ -25,13 +27,31 @@ export interface ApiContext {
     eventBulkStateUpdate: (
         eventIds: string[],
         state: EventState
-    ) => Promise<EventUpdateError[]>;
+    ) => Promise<EventOperationError[]>;
+    eventBulkDelete: (eventIds: string[]) => Promise<EventOperationError[]>;
     assignmentBulkStateUpdate: (
         assignmentIds: string[],
         state: AssignmentState
-    ) => Promise<AssignmentUpdateError[]>;
+    ) => Promise<AssignmentOperationError[]>;
+    assignmentBulkDelete: (
+        assignmentIds: string[]
+    ) => Promise<AssignmentOperationError[]>;
     searchSchedulerData: (date: string) => Promise<SchedulerInfo>;
     getAlertsInfo: () => Promise<AlertsInfo>;
+    hide: (entity: string, id: string) => Promise<void>;
+    unhide: (entity: string, id: string) => Promise<void>;
+    importReservations: (
+        file: File,
+        source: ImportSource
+    ) => Promise<ImportBatchResult>;
+    getFailedImportedEvents: () => Promise<FailedImportedEvent[]>;
+    updateFailedImportedEvent: (
+        id: string,
+        form: FailedImportedEventUpdateForm
+    ) => Promise<FailedImportedEvent>;
+    retryFailedImportedEvents: () => Promise<ImportBatchResult>;
+    dismissFailedImportedEvent: (id: string) => Promise<void>;
+    dismissAllFailedImportedEvents: () => Promise<void>;
 }
 
 export const ApiContext = createContext<ApiContext>({} as ApiContext);
@@ -85,7 +105,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
     const eventBulkStateUpdate = async (
         eventIds: string[],
         state: EventState
-    ): Promise<EventUpdateError[]> => {
+    ): Promise<EventOperationError[]> => {
         const url = `${apiUrl}events/state/${state}`;
         const options: RequestInit = {
             method: 'PATCH',
@@ -95,7 +115,22 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<EventUpdateError[]> = await res.json();
+        const resObject: ApiResponse<EventOperationError[]> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const eventBulkDelete = async (eventIds: string[]) => {
+        const url = `${apiUrl}events`;
+        const options: RequestInit = {
+            method: 'DELETE',
+            body: JSON.stringify(eventIds),
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<EventOperationError[]> = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
@@ -103,7 +138,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
     const assignmentBulkStateUpdate = async (
         assignmentIds: string[],
         state: AssignmentState
-    ): Promise<AssignmentUpdateError[]> => {
+    ): Promise<AssignmentOperationError[]> => {
         const url = `${apiUrl}assignments/state/${state}`;
         const options: RequestInit = {
             method: 'PATCH',
@@ -113,7 +148,23 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<AssignmentUpdateError[]> =
+        const resObject: ApiResponse<AssignmentOperationError[]> =
+            await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const assignmentBulkDelete = async (assignmentIds: string[]) => {
+        const url = `${apiUrl}assignments`;
+        const options: RequestInit = {
+            method: 'DELETE',
+            body: JSON.stringify(assignmentIds),
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<AssignmentOperationError[]> =
             await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
@@ -149,14 +200,131 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         return resObject.data;
     };
 
+    const hide = async (entity: string, id: string): Promise<void> => {
+        const url = `${apiUrl}${entity}/${id}/hide`;
+        const options: RequestInit = {
+            method: 'PATCH',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<unknown> = await res.json();
+        checkResponseException(res, resObject);
+    };
+
+    const unhide = async (entity: string, id: string): Promise<void> => {
+        const url = `${apiUrl}${entity}/${id}/unhide`;
+        const options: RequestInit = {
+            method: 'PATCH',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<unknown> = await res.json();
+        checkResponseException(res, resObject);
+    };
+
+    const importReservations = async (
+        file: File,
+        source: ImportSource
+    ): Promise<ImportBatchResult> => {
+        const url = `${apiUrl}imported-events/upload`;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('source', source);
+        const options: RequestInit = {
+            method: 'POST',
+            body: formData
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<ImportBatchResult> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const getFailedImportedEvents = async (): Promise<FailedImportedEvent[]> => {
+        const url = `${apiUrl}imported-events`;
+        const options: RequestInit = {
+            method: 'GET',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<FailedImportedEvent[]> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const updateFailedImportedEvent = async (
+        id: string,
+        form: FailedImportedEventUpdateForm
+    ): Promise<FailedImportedEvent> => {
+        const url = `${apiUrl}imported-events/${id}`;
+        const options: RequestInit = {
+            method: 'PATCH',
+            body: JSON.stringify(form),
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<FailedImportedEvent> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const retryFailedImportedEvents = async (): Promise<ImportBatchResult> => {
+        const url = `${apiUrl}imported-events/retry`;
+        const options: RequestInit = {
+            method: 'POST'
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<ImportBatchResult> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const dismissFailedImportedEvent = async (id: string): Promise<void> => {
+        const url = `${apiUrl}imported-events/${id}`;
+        const options: RequestInit = {
+            method: 'DELETE'
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<unknown> = await res.json();
+        checkResponseException(res, resObject);
+    };
+
+    const dismissAllFailedImportedEvents = async (): Promise<void> => {
+        const url = `${apiUrl}imported-events`;
+        const options: RequestInit = {
+            method: 'DELETE'
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<unknown> = await res.json();
+        checkResponseException(res, resObject);
+    };
+
     const value: ApiContext = {
         register,
         forgottenPassword,
         resetPassword,
         eventBulkStateUpdate,
         assignmentBulkStateUpdate,
+        eventBulkDelete,
+        assignmentBulkDelete,
         searchSchedulerData,
-        getAlertsInfo
+        getAlertsInfo,
+        hide,
+        unhide,
+        importReservations,
+        getFailedImportedEvents,
+        updateFailedImportedEvent,
+        retryFailedImportedEvents,
+        dismissFailedImportedEvent,
+        dismissAllFailedImportedEvents
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

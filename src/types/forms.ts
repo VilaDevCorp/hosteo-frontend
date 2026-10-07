@@ -1,4 +1,4 @@
-import { Address, Apartment, Assignment, Event, Task, Template, EventSchedulerDto, AssignmentWithNextEventDto, EventForAssignment } from './entities';
+import { Address, Apartment, Event, Task, Template, EventSchedulerDto, AssignmentWithNextEventDto, EventForAssignment } from './entities';
 import {
     ASSIGNMENT_STATE,
     CATEGORY_ENUM,
@@ -202,6 +202,13 @@ export const formFieldsToUpdateEventForm = (formFields: EventFormFields): EventU
         endDate: dayjs(formFields.endDate, conf.dateInputFormat).unix(),
     };
 };
+
+export interface FailedImportedEventUpdateForm {
+    apartmentId?: string;
+    name?: string;
+    startDate?: number;
+    endDate?: number;
+}
 
 export interface TaskCreateForm {
     apartmentId: string;

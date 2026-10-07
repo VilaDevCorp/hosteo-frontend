@@ -4,13 +4,19 @@ import { Task } from '../../types/entities';
 
 export function TasksSection({
     tasks,
+    showHidden,
     onEdit,
-    onDelete
+    onToggleVisibility
 }: {
     tasks: Task[];
+    showHidden: boolean;
     onEdit: (id: string) => void;
-    onDelete: (id: string) => void;
+    onToggleVisibility: (id: string, visible: boolean) => void;
 }) {
+    const visibleTasks = tasks.filter((task) =>
+        showHidden ? task.visible === false : task.visible !== false
+    );
+
     return (
         <Tabs.Panel
             value="tasks"
@@ -26,12 +32,14 @@ export function TasksSection({
                 paddingRight: '0.4rem'
             }}
         >
-            {tasks.map((task) => (
+            {visibleTasks.map((task) => (
                 <TaskOrTemplateCard
                     item={task}
                     key={task.id}
                     onEdit={() => onEdit(task.id)}
-                    onDelete={() => onDelete(task.id)}
+                    onToggleVisibility={() =>
+                        onToggleVisibility(task.id, task.visible)
+                    }
                 />
             ))}
         </Tabs.Panel>

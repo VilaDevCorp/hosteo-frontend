@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Address, AlertItem, AlertsInfo, Assignment, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
+import { Address, AlertItem, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { conf } from '../../conf';
 

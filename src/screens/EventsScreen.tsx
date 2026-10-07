@@ -11,7 +11,7 @@ import {
 import { useCrud } from '../hooks/useCrud';
 import { Event, EventWithAssignments } from '../types/entities';
 import { Page, TableStructure } from '../types/types';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { EventStateBadge } from '../components/atoms/EventStateBadge';
 import { ApartmentStateBadge } from '../components/atoms/ApartmentStateBadge';
 import { EventCard } from '../components/molecules/EventCard';
@@ -44,18 +44,13 @@ const tableStructure: TableStructure<Event> = {
     ],
     accesorMethods: [
         (event: Event) => event.apartment.name,
-        (event: Event) => (
-            <PlatformIcon platform={event.source} size={20} />
-        ),
+        (event: Event) => <PlatformIcon platform={event.source} size={20} />,
         (event: Event) =>
             dayjs.unix(event.startDate).format(conf.dateTimeFormat),
-        (event: Event) =>
-            dayjs.unix(event.endDate).format(conf.dateTimeFormat),
+        (event: Event) => dayjs.unix(event.endDate).format(conf.dateTimeFormat),
         (event: Event) => event.name,
         (event: Event) => <EventStateBadge state={event.state} />,
-        (event: Event) => (
-            <ApartmentStateBadge state={event.apartment.state} />
-        )
+        (event: Event) => <ApartmentStateBadge state={event.apartment.state} />
     ]
 };
 
@@ -74,10 +69,10 @@ export function EventsScreen() {
     const [toDate, setToDate] = useState<string | null>(null);
 
     const [cardViewMode, setCardViewMode] = useState<boolean>(true);
+    const [showHidden, setShowHidden] = useState<boolean>(false);
 
     const {
         data: eventPage,
-        refetch: reloadEvents,
         isLoading,
         isError,
         error
@@ -88,7 +83,8 @@ export function EventsScreen() {
             debouncedApartmentSearch,
             stateSearch,
             fromDate,
-            toDate
+            toDate,
+            showHidden
         ],
         queryFn: () =>
             search(pageNumber - 1, 15, {
@@ -97,7 +93,8 @@ export function EventsScreen() {
                 startDate: fromDate
                     ? dayjs(fromDate).unix().toString()
                     : undefined,
-                endDate: toDate ? dayjs(toDate).unix().toString() : undefined
+                endDate: toDate ? dayjs(toDate).unix().toString() : undefined,
+                frozen: showHidden
             }),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -159,18 +156,35 @@ export function EventsScreen() {
         return () => clearTimeout(timer);
     }, [apartmentSearch]);
 
-    const onDeleteEvent = async (id: string) => {
+    const deleteEvent = async (id: string) => {
         await remove(id);
-        showNotificationSuccess('Event deleted');
-        reloadEvents();
     };
+
+    const queryClient = useQueryClient();
+
+    const { mutateAsync: deleteEventMutation } = useMutation({
+        mutationFn: deleteEvent,
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({
+                queryKey: ['event', variables]
+            });
+            queryClient.invalidateQueries({ queryKey: ['apartments'] });
+            queryClient.invalidateQueries({ queryKey: ['apartment'] });
+            queryClient.invalidateQueries({
+                queryKey: ['schedulerInfo']
+            });
+            showNotificationSuccess('Event deleted');
+        },
+        onError: handleError
+    });
 
     const openDeleteModal = (id: string) =>
         openModal({
             title: 'Delete event',
             message: 'Deleting this event will remove it permanently.',
             color: 'error',
-            onConfirm: () => onDeleteEvent(id)
+            onConfirm: () => deleteEventMutation(id)
         });
 
     return (
@@ -246,6 +260,14 @@ export function EventsScreen() {
                                 clearable
                             />
                         </div>
+                        <Switch
+                            label="Show hidden"
+                            checked={showHidden}
+                            onChange={(e) => {
+                                setPageNumber(1);
+                                setShowHidden(e.currentTarget.checked);
+                            }}
+                        />
                     </>
                 }
                 cardViewModeComponent={
@@ -276,7 +298,7 @@ export function EventsScreen() {
                     </Button>
                 }
                 filtersOnModalActivated={
-                    stateSearch.length > 0 || !!fromDate || !!toDate
+                    stateSearch.length > 0 || !!fromDate || !!toDate || showHidden
                 }
             />
             <DataTable
