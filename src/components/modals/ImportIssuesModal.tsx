@@ -1,7 +1,7 @@
 import { Button, Group, Modal, ScrollArea, Stack, Text } from '@mantine/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IconRotateClockwise, IconTrashX } from '@tabler/icons-react';
-import { ImportBatchResult, FailedImportedEvent } from '../../types/entities';
+import { FailedImportedEvent } from '../../types/entities';
 import { useApi } from '../../hooks/useApi';
 import { useError } from '../../hooks/useError';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
@@ -49,7 +49,7 @@ export function ImportIssuesModal({
 
     const { mutateAsync: retryMutation, isPending: isRetrying } = useMutation({
         mutationFn: retryFailedImportedEvents,
-        onSuccess: (result: ImportBatchResult) => {
+        onSuccess: () => {
             invalidate();
         },
         onError: handleError
