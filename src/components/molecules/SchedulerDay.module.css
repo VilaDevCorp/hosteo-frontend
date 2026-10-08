@@ -1,0 +1,22 @@
+.scrollContainer {
+    scrollbar-width: thin;
+    scrollbar-color: var(--mantine-color-gray-4) transparent;
+}
+
+.scrollContainer::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+    background-color: var(--mantine-color-gray-4);
+    border-radius: 999px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mantine-color-gray-6);
+}

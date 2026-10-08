@@ -14,7 +14,7 @@ import { useReactQuery } from '../../hooks/useReactQuery';
 import { useCrud } from '../../hooks/useCrud';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { showNotificationSuccess } from '../../utils/notifUtils';
-import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
+import { useAssignmentSchedulerWithContext } from '../../hooks/useAssignmentSchedulerWithContext';
 import { useMutation } from '@tanstack/react-query';
 import { useError } from '../../hooks/useError';
 
@@ -59,8 +59,8 @@ export function EventDetails({
             onConfirm: () => deleteAssignmentMutation(id)
         });
 
-    const { assignmentScheduler, onCreateAssignment, onUpdateAssignment } =
-        useAssignmentScheduler();
+    const { onCreateAssignment, onUpdateAssignment } =
+        useAssignmentSchedulerWithContext();
 
     return event ? (
         <div
@@ -187,7 +187,6 @@ export function EventDetails({
                     />
                 ))}
             </div>
-            {assignmentScheduler}
         </div>
     ) : (
         <></>

@@ -1,5 +1,5 @@
-const dateTimeFormat = 'DD/MM/YYYY HH:mm';
-const dateFormat = 'DD/MM/YYYY';
+const dateTimeFormat = 'DD/MM/YY HH:mm';
+const dateFormat = 'DD/MM/YY';
 const dateUrlFormat = 'DD-MM-YYYY';
 const dateInputFormat = 'YYYY-MM-DD HH:mm';
 const dateTimeWithWeekDay = 'ddd D/M/YY'

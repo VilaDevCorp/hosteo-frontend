@@ -18,7 +18,7 @@ import { useCrud } from '../../hooks/useCrud';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { WeeklyCalendar } from './WeeklyCalendar';
-import { useAssignmentScheduler } from '../../hooks/useAssignmentScheduler';
+import { useAssignmentSchedulerWithContext } from '../../hooks/useAssignmentSchedulerWithContext';
 import { useError } from '../../hooks/useError';
 import { useApi } from '../../hooks/useApi';
 
@@ -41,8 +41,7 @@ export function Scheduler() {
     const [importModalOpened, setImportModalOpened] = useState<boolean>(false);
     const [issuesModalOpened, setIssuesModalOpened] = useState<boolean>(false);
 
-    const { assignmentScheduler, onUpdateAssignment } =
-        useAssignmentScheduler();
+    const { onUpdateAssignment } = useAssignmentSchedulerWithContext();
 
     const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(
         new Set()
@@ -218,6 +217,7 @@ export function Scheduler() {
                 onSelectEvent={onSelectEvent}
                 onEditEvent={onEditEvent}
                 onDeleteEvent={onDeleteEvent}
+                selectedAssignmentIds={selectedAssignmentIds}
                 onSelectAssignment={onSelectAssignment}
                 onEditAssignment={onUpdateAssignment}
                 onDeleteAssignment={onDeleteAssignment}
@@ -227,7 +227,6 @@ export function Scheduler() {
                 onClose={() => setOpenedDrawer(false)}
             />
             {eventFormModal}
-            {assignmentScheduler}
             <ImportModal
                 opened={importModalOpened}
                 onClose={() => setImportModalOpened(false)}

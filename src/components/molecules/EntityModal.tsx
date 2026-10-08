@@ -25,6 +25,7 @@ export function EntityModal({
             opened={opened}
             onClose={onClose}
             size={'lg'}
+            zIndex={501}
             title={title}
             withCloseButton={!removeHeader}
             transitionProps={{

@@ -29,16 +29,14 @@ export function SchedulerAssignmentCard({
             w={'100%'}
             className={onClick && !isFrozen ? styles.selectableCard : undefined}
             onClick={onClick && !isFrozen ? () => onClick() : undefined}
+            data-selected={isSelected ? 'true' : 'false'}
             padding="0"
             radius="md"
             shadow="sm"
             style={{
                 flexShrink: 0,
                 cursor: onClick && !isFrozen ? 'pointer' : 'default',
-                opacity: isFrozen ? 0.5 : 1,
-                backgroundColor: isSelected
-                    ? 'var(--mantine-color-blue-0)'
-                    : 'white'
+                opacity: isFrozen ? 0.5 : 1
             }}
             onMouseEnter={
                 onClick && !isFrozen

@@ -19,8 +19,8 @@ function AlertCounter({
                 gap: '0.25rem'
             }}
         >
-            <AlertIcon alertType={alertType} size={32} />
-            <Text size="xl" c={'var(--mantine-color-gray-9)'}>
+            <AlertIcon alertType={alertType} size={28} />
+            <Text size="lg" c={'var(--mantine-color-gray-9)'}>
                 {count ?? 0}
             </Text>
         </div>

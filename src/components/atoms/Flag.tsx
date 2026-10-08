@@ -24,7 +24,7 @@ export function Flag({ country }: { country: string | undefined }) {
                     </defs>
                 </svg>
             );
-        case 'en':
+        default:
             return (
                 <svg width={20} height={20} fill="none" viewBox="0 0 24 24">
                     <g clipPath="url(#GB_svg__a)">
@@ -52,7 +52,5 @@ export function Flag({ country }: { country: string | undefined }) {
                     </defs>
                 </svg>
             );
-        default:
-            return <img src="/unknown.png" alt="Unknown flag" />;
     }
 }

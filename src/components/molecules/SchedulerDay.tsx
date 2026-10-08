@@ -4,6 +4,7 @@ import { SchedulerEventCard } from './SchedulerEventCard';
 import { SchedulerItem } from '../../types/entities';
 import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
 import { IncompleteAssignmentCard } from './IncompleteAssignmentCard.tsx';
+import styles from './SchedulerDay.module.css';
 
 export function SchedulerDay({
     date,
@@ -78,9 +79,9 @@ export function SchedulerDay({
                     flexDirection: 'column',
                     gap: '0.5rem',
                     overflow: 'auto',
-                    scrollbarWidth: 'thin',
                     borderRadius: 'var(--mantine-radius-md)'
                 }}
+                className={styles.scrollContainer}
             >
                 {items.map((item) => {
                     if (item.type === 'event') {
@@ -122,15 +123,24 @@ export function SchedulerDay({
                             <SchedulerAssignmentCard
                                 key={assignment.id}
                                 item={assignment}
-                                onClick={() =>
-                                    onAssignmentClick?.(assignment.id)
+                                onClick={
+                                    onAssignmentClick
+                                        ? () => onAssignmentClick(assignment.id)
+                                        : undefined
                                 }
                                 isSelected={selectedAssignmentIds?.has(
                                     assignment.id
                                 )}
-                                onEdit={() => onAssignmentEdit?.(assignment.id)}
-                                onDelete={() =>
-                                    onAssignmentDelete?.(assignment.id)
+                                onEdit={
+                                    onAssignmentEdit
+                                        ? () => onAssignmentEdit(assignment.id)
+                                        : undefined
+                                }
+                                onDelete={
+                                    onAssignmentDelete
+                                        ? () =>
+                                              onAssignmentDelete(assignment.id)
+                                        : undefined
                                 }
                             />
                         );

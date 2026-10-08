@@ -13,3 +13,7 @@
 .selectableCard:hover {
     opacity: 0.8;
 }
+
+.selectableCard[data-selected="true"] {
+    background-color: var(--mantine-color-blue-0);
+}

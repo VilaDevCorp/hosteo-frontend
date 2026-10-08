@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { AssignmentScheduler } from '../components/organism/AssignmentScheduler';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -9,7 +9,13 @@ import {
 import { useCrud } from './useCrud';
 import { Modal } from '@mantine/core';
 
-export const useAssignmentScheduler = () => {
+export interface IUseAssignmentScheduler {
+    onCreateAssignment: (event: EventForAssignment, task: Task) => void;
+    onUpdateAssignment: (assignmentId: string) => void;
+    modalComponent: ReactNode;
+}
+
+export const useAssignmentScheduler = (): IUseAssignmentScheduler => {
     const [assignmentId, setAssignmentId] = useState<string | undefined>();
     const [event, setEvent] = useState<EventForAssignment | undefined>();
     const [task, setTask] = useState<Task | undefined>();
@@ -42,13 +48,14 @@ export const useAssignmentScheduler = () => {
         setTask(undefined);
     };
 
-    const assignmentScheduler = (
+    const modalComponent = (
         <Modal
             opened={opened}
             onClose={onClose}
             title="Schedule task"
             withCloseButton
             size={'xl'}
+            zIndex={500}
             styles={{
                 content: {
                     maxWidth: '90rem',
@@ -76,5 +83,5 @@ export const useAssignmentScheduler = () => {
         </Modal>
     );
 
-    return { assignmentScheduler, onCreateAssignment, onUpdateAssignment };
+    return { modalComponent, onCreateAssignment, onUpdateAssignment };
 };

@@ -33,6 +33,7 @@ export function SchedulerEventCard({
             className={
                 onClick && !isFrozen ? styles.selectableCard : undefined
             }
+            data-selected={isSelected ? 'true' : 'false'}
             onClick={
                 onClick && !isFrozen ? () => onClick(item.id) : undefined
             }
@@ -43,9 +44,6 @@ export function SchedulerEventCard({
                 flexShrink: 0,
                 opacity: isFrozen ? 0.5 : 1,
                 cursor: onClick && !isFrozen ? 'pointer' : 'default',
-                backgroundColor: isSelected
-                    ? 'var(--mantine-color-blue-0)'
-                    : 'white',
                 borderLeft: '3px solid var(--mantine-color-gray-5)',
                 borderRight: '3px solid var(--mantine-color-gray-5)',
                 borderTop: isStart

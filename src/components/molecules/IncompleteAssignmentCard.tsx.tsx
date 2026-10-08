@@ -16,7 +16,8 @@ export function IncompleteAssignmentCard({
             radius="md"
             shadow="sm"
             style={{
-                border: `3px solid var(--mantine-color-primary-6)`
+                border: `3px solid var(--mantine-color-primary-6)`,
+                flexShrink: 0,
             }}
         >
             <Card.Section

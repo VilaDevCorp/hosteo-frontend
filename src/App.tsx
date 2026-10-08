@@ -11,6 +11,7 @@ import '@mantine/notifications/styles.css';
 import { ModalsProvider } from '@mantine/modals';
 import { BrowserRouter } from 'react-router-dom';
 import { ConfirmModalProvider } from './providers/ConfirmModalProvider';
+import { AssignmentSchedulerProvider } from './providers/AssignmentSchedulerProvider';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
@@ -34,7 +35,9 @@ function App() {
                                 <BrowserRouter>
                                     <AuthProvider>
                                         <ApiProvider>
-                                            <Body />
+                                            <AssignmentSchedulerProvider>
+                                                <Body />
+                                            </AssignmentSchedulerProvider>
                                         </ApiProvider>
                                     </AuthProvider>
                                 </BrowserRouter>
