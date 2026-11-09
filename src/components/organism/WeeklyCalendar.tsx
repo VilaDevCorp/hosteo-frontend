@@ -7,7 +7,10 @@ import {
     SchedulerInfo
 } from '../../types/entities';
 import { useQuery } from '@tanstack/react-query';
-import { groupItemsByDateAndAddAlerts } from '../../utils/utilFunctions';
+import {
+    getAssignmentDateBounds,
+    groupItemsByDateAndAddAlerts
+} from '../../utils/utilFunctions';
 import { useApi } from '../../hooks/useApi';
 import { SetStateAction, useEffect, useMemo } from 'react';
 import { useError } from '../../hooks/useError';
@@ -90,17 +93,14 @@ export function WeeklyCalendar(props: WeeklyCalendarProps) {
 
     const getDisabledDates = (date: string): boolean => {
         if (!assignmentBeingModified) return false;
-        const event = assignmentBeingModified.event;
-        const nextEvent = assignmentBeingModified?.event?.nextEvent;
-        if (event) {
-            if (dayjs(date).isBefore(dayjs.unix(event.endDate), 'day')) {
-                return true;
-            }
+        const { firstDate, lastDate } = getAssignmentDateBounds(
+            assignmentBeingModified.event
+        );
+        if (firstDate && dayjs(date).isBefore(firstDate, 'day')) {
+            return true;
         }
-        if (nextEvent) {
-            if (dayjs(date).isAfter(dayjs.unix(nextEvent.startDate), 'day')) {
-                return true;
-            }
+        if (lastDate && dayjs(date).isAfter(lastDate, 'day')) {
+            return true;
         }
         return false;
     };

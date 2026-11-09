@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Address, AlertItem, AssignmentDto, AssignmentInfoForScheduler, EventSchedulerDto, SchedulerItem } from '../types/entities';
+import { Address, AlertItem, AssignmentDto, AssignmentInfoForScheduler, EventForAssignment, EventSchedulerDto, SchedulerItem } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { conf } from '../../conf';
 
@@ -30,6 +30,43 @@ export function getStartOfWeek(date: string | null) {
 
 export function getEndOfWeek(date: string | null) {
     return dayjs(date).endOf('week').toISOString();
+}
+
+export function getAssignmentDateBounds(event?: EventForAssignment): {
+    firstDate?: dayjs.Dayjs;
+    lastDate?: dayjs.Dayjs;
+} {
+    if (!event) return {};
+    return {
+        firstDate: dayjs.unix(event.endDate),
+        lastDate: event.nextEvent
+            ? dayjs.unix(event.nextEvent.startDate)
+            : undefined
+    };
+}
+
+export function getFirstAssignableDate({
+    event,
+    assignmentStartDate
+}: {
+    event?: EventForAssignment;
+    assignmentStartDate?: number;
+}): dayjs.Dayjs {
+    if (assignmentStartDate) {
+        return dayjs.unix(assignmentStartDate);
+    }
+
+    const today = dayjs().startOf('day');
+    const { firstDate, lastDate } = getAssignmentDateBounds(event);
+
+    if (!firstDate) return today;
+
+    // When the whole window is already in the past, its days are the only
+    // selectable ones, so show the window instead of clamping to today.
+    const windowIsStillOpen = !lastDate || !lastDate.isBefore(today, 'day');
+    return windowIsStillOpen && firstDate.isBefore(today, 'day')
+        ? today
+        : firstDate;
 }
 
 export const groupItemsByDateAndAddAlerts = (

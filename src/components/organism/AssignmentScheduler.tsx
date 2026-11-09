@@ -10,7 +10,10 @@ import {
     Task,
     Worker
 } from '../../types/entities';
-import { getStartOfWeek } from '../../utils/utilFunctions';
+import {
+    getFirstAssignableDate,
+    getStartOfWeek
+} from '../../utils/utilFunctions';
 import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
 import { Button, Select } from '@mantine/core';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
@@ -63,8 +66,13 @@ export function AssignmentScheduler({
         setSelectedWorker(assignment?.worker);
     }, [assignment]);
 
-    const [startOfWeek, setStartOfWeek] = useState<string>(
-        getStartOfWeek(new Date().toISOString())
+    const [startOfWeek, setStartOfWeek] = useState<string>(() =>
+        getStartOfWeek(
+            getFirstAssignableDate({
+                assignmentStartDate: assignment?.startDate,
+                event
+            }).toISOString()
+        )
     );
 
     const { error: startDateError, validate: startDateValidate } = useValidator(

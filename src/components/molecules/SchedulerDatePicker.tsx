@@ -1,4 +1,4 @@
-import { ActionIcon, Popover, Text } from '@mantine/core';
+import { ActionIcon, Button, Popover, Text } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
 import {
     IconChevronLeft,
@@ -32,9 +32,16 @@ export function SchedulerDatePicker({
                 display: 'flex',
                 gap: '1rem',
                 alignItems: 'center',
-                width: '20rem'
+                width: '25rem'
             }}
         >
+            <Button
+                variant="light"
+                size="compact-sm"
+                onClick={() => setDate(getStartOfWeek(dayjs().toISOString()))}
+            >
+                {"Today"}
+            </Button>
             <div
                 style={{
                     display: 'flex',
@@ -80,6 +87,7 @@ export function SchedulerDatePicker({
                 </Popover.Target>
                 <Popover.Dropdown>
                     <Calendar
+                        defaultDate={date}
                         withCellSpacing={false}
                         getDayProps={(dateCell) => {
                             const isHovered = isInWeekRange(dateCell, hovered);
