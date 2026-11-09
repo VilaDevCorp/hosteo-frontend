@@ -116,7 +116,7 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
                 // of the modals of this app, which made the dropdowns invisible
                 // (they were painted behind the modal). Keeping the popover layer
                 // above the modal layers fixes every dropdown in the app.
-                Popover: Notifications.extend({
+                Popover: Popover.extend({
                     defaultProps: {
                         zIndex: Z_INDEX.popover
                     }

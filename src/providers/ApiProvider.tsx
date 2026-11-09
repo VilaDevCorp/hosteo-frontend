@@ -2,6 +2,7 @@ import { createContext, ReactNode } from 'react';
 import {
     AlertsInfo,
     AssignmentOperationError,
+    BulkOperationResponse,
     EventOperationError,
     ImportBatchResult,
     FailedImportedEvent,
@@ -27,15 +28,17 @@ export interface ApiContext {
     eventBulkStateUpdate: (
         eventIds: string[],
         state: EventState
-    ) => Promise<EventOperationError[]>;
-    eventBulkDelete: (eventIds: string[]) => Promise<EventOperationError[]>;
+    ) => Promise<BulkOperationResponse<EventOperationError>>;
+    eventBulkDelete: (
+        eventIds: string[]
+    ) => Promise<BulkOperationResponse<EventOperationError>>;
     assignmentBulkStateUpdate: (
         assignmentIds: string[],
         state: AssignmentState
-    ) => Promise<AssignmentOperationError[]>;
+    ) => Promise<BulkOperationResponse<AssignmentOperationError>>;
     assignmentBulkDelete: (
         assignmentIds: string[]
-    ) => Promise<AssignmentOperationError[]>;
+    ) => Promise<BulkOperationResponse<AssignmentOperationError>>;
     searchSchedulerData: (date: string) => Promise<SchedulerInfo>;
     getAlertsInfo: () => Promise<AlertsInfo>;
     hide: (entity: string, id: string) => Promise<void>;
@@ -105,7 +108,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
     const eventBulkStateUpdate = async (
         eventIds: string[],
         state: EventState
-    ): Promise<EventOperationError[]> => {
+    ): Promise<BulkOperationResponse<EventOperationError>> => {
         const url = `${apiUrl}events/state/${state}`;
         const options: RequestInit = {
             method: 'PATCH',
@@ -115,12 +118,15 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<EventOperationError[]> = await res.json();
+        const resObject: ApiResponse<BulkOperationResponse<EventOperationError>> =
+            await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
 
-    const eventBulkDelete = async (eventIds: string[]) => {
+    const eventBulkDelete = async (
+        eventIds: string[]
+    ): Promise<BulkOperationResponse<EventOperationError>> => {
         const url = `${apiUrl}events`;
         const options: RequestInit = {
             method: 'DELETE',
@@ -130,7 +136,8 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<EventOperationError[]> = await res.json();
+        const resObject: ApiResponse<BulkOperationResponse<EventOperationError>> =
+            await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
@@ -138,7 +145,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
     const assignmentBulkStateUpdate = async (
         assignmentIds: string[],
         state: AssignmentState
-    ): Promise<AssignmentOperationError[]> => {
+    ): Promise<BulkOperationResponse<AssignmentOperationError>> => {
         const url = `${apiUrl}assignments/state/${state}`;
         const options: RequestInit = {
             method: 'PATCH',
@@ -148,13 +155,16 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<AssignmentOperationError[]> =
-            await res.json();
+        const resObject: ApiResponse<
+            BulkOperationResponse<AssignmentOperationError>
+        > = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
 
-    const assignmentBulkDelete = async (assignmentIds: string[]) => {
+    const assignmentBulkDelete = async (
+        assignmentIds: string[]
+    ): Promise<BulkOperationResponse<AssignmentOperationError>> => {
         const url = `${apiUrl}assignments`;
         const options: RequestInit = {
             method: 'DELETE',
@@ -164,8 +174,9 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<AssignmentOperationError[]> =
-            await res.json();
+        const resObject: ApiResponse<
+            BulkOperationResponse<AssignmentOperationError>
+        > = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };

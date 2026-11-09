@@ -288,3 +288,8 @@ export interface EventOperationError {
     event: Event;
     error: string;
 }
+
+export interface BulkOperationResponse<T> {
+    successCount: number;
+    errors: T[];
+}

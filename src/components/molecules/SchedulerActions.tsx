@@ -1,4 +1,5 @@
 import { ActionIcon, ActionIconGroup, Text } from '@mantine/core';
+import { useState } from 'react';
 import {
     ASSIGNMENT_STATE,
     AssignmentState,
@@ -16,16 +17,34 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../hooks/useApi';
 import { useError } from '../../hooks/useError';
-import { ITEM_TYPE, ItemType } from '../../types/entities';
+import {
+    AssignmentOperationError,
+    BulkOperationResponse,
+    EventOperationError,
+    ITEM_TYPE,
+    ItemType
+} from '../../types/entities';
 import styles from './SchedulerActions.module.css';
 import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithContext';
 import { showNotificationSuccess } from '../../utils/notifUtils';
+import { BulkOperationResultModal } from '../modals/BulkOperationResultModal';
+import { BulkAction, getBulkResultLabel } from '../../utils/bulkResultLabel';
 
 interface SchedulerActionProps {
     selectedEventIds: Set<string>;
     setSelectedEventIds: React.Dispatch<React.SetStateAction<Set<string>>>;
     selectedAssignmentIds: Set<string>;
     setSelectedAssignmentIds: React.Dispatch<React.SetStateAction<Set<string>>>;
+}
+
+type BulkEventResult = BulkOperationResponse<EventOperationError>;
+type BulkAssignmentResult = BulkOperationResponse<AssignmentOperationError>;
+
+interface BulkResultModalState {
+    itemType: ItemType;
+    action: BulkAction;
+    successCount: number;
+    errors: (EventOperationError | AssignmentOperationError)[];
 }
 
 export function SchedulerActions({
@@ -45,44 +64,71 @@ export function SchedulerActions({
     const queryClient = useQueryClient();
     const { openModal } = useConfirmModalWithContext();
 
-    const onBulkEventStateUpdate = async (state: EventState) => {
-        const eventIds = Array.from(selectedEventIds.values());
-        const errors = await eventBulkStateUpdate(eventIds, state);
-        if (errors.length > 0) {
-            handleError(errors);
+    const [bulkResult, setBulkResult] = useState<BulkResultModalState | null>(
+        null
+    );
+
+    const invalidateQueries = () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        queryClient.invalidateQueries({ queryKey: ['event'] });
+        queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+        queryClient.invalidateQueries({ queryKey: ['apartments'] });
+        queryClient.invalidateQueries({ queryKey: ['apartment'] });
+    };
+
+    const showBulkResult = (
+        itemType: ItemType,
+        action: BulkAction,
+        result: BulkEventResult | BulkAssignmentResult
+    ) => {
+        invalidateQueries();
+
+        if (itemType === ITEM_TYPE.EVENT) {
+            setSelectedEventIds(new Set());
+        } else {
+            setSelectedAssignmentIds(new Set());
         }
+
+        if (result.errors.length === 0) {
+            showNotificationSuccess(
+                getBulkResultLabel(itemType, action, result.successCount)
+            );
+        } else {
+            setBulkResult({
+                itemType,
+                action,
+                successCount: result.successCount,
+                errors: result.errors
+            });
+        }
+    };
+
+    const onBulkEventStateUpdate = async (
+        state: EventState
+    ): Promise<BulkEventResult> => {
+        const eventIds = Array.from(selectedEventIds.values());
+        return eventBulkStateUpdate(eventIds, state);
     };
     const { mutate: mutateBulkEventStateUpdate } = useMutation({
         mutationFn: onBulkEventStateUpdate,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
-            queryClient.invalidateQueries({ queryKey: ['event'] });
-            queryClient.invalidateQueries({
-                queryKey: ['schedulerInfo']
-            });
-            queryClient.invalidateQueries({ queryKey: ['apartments'] });
-            queryClient.invalidateQueries({ queryKey: ['apartment'] });
-            setSelectedEventIds(new Set());
-        }
+        onSuccess: (result) => {
+            showBulkResult(ITEM_TYPE.EVENT, 'update', result);
+        },
+        onError: handleError
     });
 
-    const onBulkAssignmentStateUpdate = async (state: AssignmentState) => {
+    const onBulkAssignmentStateUpdate = async (
+        state: AssignmentState
+    ): Promise<BulkAssignmentResult> => {
         const assignmentIds = Array.from(selectedAssignmentIds.values());
-        const errors = await assignmentBulkStateUpdate(assignmentIds, state);
-        if (errors.length > 0) {
-            handleError(errors);
-        }
+        return assignmentBulkStateUpdate(assignmentIds, state);
     };
     const { mutate: mutateBulkAssignmentStateUpdate } = useMutation({
         mutationFn: onBulkAssignmentStateUpdate,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
-            queryClient.invalidateQueries({ queryKey: ['event'] });
-            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
-            queryClient.invalidateQueries({ queryKey: ['apartments'] });
-            queryClient.invalidateQueries({ queryKey: ['apartment'] });
-            setSelectedAssignmentIds(new Set());
-        }
+        onSuccess: (result) => {
+            showBulkResult(ITEM_TYPE.ASSIGNMENT, 'update', result);
+        },
+        onError: handleError
     });
 
     const isVisible =
@@ -98,23 +144,19 @@ export function SchedulerActions({
         }
     };
 
-    const deleteEvents = async (ids: string[]) => {
-        await eventBulkDelete(ids);
+    const deleteEvents = async (
+        ids: string[]
+    ): Promise<BulkEventResult> => {
+        return eventBulkDelete(ids);
     };
 
     const { mutateAsync: deleteEventsMutation } = useMutation({
         mutationFn: deleteEvents,
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
+        onSuccess: (result, variables) => {
+            showBulkResult(ITEM_TYPE.EVENT, 'delete', result);
             variables.forEach((id) => {
                 queryClient.invalidateQueries({ queryKey: ['event', id] });
             });
-            queryClient.invalidateQueries({ queryKey: ['apartments'] });
-            queryClient.invalidateQueries({ queryKey: ['apartment'] });
-            queryClient.invalidateQueries({
-                queryKey: ['schedulerInfo']
-            });
-            showNotificationSuccess('Event deleted');
         },
         onError: handleError
     });
@@ -124,22 +166,21 @@ export function SchedulerActions({
             title: 'Delete events',
             message: 'Deleting these events will remove them permanently.',
             color: 'error',
-            onConfirm: () => deleteEventsMutation(ids)
+            onConfirm: async () => {
+                await deleteEventsMutation(ids);
+            }
         });
 
-    const deleteAssignments = async (ids: string[]) => {
-        await assignmentBulkDelete(ids);
+    const deleteAssignments = async (
+        ids: string[]
+    ): Promise<BulkAssignmentResult> => {
+        return assignmentBulkDelete(ids);
     };
 
     const { mutateAsync: deleteAssignmentsMutation } = useMutation({
         mutationFn: deleteAssignments,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
-            queryClient.invalidateQueries({ queryKey: ['event'] });
-            queryClient.invalidateQueries({ queryKey: ['apartments'] });
-            queryClient.invalidateQueries({ queryKey: ['apartment'] });
-            queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
-            showNotificationSuccess('Assignments deleted');
+        onSuccess: (result) => {
+            showBulkResult(ITEM_TYPE.ASSIGNMENT, 'delete', result);
         },
         onError: handleError
     });
@@ -150,12 +191,14 @@ export function SchedulerActions({
             message:
                 'Are you sure you want to delete these assignments? This action cannot be undone',
             color: 'red',
-            onConfirm: () => deleteAssignmentsMutation(ids)
+            onConfirm: async () => {
+                await deleteAssignmentsMutation(ids);
+            }
         });
 
     return (
-        isVisible && (
-            <>
+        <>
+            {isVisible && (
                 <ActionIconGroup className={styles.schedulerActionsContainer}>
                     <div
                         style={{
@@ -257,7 +300,15 @@ export function SchedulerActions({
                         <IconTrash />
                     </ActionIcon>
                 </ActionIconGroup>
-            </>
-        )
+            )}
+            <BulkOperationResultModal
+                opened={bulkResult !== null}
+                onClose={() => setBulkResult(null)}
+                itemType={bulkResult?.itemType ?? ITEM_TYPE.EVENT}
+                action={bulkResult?.action ?? 'update'}
+                successCount={bulkResult?.successCount ?? 0}
+                errors={bulkResult?.errors ?? []}
+            />
+        </>
     );
 }

@@ -18,7 +18,7 @@ export function AlertAssignmentCard({
     const { assignmentBulkStateUpdate } = useApi();
 
     const onAssignmentComplete = async (assignmentId: string) => {
-        const errors = await assignmentBulkStateUpdate(
+        const { errors } = await assignmentBulkStateUpdate(
             [assignmentId],
             ASSIGNMENT_STATE.FINISHED
         );
