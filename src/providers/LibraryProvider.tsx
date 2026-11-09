@@ -13,6 +13,7 @@ import {
     Modal,
     MultiSelect,
     Pagination,
+    Popover,
     Radio,
     Switch,
     Table,
@@ -21,6 +22,7 @@ import {
 import { Notifications } from '@mantine/notifications';
 import { useScreen } from '../hooks/useScreen';
 import { Select } from '@mantine/core';
+import { Z_INDEX } from '../utils/zIndex';
 
 export const LibraryProvider = ({ children }: { children: ReactNode }) => {
     const { isTablet } = useScreen();
@@ -108,6 +110,22 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
             primaryColor: 'primary',
             fontFamily: 'Inter, sans-serif',
             components: {
+                // Combobox based components (Select, MultiSelect, DatePickerInput,
+                // TimePicker, ...) render their dropdown in a Popover portal.
+                // Mantine's default popover z-index (300) is lower than the z-index
+                // of the modals of this app, which made the dropdowns invisible
+                // (they were painted behind the modal). Keeping the popover layer
+                // above the modal layers fixes every dropdown in the app.
+                Popover: Notifications.extend({
+                    defaultProps: {
+                        zIndex: Z_INDEX.popover
+                    }
+                }),
+                Notifications: Notifications.extend({
+                    defaultProps: {
+                        zIndex: Z_INDEX.popover
+                    }
+                }),
                 Button: Button.extend({
                     defaultProps: {
                         size: defaultSize

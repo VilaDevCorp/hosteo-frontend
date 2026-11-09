@@ -8,6 +8,7 @@ import {
 } from '../types/entities';
 import { useCrud } from './useCrud';
 import { Modal } from '@mantine/core';
+import { Z_INDEX } from '../utils/zIndex';
 
 export interface IUseAssignmentScheduler {
     onCreateAssignment: (event: EventForAssignment, task: Task) => void;
@@ -55,7 +56,7 @@ export const useAssignmentScheduler = (): IUseAssignmentScheduler => {
             title="Schedule task"
             withCloseButton
             size={'xl'}
-            zIndex={500}
+            zIndex={Z_INDEX.schedulerModal}
             styles={{
                 content: {
                     maxWidth: '90rem',

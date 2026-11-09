@@ -3,6 +3,7 @@ import { ExtendedCustomColors } from '../../mantine';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useState } from 'react';
+import { Z_INDEX } from '../../utils/zIndex';
 
 export interface ConfirmModalProperties {
     title: string;
@@ -39,7 +40,7 @@ export const ConfirmationModal = ({
 
     return (
         <Modal
-            zIndex={1000}
+            zIndex={Z_INDEX.confirmationModal}
             closeOnEscape={false}
             onKeyDown={(e) => {
                 e.stopPropagation();

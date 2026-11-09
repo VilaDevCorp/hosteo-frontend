@@ -1,6 +1,7 @@
 import { Modal } from '@mantine/core';
 import React from 'react';
 import { useScreen } from '../../hooks/useScreen';
+import { Z_INDEX } from '../../utils/zIndex';
 
 interface EntityModalProps {
     opened: boolean;
@@ -25,7 +26,7 @@ export function EntityModal({
             opened={opened}
             onClose={onClose}
             size={'lg'}
-            zIndex={501}
+            zIndex={Z_INDEX.entityModal}
             title={title}
             withCloseButton={!removeHeader}
             transitionProps={{
