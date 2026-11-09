@@ -4,6 +4,15 @@ import StatusCode from 'status-code-enum';
 import { useAuth } from './useAuth';
 import { ERROR_CODE, ErrorCode } from '../types/enums';
 import { showNotificationError } from '../utils/notifUtils';
+import { getErrorMessage } from '../utils/errorMessages';
+
+const SESSION_EXPIRED_CODES: ErrorCode[] = [
+    ERROR_CODE.NOT_JWT_TOKEN,
+    ERROR_CODE.NOT_CSR_TOKEN,
+    ERROR_CODE.USER_AGENT_NOT_MATCH,
+    ERROR_CODE.TOKEN_ALREADY_USED,
+    ERROR_CODE.INVALID_TOKEN
+];
 
 export const useError = () => {
     const navigate = useNavigate();
@@ -12,26 +21,22 @@ export const useError = () => {
     const handleError = (error: unknown) => {
         console.error('Error:', error);
         if (error instanceof ApiError) {
+            const code = error.code as ErrorCode | undefined;
+            const message = getErrorMessage(error.code);
+
+            if (code && SESSION_EXPIRED_CODES.includes(code)) {
+                logout();
+                navigate('/login');
+                showNotificationError(message ?? 'Your session has expired');
+                return;
+            }
+
+            if (message) {
+                showNotificationError(message);
+                return;
+            }
+
             switch (error.statusCode) {
-                case StatusCode.ClientErrorUnauthorized:
-                    if (
-                        error.code &&
-                        (
-                            [
-                                ERROR_CODE.NOT_JWT_TOKEN,
-                                ERROR_CODE.NOT_CSR_TOKEN,
-                                ERROR_CODE.USER_AGENT_NOT_MATCH,
-                                ERROR_CODE.TOKEN_ALREADY_USED,
-                                ERROR_CODE.INVALID_TOKEN
-                            ] as ErrorCode[]
-                        ).includes(error.code as ErrorCode)
-                    ) {
-                        logout();
-                        navigate('/login');
-                        showNotificationError('Your session has expired');
-                        return;
-                    }
-                    break;
                 case StatusCode.ClientErrorBadRequest:
                     showNotificationError('There are errors in the form');
                     return;

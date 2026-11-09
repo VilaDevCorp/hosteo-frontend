@@ -2,7 +2,6 @@ import { notifications } from "@mantine/notifications"
 
 const showNotificationError = (message: string) => {
     notifications.show({
-        title: 'Error',
         message,
         color: 'error'
     });
@@ -10,7 +9,6 @@ const showNotificationError = (message: string) => {
 
 const showNotificationSuccess = (message: string) => {
     notifications.show({
-        title: 'Success',
         message,
         color: 'success'
     });
