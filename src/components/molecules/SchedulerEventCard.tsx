@@ -30,13 +30,9 @@ export function SchedulerEventCard({
     return (
         <Card
             w={'100%'}
-            className={
-                onClick && !isFrozen ? styles.selectableCard : undefined
-            }
+            className={onClick && !isFrozen ? styles.selectableCard : undefined}
             data-selected={isSelected ? 'true' : 'false'}
-            onClick={
-                onClick && !isFrozen ? () => onClick(item.id) : undefined
-            }
+            onClick={onClick && !isFrozen ? () => onClick(item.id) : undefined}
             padding="0"
             shadow="sm"
             radius={'0'}
@@ -188,7 +184,9 @@ export function SchedulerEventCard({
                         }}
                     >
                         <Text size="sm" fw={'bold'}>
-                            {dayjs.unix(item.startDate).format(conf.timeFormat)}
+                            {dayjs
+                                .unix(isStart ? item.startDate : item.endDate)
+                                .format(conf.timeFormat)}
                         </Text>
                         <StateIndicator state={item.state} size="md" />
                         {item.overdue && (
