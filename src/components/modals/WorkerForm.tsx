@@ -15,6 +15,9 @@ import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
 import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useReactQuery } from '../../hooks/useReactQuery';
+import { EntityImageInput } from '../molecules/EntityImageInput';
+import { useEntityImage } from '../../hooks/useEntityImage';
+import { useApi } from '../../hooks/useApi';
 
 export function WorkerForm({
     onClose,
@@ -26,16 +29,20 @@ export function WorkerForm({
     const { create, update } = useCrud<Worker>('worker');
     const { handleError } = useError();
     const { queryClient } = useReactQuery();
+    const { updateImage } = useApi();
 
     const [formFields, setFormFields] = useState<WorkerFormFields>(
         workerToForm(worker)
     );
+    const image = useEntityImage(worker?.imageUrl);
+    const resetImage = image.reset;
 
     useEffect(() => {
         if (worker) {
             setFormFields(workerToForm(worker));
+            resetImage();
         }
-    }, [worker]);
+    }, [worker, resetImage]);
 
     const {
         dirty: nameDirty,
@@ -45,8 +52,16 @@ export function WorkerForm({
         activateDirty: setDirtyName
     } = useValidator(formFields.name, [notEmptyValidator]);
 
+    const applyImageChanges = async (id: string) => {
+        if (!image.dirty) {
+            return;
+        }
+        await updateImage('worker', id, image.file);
+    };
+
     const createWorker = async () => {
-        await create(formFieldsToCreateWorkerForm(formFields));
+        const created = await create(formFieldsToCreateWorkerForm(formFields));
+        await applyImageChanges(created.id);
     };
 
     const { mutate: createWorkerMutation, isPending: isLoadingCreate } =
@@ -65,6 +80,9 @@ export function WorkerForm({
 
     const updateWorker = async () => {
         await update(formFieldsToUpdateWorkerForm(formFields));
+        if (worker) {
+            await applyImageChanges(worker.id);
+        }
     };
 
     const { mutate: updateWorkerMutation, isPending: isLoadingUpdate } =
@@ -103,6 +121,14 @@ export function WorkerForm({
                 onSubmit();
             }}
         >
+            <div style={{ marginBottom: '1rem' }}>
+                <EntityImageInput
+                    image={image}
+                    placeholderSrc="/user_placeholder.svg"
+                    alt="Worker picture"
+                    disabled={isLoadingCreate || isLoadingUpdate}
+                />
+            </div>
             <TextInput
                 withAsterisk
                 label="Name"

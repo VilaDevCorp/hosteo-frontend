@@ -22,6 +22,8 @@ import { useEntityModal } from '../../hooks/useEntityModal';
 import { TaskOrTemplateForm } from './TaskOrTemplateForm';
 import { TaskOrTemplateFormSkeleton } from '../skeletons/TaskOrTemplateFormSkeleton';
 import { TasksSection } from '../molecules/TasksSection';
+import { EntityImageInput } from '../molecules/EntityImageInput';
+import { useEntityImage } from '../../hooks/useEntityImage';
 
 export function ApartmentForm({
     onClose,
@@ -32,11 +34,12 @@ export function ApartmentForm({
 }) {
     const { queryClient } = useReactQuery();
     const { handleError } = useError();
-    const { hide, unhide } = useApi();
+    const { hide, unhide, updateImage } = useApi();
     const { openModal } = useConfirmModalWithContext();
     const [formFields, setFormFields] = useState<ApartmentFormFields>(
         apartmentToForm(apartment)
     );
+    const image = useEntityImage(apartment?.imageUrl);
 
     const { onOpen: onOpenFormModal, modalComponent: taskFormModal } =
         useEntityModal<Task>({
@@ -102,8 +105,18 @@ export function ApartmentForm({
         useCrud<ApartmentWithTasks>('apartment');
     const { isTablet } = useScreen();
 
+    const applyImageChanges = async (id: string) => {
+        if (!image.dirty) {
+            return;
+        }
+        await updateImage('apartment', id, image.file);
+    };
+
     const createApartment = async () => {
-        await create(formFieldsToCreateApartmentForm(formFields));
+        const created = await create(
+            formFieldsToCreateApartmentForm(formFields)
+        );
+        await applyImageChanges(created.id);
     };
 
     const { mutate: createApartmentMutation, isPending: isLoadingCreate } =
@@ -127,6 +140,9 @@ export function ApartmentForm({
 
     const onUpdateApartment = async () => {
         await updateApartment(formFieldsToUpdateApartmentForm(formFields));
+        if (apartment) {
+            await applyImageChanges(apartment.id);
+        }
     };
 
     const { mutate: updateApartmentMutation, isPending: isLoadingUpdate } =
@@ -231,6 +247,16 @@ export function ApartmentForm({
                                 flexDirection: 'column'
                             }}
                         >
+                            <div style={{ marginBottom: '1rem' }}>
+                                <EntityImageInput
+                                    image={image}
+                                    placeholderSrc="/apartment_placeholder.svg"
+                                    alt="Apartment picture"
+                                    disabled={
+                                        isLoadingCreate || isLoadingUpdate
+                                    }
+                                />
+                            </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <TextInput
                                     label="Name"

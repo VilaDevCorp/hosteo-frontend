@@ -47,6 +47,7 @@ export interface Apartment extends BaseEntity {
     address?: Address;
     state: ApartmentState;
     visible: boolean;
+    imageUrl?: string | null;
 }
 
 export interface ApartmentWithTasks extends Apartment {
@@ -88,6 +89,7 @@ export interface Worker extends BaseEntity {
     name: string;
     language: Language;
     visible: boolean;
+    imageUrl?: string | null;
 }
 
 export interface Assignment extends BaseEntity {

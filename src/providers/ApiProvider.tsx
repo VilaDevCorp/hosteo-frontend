@@ -9,7 +9,7 @@ import {
     SchedulerInfo,
     User
 } from '../types/entities';
-import { ApiResponse } from '../types/types';
+import { ApiError, ApiResponse } from '../types/types';
 import { checkResponseException } from '../utils/utilFunctions';
 import { FailedImportedEventUpdateForm, RegisterUserForm } from '../types/forms';
 import { AssignmentState, EventState, ImportSource } from '../types/enums';
@@ -43,6 +43,11 @@ export interface ApiContext {
     getAlertsInfo: () => Promise<AlertsInfo>;
     hide: (entity: string, id: string) => Promise<void>;
     unhide: (entity: string, id: string) => Promise<void>;
+    updateImage: (
+        entity: 'apartment' | 'worker',
+        id: string,
+        file?: File | null
+    ) => Promise<void>;
     importReservations: (
         file: File,
         source: ImportSource
@@ -237,6 +242,38 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         checkResponseException(res, resObject);
     };
 
+    // Passing no file deletes the image (the API treats it as an idempotent delete).
+    const updateImage = async (
+        entity: 'apartment' | 'worker',
+        id: string,
+        file?: File | null
+    ): Promise<void> => {
+        const url = `${apiUrl}${entity}/${id}/image`;
+        const options: RequestInit = {
+            method: 'PUT'
+        };
+        if (file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            options.body = formData;
+        }
+        const res = await fetchWithAuth(url, options);
+        if (res.ok) {
+            return;
+        }
+        let resObject: ApiResponse<unknown> | undefined;
+        try {
+            resObject = await res.json();
+        } catch {
+            resObject = undefined;
+        }
+        throw new ApiError({
+            statusCode: res.status,
+            message: resObject?.errorMessage ?? '',
+            code: resObject?.errorCode
+        });
+    };
+
     const importReservations = async (
         file: File,
         source: ImportSource
@@ -330,6 +367,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         getAlertsInfo,
         hide,
         unhide,
+        updateImage,
         importReservations,
         getFailedImportedEvents,
         updateFailedImportedEvent,

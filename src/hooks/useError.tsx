@@ -46,6 +46,12 @@ export const useError = () => {
                 case StatusCode.ClientErrorConflict:
                     showNotificationError(error.message);
                     return;
+                case StatusCode.ClientErrorPayloadTooLarge:
+                    showNotificationError('File is too large (max 5 MB)');
+                    return;
+                case StatusCode.ClientErrorUnsupportedMediaType:
+                    showNotificationError('Use a PNG or JPEG image');
+                    return;
             }
         }
         showNotificationError('An internal error occurred');

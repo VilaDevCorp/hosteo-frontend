@@ -99,10 +99,18 @@ Here is the step-by-step routine you will use most often.
 ### A. One-time setup
 
 1. **Add your apartments** (name, address, and optionally the Airbnb/Booking IDs).
+   You can also add a **photo** — a PNG or JPEG file of up to 5 MB — which is
+   displayed on the apartment card.
 2. For each apartment, **add its tasks** — at minimum the **mandatory** ones
    (for example "Full clean"). You can add extra tasks and step-by-step
    checklists too.
-3. **Add your workers** (name and language).
+3. **Add your workers** (name and language). You can also add a **photo**,
+   shown on the worker card.
+
+> **Photos:** the image controls are at the top of the apartment and worker
+> forms. Use **Add image** to choose a PNG or JPEG (maximum 5 MB),
+> **Change image** to replace it, or **Remove image** to delete it. The change
+> is applied when you click **Create** / **Update**.
 
 ### B. For each guest stay
 

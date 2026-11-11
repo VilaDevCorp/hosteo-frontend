@@ -7,6 +7,17 @@ export function ApartmentFormSkeleton() {
 
     return (
         <div>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start'
+                }}
+            >
+                <Skeleton height={120} width={'10rem'} mb="1rem" radius="md" />
+                <Skeleton height={36} width={'10rem'} mb="1rem" radius="md" />
+            </div>
+
             <div style={{ display: 'flex', gap: '1rem' }}>
                 <Skeleton height={36} width="100%" mb="1rem" radius="md" />
                 <Skeleton height={36} width="8rem" mb="1rem" radius="md" />

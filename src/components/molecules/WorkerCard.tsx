@@ -1,8 +1,9 @@
 import { Worker } from '../../types/entities';
-import { Card, Image, Text, Title } from '@mantine/core';
+import { Card, Text, Title } from '@mantine/core';
 import styles from '../styles/DataTable.module.css';
 import { CardControls } from '../atoms/CardControls';
 import { Flag } from '../atoms/Flag';
+import { EntityImage } from '../atoms/EntityImage';
 
 export function WorkerCard({
     item,
@@ -26,9 +27,12 @@ export function WorkerCard({
             onClick={onClick && (() => onClick(item.id))}
         >
             <Card.Section p={'1rem'}>
-                <Image
-                    src="/user_placeholder.svg"
+                <EntityImage
+                    src={item.imageUrl}
+                    placeholder="/user_placeholder.svg"
                     w={'10rem'}
+                    h={'10rem'}
+                    fit="cover"
                     alt="Worker picture"
                 />
             </Card.Section>

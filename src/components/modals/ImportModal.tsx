@@ -32,11 +32,12 @@ export function ImportModal({
         queryClient.invalidateQueries({ queryKey: ['apartments'] });
         queryClient.invalidateQueries({ queryKey: ['apartment'] });
         queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });
+        queryClient.invalidateQueries({ queryKey: ['failedImportedEvents'] });
+        queryClient.invalidateQueries({ queryKey: ['importedEvents'] });
     };
 
     const onImported = (nSuccessItems: number) => {
         invalidateQueries();
-        queryClient.invalidateQueries({ queryKey: ['importedEvents'] });
         onClose();
         onOpenIssuesModal(nSuccessItems);
     };
@@ -46,7 +47,7 @@ export function ImportModal({
             throw new Error('Source and file must be provided');
         }
         const result = await importReservations(file, source);
-        console.log(result)
+        console.log(result);
         return result.successCount;
     };
 

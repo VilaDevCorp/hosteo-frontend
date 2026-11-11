@@ -1,9 +1,10 @@
 import { Apartment } from '../../types/entities';
-import { Card, Image, Text, Title } from '@mantine/core';
+import { Card, Text, Title } from '@mantine/core';
 import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
 import { addressToString } from '../../utils/utilFunctions';
 import styles from '../styles/DataTable.module.css';
 import { CardControls } from '../atoms/CardControls';
+import { EntityImage } from '../atoms/EntityImage';
 
 export function ApartmentCard({
     item,
@@ -27,9 +28,12 @@ export function ApartmentCard({
             onClick={onClick && (() => onClick(item.id))}
         >
             <Card.Section>
-                <Image
-                    src="/apartment_placeholder.svg"
-                    height={160}
+                <EntityImage
+                    src={item.imageUrl}
+                    placeholder="/apartment_placeholder.svg"
+                    h={160}
+                    w={'100%'}
+                    fit="cover"
                     alt="Apartment picture"
                 />
             </Card.Section>

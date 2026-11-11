@@ -3,8 +3,8 @@ import { Card, Skeleton } from '@mantine/core';
 export function WorkerCardSkeleton() {
     return (
         <Card w={'100%'} miw={'15rem'} h={'18rem'}>
-            <Card.Section>
-                <Skeleton height={160} />
+            <Card.Section p={'1rem'}>
+                <Skeleton height={160} width={160} radius="md" />
             </Card.Section>
             <Card.Section
                 style={{
