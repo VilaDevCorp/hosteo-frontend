@@ -56,7 +56,13 @@ export function WorkerForm({
         if (!image.dirty) {
             return;
         }
-        await updateImage('worker', id, image.file);
+        try {
+            await updateImage('worker', id, image.file);
+        } catch (e) {
+            // The worker is already saved, so keep the flow going and just
+            // report the image problem instead of inviting a duplicate create.
+            handleError(e);
+        }
     };
 
     const createWorker = async () => {
