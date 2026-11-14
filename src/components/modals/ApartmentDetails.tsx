@@ -41,7 +41,7 @@ export function ApartmentDetails({
                     w={'12rem'}
                     radius="md"
                     style={{
-                        objectFit: 'contain',
+                        objectFit: 'fill',
                         objectPosition: isTablet ? 'left' : 'center'
                     }}
                     alt="Apartment picture"
