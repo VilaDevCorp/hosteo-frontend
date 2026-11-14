@@ -37,6 +37,7 @@ export function ProfileModal({ opened, onClose }: ImportModalProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['getUserInfo'] });
                 showNotificationSuccess('Profile updated');
+                onClose();
             },
             onError: handleError
         });
