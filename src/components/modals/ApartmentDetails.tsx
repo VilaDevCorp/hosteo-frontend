@@ -1,10 +1,11 @@
-import { Divider, Image, Text } from '@mantine/core';
+import { Divider, Text } from '@mantine/core';
 import { ApartmentWithTasks } from '../../types/entities';
 import { addressToString } from '../../utils/utilFunctions';
 import { PlatformIcon } from '../atoms/PlatformIcon';
 import { useScreen } from '../../hooks/useScreen';
 import { TaskOrTemplateCard } from '../molecules/TaskOrTemplateCard';
 import { useTaskOrTemplateDetailsModal } from '../organism/TaskOrTemplateDetailsModal';
+import { Img } from '../atoms/Img';
 
 export function ApartmentDetails({
     entity: apartment
@@ -33,9 +34,10 @@ export function ApartmentDetails({
                     flexDirection: isTablet ? 'row' : 'column'
                 }}
             >
-                <Image
-                    src="/apartment_placeholder.svg"
-                    height={120}
+                <Img
+                    src={apartment?.imageUrl}
+                    placeholder="/apartment_placeholder.svg"
+                    h={120}
                     style={{
                         objectFit: 'contain',
                         objectPosition: isTablet ? 'left' : 'center'

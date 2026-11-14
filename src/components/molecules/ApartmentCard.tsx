@@ -4,7 +4,7 @@ import { ApartmentStateBadge } from '../atoms/ApartmentStateBadge';
 import { addressToString } from '../../utils/utilFunctions';
 import styles from '../styles/DataTable.module.css';
 import { CardControls } from '../atoms/CardControls';
-import { EntityImage } from '../atoms/EntityImage';
+import { Img } from '../atoms/Img';
 
 export function ApartmentCard({
     item,
@@ -28,7 +28,7 @@ export function ApartmentCard({
             onClick={onClick && (() => onClick(item.id))}
         >
             <Card.Section>
-                <EntityImage
+                <Img
                     src={item.imageUrl}
                     placeholder="/apartment_placeholder.svg"
                     h={160}

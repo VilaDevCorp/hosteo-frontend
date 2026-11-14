@@ -7,7 +7,7 @@ import {
     IMAGE_HINT,
     validateImageFile
 } from '../../utils/imageUtils';
-import { EntityImage } from '../atoms/EntityImage';
+import { Img } from '../atoms/Img';
 
 export function EntityImageInput({
     image,
@@ -46,12 +46,15 @@ export function EntityImageInput({
                 {label}
             </Text>
             <Group align="flex-start" gap={'1rem'} wrap="nowrap">
-                <EntityImage
+                <Img
                     src={image.previewSrc}
                     placeholder={placeholderSrc}
                     alt={alt}
+                    
+                    
                     w={'10rem'}
                     h={'7.5rem'}
+                    
                     fit="cover"
                     radius="md"
                 />

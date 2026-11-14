@@ -68,7 +68,7 @@ export function SchedulerEventCard({
                 style={{
                     position: 'relative',
                     height: '36px',
-                    backgroundImage: 'url(apartment_placeholder.svg)',
+                    backgroundImage: `url(${item.apartmentImageUrl ?? '/apartment_placeholder.svg'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}

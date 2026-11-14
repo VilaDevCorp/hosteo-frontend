@@ -53,7 +53,7 @@ export function SchedulerAssignmentCard({
                 style={{
                     position: 'relative',
                     minHeight: '36px',
-                    backgroundImage: 'url(apartment_placeholder.svg)',
+                    backgroundImage: `url(${item.task.apartment.imageUrl ?? '/apartment_placeholder.svg'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}

@@ -146,6 +146,7 @@ export interface EventSchedulerDto {
     endDate: number;
     name: string;
     apartmentName: string;
+    apartmentImageUrl?: string;
     source: EventSource;
     nMandatoryAssignedTasks: number;
     nExtraAssignedTasks: number;

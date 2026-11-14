@@ -1,6 +1,7 @@
 import { Card, Image, Title } from '@mantine/core';
 import { Apartment } from '../../types/entities';
 import styles from '../styles/DataTable.module.css';
+import { Img } from '../atoms/Img';
 
 export function ApartmentSimpleCard({
     item,
@@ -19,9 +20,10 @@ export function ApartmentSimpleCard({
             padding="0"
         >
             <Card.Section>
-                <Image
-                    src="/apartment_placeholder.svg"
-                    height={140}
+                <Img
+                    src={item.imageUrl}
+                    placeholder="/apartment_placeholder.svg"
+                    h={140}
                     alt={item.name}
                 />
             </Card.Section>

@@ -17,6 +17,7 @@ import { showNotificationSuccess } from '../../utils/notifUtils';
 import { useAssignmentSchedulerWithContext } from '../../hooks/useAssignmentSchedulerWithContext';
 import { useMutation } from '@tanstack/react-query';
 import { useError } from '../../hooks/useError';
+import { Img } from '../atoms/Img';
 
 export function EventDetails({
     entity: event
@@ -79,9 +80,10 @@ export function EventDetails({
                     flexDirection: isTablet ? 'row' : 'column'
                 }}
             >
-                <Image
-                    src="/apartment_placeholder.svg"
-                    height={120}
+                <Img
+                    src={event.apartment.imageUrl}
+                    placeholder="/apartment_placeholder.svg"
+                    h={120}
                     style={{
                         objectFit: 'contain',
                         objectPosition: isTablet ? 'left' : 'center'

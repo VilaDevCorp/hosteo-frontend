@@ -4,6 +4,7 @@ import { Flag } from '../atoms/Flag';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
 import { useState } from 'react';
 import { IconEdit } from '@tabler/icons-react';
+import { Img } from '../atoms/Img';
 
 export function WorkerSelector({
     worker,
@@ -42,8 +43,9 @@ export function WorkerSelector({
                             width: '100%'
                         }}
                     >
-                        <Image
-                            src="/user_placeholder.svg"
+                        <Img
+                            src={worker?.imageUrl}
+                            placeholder="/user_placeholder.svg"
                             w={'10rem'}
                             opacity={worker ? 1 : 0.2}
                             alt="Worker picture"
