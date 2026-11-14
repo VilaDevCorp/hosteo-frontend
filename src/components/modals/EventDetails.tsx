@@ -85,7 +85,7 @@ export function EventDetails({
                     placeholder="/apartment_placeholder.svg"
                     h={120}
                     style={{
-                        objectFit: 'contain',
+                        objectFit: 'fill',
                         objectPosition: isTablet ? 'left' : 'center'
                     }}
                     alt="Apartment picture"
