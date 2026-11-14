@@ -34,6 +34,7 @@ export interface User extends BaseEntity {
     username: string;
     email: string;
     validated: boolean;
+    imageUrl?: string | null;
 }
 
 export interface Conflict {

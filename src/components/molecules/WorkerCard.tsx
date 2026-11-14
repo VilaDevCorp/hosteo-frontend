@@ -30,8 +30,9 @@ export function WorkerCard({
                 <Img
                     src={item.imageUrl}
                     placeholder="/user_placeholder.svg"
-                    w={'10rem'}
-                    h={'10rem'}
+                    w={'7.5rem'}
+                    h={'7.5rem'}
+                    radius={'50%'}
                     fit="cover"
                     alt="Worker picture"
                 />

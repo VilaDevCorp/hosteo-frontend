@@ -57,7 +57,7 @@ export function WorkerForm({
             return;
         }
         try {
-            await updateImage('worker', id, image.file);
+            await updateImage('worker', image.file, id);
         } catch (e) {
             // The worker is already saved, so keep the flow going and just
             // report the image problem instead of inviting a duplicate create.
@@ -133,6 +133,7 @@ export function WorkerForm({
                     placeholderSrc="/user_placeholder.svg"
                     alt="Worker picture"
                     disabled={isLoadingCreate || isLoadingUpdate}
+                    rounded
                 />
             </div>
             <TextInput

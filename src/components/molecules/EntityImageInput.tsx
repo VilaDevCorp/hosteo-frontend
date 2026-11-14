@@ -14,13 +14,15 @@ export function EntityImageInput({
     placeholderSrc,
     alt,
     label = 'Image',
-    disabled
+    disabled,
+    rounded
 }: {
     image: EntityImageController;
     placeholderSrc: string;
     alt: string;
     label?: string;
     disabled?: boolean;
+    rounded?: boolean;
 }) {
     const [error, setError] = useState<string | undefined>(undefined);
 
@@ -45,18 +47,15 @@ export function EntityImageInput({
             <Text size="sm" fw={500}>
                 {label}
             </Text>
-            <Group align="flex-start" gap={'1rem'} wrap="nowrap">
+            <Group align="center" gap={'2rem'} wrap="nowrap">
                 <Img
                     src={image.previewSrc}
                     placeholder={placeholderSrc}
                     alt={alt}
-                    
-                    
-                    w={'10rem'}
-                    h={'7.5rem'}
-                    
+                    radius={rounded ? '50%' : 'md'}
+                    w={'7.5rem'}
+                    h={rounded ? '7.5rem' : '5rem'}
                     fit="cover"
-                    radius="md"
                 />
                 <Stack gap={'0.5rem'} align="flex-start">
                     <FileButton

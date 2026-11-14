@@ -1,14 +1,21 @@
 import {
     IconBed,
     IconCalendarWeek,
+    IconEdit,
     IconHome,
+    IconLogout,
     IconTemplate,
     IconUsers
 } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './SideNav.module.css';
 import logo from '/logo_icon.svg';
-import { Tooltip } from '@mantine/core';
+import { Menu, Tooltip } from '@mantine/core';
+import { Img } from '../../atoms/Img';
+import { Button } from '@mantine/core';
+import { useAuth } from '../../../hooks/useAuth';
+import { ProfileModal } from '../../modals/ProfileModal';
+import { useState } from 'react';
 
 const navItems = [
     {
@@ -41,6 +48,9 @@ const navItems = [
 export function SideNav() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
+
+    const [profileModalOpened, setProfileModalOpened] = useState(false);
 
     return (
         <nav className={styles.sideNav}>
@@ -73,6 +83,50 @@ export function SideNav() {
                     </Tooltip>
                 ))}
             </ul>
+            <Menu position="right-start" withArrow>
+                <Menu.Target>
+                    <Button
+                        variant="transparent"
+                        p={0}
+                        w={'3rem'}
+                        h={'3rem'}
+                        radius={'50%'}
+                        className={styles.profileButton}
+                    >
+                        <Img
+                            src={useAuth().user?.imageUrl}
+                            placeholder="/user_placeholder.svg"
+                            alt="User profile"
+                            w={'3rem'}
+                            h={'3rem'}
+                            radius={'50%'}
+                            fit="cover"
+                        />
+                    </Button>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                    <Menu.Item
+                        leftSection={<IconEdit size={16} />}
+                        onClick={() => setProfileModalOpened(true)}
+                    >
+                        Profile
+                    </Menu.Item>
+                    <Menu.Item
+                        className={styles.logoutButton}
+                        leftSection={<IconLogout size={16} />}
+                        onClick={() => {
+                            logout();
+                        }}
+                    >
+                        Logout
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>
+            <ProfileModal
+                opened={profileModalOpened}
+                onClose={() => setProfileModalOpened(false)}
+            />
         </nav>
     );
 }

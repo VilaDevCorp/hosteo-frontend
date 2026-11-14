@@ -11,7 +11,10 @@ import {
 } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { checkResponseException } from '../utils/utilFunctions';
-import { FailedImportedEventUpdateForm, RegisterUserForm } from '../types/forms';
+import {
+    FailedImportedEventUpdateForm,
+    RegisterUserForm
+} from '../types/forms';
 import { AssignmentState, EventState, ImportSource } from '../types/enums';
 import { useAuth } from '../hooks/useAuth';
 import dayjs from 'dayjs';
@@ -44,9 +47,9 @@ export interface ApiContext {
     hide: (entity: string, id: string) => Promise<void>;
     unhide: (entity: string, id: string) => Promise<void>;
     updateImage: (
-        entity: 'apartment' | 'worker',
-        id: string,
-        file?: File | null
+        entity: 'apartment' | 'worker' | 'self',
+        file?: File | null,
+        id?: string
     ) => Promise<void>;
     importReservations: (
         file: File,
@@ -123,8 +126,9 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<BulkOperationResponse<EventOperationError>> =
-            await res.json();
+        const resObject: ApiResponse<
+            BulkOperationResponse<EventOperationError>
+        > = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
@@ -141,8 +145,9 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
             })
         };
         const res = await fetchWithAuth(url, options);
-        const resObject: ApiResponse<BulkOperationResponse<EventOperationError>> =
-            await res.json();
+        const resObject: ApiResponse<
+            BulkOperationResponse<EventOperationError>
+        > = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
@@ -244,11 +249,11 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
 
     // Passing no file deletes the image (the API treats it as an idempotent delete).
     const updateImage = async (
-        entity: 'apartment' | 'worker',
-        id: string,
-        file?: File | null
+        entity: 'apartment' | 'worker' | 'self',
+        file?: File | null,
+        id?: string
     ): Promise<void> => {
-        const url = `${apiUrl}${entity}/${id}/image`;
+        const url = `${apiUrl}${entity}${id ? `/${id}` : ''}/image`;
         const options: RequestInit = {
             method: 'PUT'
         };
@@ -292,7 +297,9 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         return resObject.data;
     };
 
-    const getFailedImportedEvents = async (): Promise<FailedImportedEvent[]> => {
+    const getFailedImportedEvents = async (): Promise<
+        FailedImportedEvent[]
+    > => {
         const url = `${apiUrl}imported-events`;
         const options: RequestInit = {
             method: 'GET',

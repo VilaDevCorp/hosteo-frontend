@@ -30,14 +30,16 @@ export function ApartmentDetails({
             <div
                 style={{
                     display: 'flex',
-                    gap: '1rem',
+                    gap: '2rem',
                     flexDirection: isTablet ? 'row' : 'column'
                 }}
             >
                 <Img
                     src={apartment?.imageUrl}
                     placeholder="/apartment_placeholder.svg"
-                    h={120}
+                    h={'7.5rem'}
+                    w={'12rem'}
+                    radius="md"
                     style={{
                         objectFit: 'contain',
                         objectPosition: isTablet ? 'left' : 'center'
