@@ -1,4 +1,4 @@
-import { Divider, Image, Text, useMantineTheme } from '@mantine/core';
+import { Divider, Text, useMantineTheme } from '@mantine/core';
 import {
     eventToEventForAssignment,
     EventWithAssignments

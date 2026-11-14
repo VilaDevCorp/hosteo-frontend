@@ -1,7 +1,6 @@
 import {
     Button,
     Card,
-    Image,
     Text,
     Title,
     useMantineTheme

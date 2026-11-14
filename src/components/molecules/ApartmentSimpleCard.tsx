@@ -1,4 +1,4 @@
-import { Card, Image, Title } from '@mantine/core';
+import { Card, Title } from '@mantine/core';
 import { Apartment } from '../../types/entities';
 import styles from '../styles/DataTable.module.css';
 import { Img } from '../atoms/Img';

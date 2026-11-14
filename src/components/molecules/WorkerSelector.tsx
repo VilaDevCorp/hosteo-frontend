@@ -1,5 +1,5 @@
 import { Worker } from '../../types/entities';
-import { ActionIcon, Button, Image, Text, Title } from '@mantine/core';
+import { ActionIcon, Button, Text, Title } from '@mantine/core';
 import { Flag } from '../atoms/Flag';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
 import { useState } from 'react';
