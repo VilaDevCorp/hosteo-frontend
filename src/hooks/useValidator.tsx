@@ -22,6 +22,20 @@ export function authCodeValidator(value: string): string {
     return /^[0-9]{6}$/.test(value) ? '' : 'The code is not valid';
 }
 
+export function positiveNumberValidator(input: string): string {
+    const value = Number(input);
+    return input.trim() !== '' && !Number.isNaN(value) && value > 0
+        ? ''
+        : 'The amount must be a positive number';
+}
+
+export function nonNegativeNumberValidator(input: string): string {
+    const value = Number(input);
+    return input.trim() !== '' && !Number.isNaN(value) && value >= 0
+        ? ''
+        : 'The value must be zero or a positive number';
+}
+
 export function upperLowerCaseValidator(input: string): string {
     return /(?=.*[A-Z])(?=.*[a-z]).*/.test(input)
         ? ''

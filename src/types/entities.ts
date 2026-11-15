@@ -61,6 +61,7 @@ export interface Task extends BaseEntity {
     type: TaskType;
     steps: string[];
     visible: boolean;
+    cost: number;
 }
 
 export interface TaskWithApartment extends BaseEntity {
@@ -71,6 +72,7 @@ export interface TaskWithApartment extends BaseEntity {
     steps: string[];
     apartment: Apartment;
     visible: boolean;
+    cost: number;
 }
 
 export interface Template extends BaseEntity {
@@ -90,6 +92,17 @@ export interface Worker extends BaseEntity {
     language: Language;
     visible: boolean;
     imageUrl?: string | null;
+}
+
+export interface Transaction extends BaseEntity {
+    worker: Worker;
+    amount: number;
+    assignment?: Assignment;
+}
+
+export interface BalanceDto {
+    worker: Worker;
+    balance: number;
 }
 
 export interface Assignment extends BaseEntity {

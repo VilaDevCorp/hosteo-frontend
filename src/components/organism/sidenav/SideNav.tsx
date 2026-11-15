@@ -1,6 +1,7 @@
 import {
     IconBed,
     IconCalendarWeek,
+    IconCash,
     IconHome,
     IconTemplate,
     IconUsers
@@ -35,6 +36,11 @@ const navItems = [
         icon: <IconTemplate size={26} stroke={2.25} />,
         path: '/templates',
         tooltip: 'Templates'
+    },
+    {
+        icon: <IconCash size={26} stroke={2.25} />,
+        path: '/finances',
+        tooltip: 'Finances'
     }
 ];
 

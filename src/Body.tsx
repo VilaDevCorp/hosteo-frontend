@@ -40,6 +40,12 @@ const LazySchedulerScreen = lazy(() =>
     }))
 );
 
+const LazyFinancesScreen = lazy(() =>
+    import('./screens/FinancesScreen').then((module) => ({
+        default: module.FinancesScreen
+    }))
+);
+
 function Body() {
     const authInfo = useAuth();
 
@@ -101,6 +107,14 @@ function Body() {
                         element={
                             <Suspense fallback={<LoadingScreen />}>
                                 <LazyTemplatesScreen />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="/finances"
+                        element={
+                            <Suspense fallback={<LoadingScreen />}>
+                                <LazyFinancesScreen />
                             </Suspense>
                         }
                     />
