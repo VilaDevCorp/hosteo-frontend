@@ -69,6 +69,7 @@ export function SchedulerActions({
     );
 
     const invalidateQueries = () => {
+        console.log('invalidating queries');
         queryClient.invalidateQueries({ queryKey: ['events'] });
         queryClient.invalidateQueries({ queryKey: ['event'] });
         queryClient.invalidateQueries({ queryKey: ['schedulerInfo'] });

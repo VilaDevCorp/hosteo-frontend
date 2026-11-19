@@ -120,7 +120,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         queryKey: ['getUserInfo'],
         queryFn: self,
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
         refetchOnReconnect: false,
         retry: false
     });

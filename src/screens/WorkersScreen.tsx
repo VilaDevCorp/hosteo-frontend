@@ -45,7 +45,6 @@ export function WorkersScreen() {
                 visible: !showHidden
             }),
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
         refetchOnReconnect: false,
         retry: false
     });

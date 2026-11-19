@@ -49,7 +49,6 @@ export function TemplatesScreen() {
                 name: debouncedNameSearch
             }),
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
         refetchOnReconnect: false,
         retry: false
     });

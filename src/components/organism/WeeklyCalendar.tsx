@@ -67,7 +67,6 @@ export function WeeklyCalendar(props: WeeklyCalendarProps) {
             return await searchSchedulerData(startOfWeek);
         },
         refetchOnWindowFocus: true,
-        refetchOnMount: true,
         refetchOnReconnect: false,
         retry: false,
         enabled: !!startOfWeek

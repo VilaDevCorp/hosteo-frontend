@@ -97,7 +97,6 @@ export function EventsScreen() {
                 frozen: showHidden
             }),
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
         refetchOnReconnect: false,
         retry: false
     });
