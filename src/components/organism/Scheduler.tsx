@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Badge, Button } from '@mantine/core';
-import { IconUpload } from '@tabler/icons-react';
+import { IconFileText, IconUpload } from '@tabler/icons-react';
 
-import { Event, FailedImportedEvent } from '../../types/entities';
+import {
+    Event,
+    FailedImportedEvent,
+    WorkerInstructions
+} from '../../types/entities';
 import { getStartOfWeek } from '../../utils/utilFunctions';
 import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
 import { AlertsIndicator } from '../atoms/AlertsIndicator';
@@ -12,6 +16,8 @@ import { SchedulerActions } from '../molecules/SchedulerActions';
 import { EventForm } from '../modals/EventForm';
 import { ImportModal } from '../modals/ImportModal';
 import { ImportIssuesModal } from '../modals/ImportIssuesModal';
+import { GenerateInstructionsModal } from '../modals/GenerateInstructionsModal';
+import { WorkerInstructionsModal } from '../modals/WorkerInstructionsModal';
 import { useEntityModal } from '../../hooks/useEntityModal';
 import { EventFormSkeleton } from '../skeletons/EventFormSkeleton';
 import { useCrud } from '../../hooks/useCrud';
@@ -40,6 +46,19 @@ export function Scheduler() {
     const [openedDrawer, setOpenedDrawer] = useState<boolean>(false);
     const [importModalOpened, setImportModalOpened] = useState<boolean>(false);
     const [issuesModalOpened, setIssuesModalOpened] = useState<boolean>(false);
+    const [generateInstructionsOpened, setGenerateInstructionsOpened] =
+        useState<boolean>(false);
+    const [instructionsModalOpened, setInstructionsModalOpened] =
+        useState<boolean>(false);
+    const [workerInstructions, setWorkerInstructions] = useState<
+        WorkerInstructions[]
+    >([]);
+
+    const onInstructionsGenerated = (instructions: WorkerInstructions[]) => {
+        setWorkerInstructions(instructions);
+        setGenerateInstructionsOpened(false);
+        setInstructionsModalOpened(true);
+    };
 
     const { onUpdateAssignment } = useAssignmentSchedulerWithContext();
 
@@ -208,6 +227,13 @@ export function Scheduler() {
                                 Pending Issues ({failedImportedEvents.length})
                             </Badge>
                         )}
+                    <Button
+                        variant="filled"
+                        leftSection={<IconFileText size={18} />}
+                        onClick={() => setGenerateInstructionsOpened(true)}
+                    >
+                        Generate Instructions
+                    </Button>
                     <AlertsIndicator onClick={() => setOpenedDrawer(true)} />
                 </div>
             </div>
@@ -236,6 +262,16 @@ export function Scheduler() {
                 opened={issuesModalOpened}
                 onClose={() => setIssuesModalOpened(false)}
                 nSuccessItems={nSuccessItems}
+            />
+            <GenerateInstructionsModal
+                opened={generateInstructionsOpened}
+                onClose={() => setGenerateInstructionsOpened(false)}
+                onGenerated={onInstructionsGenerated}
+            />
+            <WorkerInstructionsModal
+                opened={instructionsModalOpened}
+                onClose={() => setInstructionsModalOpened(false)}
+                workerInstructions={workerInstructions}
             />
         </>
     );
