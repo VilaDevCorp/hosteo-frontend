@@ -1,23 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Badge, Button } from '@mantine/core';
-import { IconFileText, IconUpload } from '@tabler/icons-react';
 
-import {
-    Event,
-    FailedImportedEvent,
-    WorkerInstructions
-} from '../../types/entities';
+import { Event } from '../../types/entities';
 import { getStartOfWeek } from '../../utils/utilFunctions';
-import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
-import { AlertsIndicator } from '../atoms/AlertsIndicator';
 import { AlertsDrawer } from './AlertsDrawer';
-import { SchedulerActions } from '../molecules/SchedulerActions';
 import { EventForm } from '../modals/EventForm';
-import { ImportModal } from '../modals/ImportModal';
-import { ImportIssuesModal } from '../modals/ImportIssuesModal';
-import { GenerateInstructionsModal } from '../modals/GenerateInstructionsModal';
-import { WorkerInstructionsModal } from '../modals/WorkerInstructionsModal';
 import { useEntityModal } from '../../hooks/useEntityModal';
 import { EventFormSkeleton } from '../skeletons/EventFormSkeleton';
 import { useCrud } from '../../hooks/useCrud';
@@ -26,7 +13,7 @@ import { useConfirmModalWithContext } from '../../hooks/useConfirmModalWithConte
 import { WeeklyCalendar } from './WeeklyCalendar';
 import { useAssignmentSchedulerWithContext } from '../../hooks/useAssignmentSchedulerWithContext';
 import { useError } from '../../hooks/useError';
-import { useApi } from '../../hooks/useApi';
+import { SchedulerTopBar } from '../molecules/SchedulerTopBar';
 
 export function Scheduler() {
     const [startOfWeek, setStartOfWeek] = useState<string>(
@@ -44,21 +31,6 @@ export function Scheduler() {
         });
 
     const [openedDrawer, setOpenedDrawer] = useState<boolean>(false);
-    const [importModalOpened, setImportModalOpened] = useState<boolean>(false);
-    const [issuesModalOpened, setIssuesModalOpened] = useState<boolean>(false);
-    const [generateInstructionsOpened, setGenerateInstructionsOpened] =
-        useState<boolean>(false);
-    const [instructionsModalOpened, setInstructionsModalOpened] =
-        useState<boolean>(false);
-    const [workerInstructions, setWorkerInstructions] = useState<
-        WorkerInstructions[]
-    >([]);
-
-    const onInstructionsGenerated = (instructions: WorkerInstructions[]) => {
-        setWorkerInstructions(instructions);
-        setGenerateInstructionsOpened(false);
-        setInstructionsModalOpened(true);
-    };
 
     const { onUpdateAssignment } = useAssignmentSchedulerWithContext();
 
@@ -68,15 +40,6 @@ export function Scheduler() {
     const [selectedAssignmentIds, setSelectedAssignmentIds] = useState<
         Set<string>
     >(new Set());
-
-    const [nSuccessItems, setNSuccessItems] = useState<number | undefined>(
-        undefined
-    );
-
-    const onOpenIssuesModal = (nSuccessItems: number) => {
-        setNSuccessItems(nSuccessItems);
-        setIssuesModalOpened(true);
-    };
 
     const onSelectEvent = (eventId: string) => {
         if (selectedAssignmentIds.size > 0) {
@@ -122,13 +85,6 @@ export function Scheduler() {
     const queryClient = useQueryClient();
 
     const { handleError } = useError();
-
-    const { getFailedImportedEvents } = useApi();
-
-    const { data: failedImportedEvents } = useQuery<FailedImportedEvent[]>({
-        queryKey: ['failedImportedEvents'],
-        queryFn: getFailedImportedEvents
-    });
 
     const deleteEvent = async (id: string) => {
         await removeEvent(id);
@@ -184,59 +140,15 @@ export function Scheduler() {
 
     return (
         <>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}
-            >
-                <SchedulerDatePicker
-                    date={startOfWeek}
-                    setDate={setStartOfWeek}
-                />
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '3rem',
-                        alignItems: 'center'
-                    }}
-                >
-                    <SchedulerActions
-                        selectedEventIds={selectedEventIds}
-                        setSelectedEventIds={setSelectedEventIds}
-                        selectedAssignmentIds={selectedAssignmentIds}
-                        setSelectedAssignmentIds={setSelectedAssignmentIds}
-                    />
-                    <Button
-                        variant="filled"
-                        leftSection={<IconUpload size={18} />}
-                        onClick={() => setImportModalOpened(true)}
-                    >
-                        Import Reservations
-                    </Button>
-                    {failedImportedEvents?.length &&
-                        failedImportedEvents.length > 0 && (
-                            <Badge
-                                variant="filled"
-                                color="warning"
-                                size="lg"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => setIssuesModalOpened(true)}
-                            >
-                                Pending Issues ({failedImportedEvents.length})
-                            </Badge>
-                        )}
-                    <Button
-                        variant="filled"
-                        leftSection={<IconFileText size={18} />}
-                        onClick={() => setGenerateInstructionsOpened(true)}
-                    >
-                        Generate Instructions
-                    </Button>
-                    <AlertsIndicator onClick={() => setOpenedDrawer(true)} />
-                </div>
-            </div>
+            <SchedulerTopBar
+                startOfWeek={startOfWeek}
+                setStartOfWeek={setStartOfWeek}
+                selectedEventIds={selectedEventIds}
+                setSelectedEventIds={setSelectedEventIds}
+                selectedAssignmentIds={selectedAssignmentIds}
+                setSelectedAssignmentIds={setSelectedAssignmentIds}
+                setOpenedDrawer={setOpenedDrawer}
+            />
             <WeeklyCalendar
                 startOfWeek={startOfWeek}
                 selectedEventIds={selectedEventIds}
@@ -253,26 +165,6 @@ export function Scheduler() {
                 onClose={() => setOpenedDrawer(false)}
             />
             {eventFormModal}
-            <ImportModal
-                opened={importModalOpened}
-                onClose={() => setImportModalOpened(false)}
-                onOpenIssuesModal={onOpenIssuesModal}
-            />
-            <ImportIssuesModal
-                opened={issuesModalOpened}
-                onClose={() => setIssuesModalOpened(false)}
-                nSuccessItems={nSuccessItems}
-            />
-            <GenerateInstructionsModal
-                opened={generateInstructionsOpened}
-                onClose={() => setGenerateInstructionsOpened(false)}
-                onGenerated={onInstructionsGenerated}
-            />
-            <WorkerInstructionsModal
-                opened={instructionsModalOpened}
-                onClose={() => setInstructionsModalOpened(false)}
-                workerInstructions={workerInstructions}
-            />
         </>
     );
 }
