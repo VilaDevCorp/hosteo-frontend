@@ -1,7 +1,6 @@
 import {
     Button,
     Card,
-    Image,
     Text,
     Title,
     useMantineTheme
@@ -13,6 +12,7 @@ import { useScreen } from '../../hooks/useScreen';
 import dayjs from 'dayjs';
 import { conf } from '../../../conf';
 import { IconCheck } from '@tabler/icons-react';
+import { Img } from '../atoms/Img';
 
 interface TaskWithAssigmentCardProps {
     task: Task;
@@ -112,8 +112,9 @@ export function TaskWithAssigmentCard({
                             gap: '0.5rem'
                         }}
                     >
-                        <Image
-                            src="/user_placeholder.svg"
+                        <Img
+                            src={assignment.worker.imageUrl}
+                            placeholder="/user_placeholder.svg"
                             w={'2rem'}
                             h={'2rem'}
                             alt="Worker picture"

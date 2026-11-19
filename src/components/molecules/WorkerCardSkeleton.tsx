@@ -4,7 +4,7 @@ export function WorkerCardSkeleton() {
     return (
         <Card w={'100%'} miw={'15rem'} h={'18rem'}>
             <Card.Section p={'1rem'}>
-                <Skeleton height={160} width={160} radius="md" />
+                <Skeleton h={'7.5rem'} w={'7.5rem'} radius="50%" />
             </Card.Section>
             <Card.Section
                 style={{

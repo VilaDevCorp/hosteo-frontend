@@ -1,6 +1,6 @@
 import { Image, ImageProps } from '@mantine/core';
 
-export function EntityImage({
+export function Img({
     src,
     placeholder,
     alt,
@@ -9,7 +9,7 @@ export function EntityImage({
     src?: string | null;
     placeholder: string;
     alt: string;
-} & Omit<ImageProps, 'src' | 'alt'>) {
+} & Omit<ImageProps, 'src' | 'alt' | 'fallbackSrc'>) {
     return (
         <Image
             {...imageProps}

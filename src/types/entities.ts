@@ -34,6 +34,7 @@ export interface User extends BaseEntity {
     username: string;
     email: string;
     validated: boolean;
+    imageUrl?: string | null;
 }
 
 export interface Conflict {
@@ -159,6 +160,7 @@ export interface EventSchedulerDto {
     endDate: number;
     name: string;
     apartmentName: string;
+    apartmentImageUrl?: string;
     source: EventSource;
     nMandatoryAssignedTasks: number;
     nExtraAssignedTasks: number;

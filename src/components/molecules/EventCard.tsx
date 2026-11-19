@@ -33,7 +33,7 @@ export function EventCard({
                 style={{
                     position: 'relative',
                     height: '80px',
-                    backgroundImage: 'url(apartment_placeholder.svg)',
+                    backgroundImage: `url(${item.apartment?.imageUrl ?? '/apartment_placeholder.svg'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}

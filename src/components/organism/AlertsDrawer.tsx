@@ -42,7 +42,7 @@ export function AlertsDrawer({
             size="md"
             position="right"
         >
-            <Accordion>{printAlerts()}</Accordion>
+            <Accordion chevron={null}>{printAlerts()}</Accordion>
         </Drawer>
     );
 }

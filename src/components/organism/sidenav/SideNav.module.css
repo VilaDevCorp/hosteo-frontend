@@ -8,6 +8,7 @@
     padding: 1rem 0;
     background-color: var(--mantine-color-gray-0);
     border-right: 1px solid var(--mantine-color-gray-3);
+    justify-content: space-between;
 }
 
 .sideNav ul {
@@ -36,5 +37,26 @@
 
 .isActive {
     color: var(--mantine-color-primary-5) !important;
-    
+}
+
+.profileButton {
+    cursor: pointer;
+}
+
+.profileButton:hover {
+    filter: brightness(0.8);
+    border: 1px solid var(--mantine-color-gray-5);
+    transition: all 0.2s ease-out;
+}
+
+.logoutButton {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mantine-color-red-5) !important;
+}
+
+.logoutButton:hover {
+    color: var(--mantine-color-red-6) !important;
 }

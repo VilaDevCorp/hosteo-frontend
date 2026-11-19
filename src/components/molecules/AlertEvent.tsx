@@ -56,10 +56,11 @@ export function AlertEvent({
                     style={{
                         position: 'relative',
                         height: '50px',
-                        backgroundImage: 'url(apartment_placeholder.svg)',
+                        borderTopLeftRadius: '0.5rem',
+                        borderTopRightRadius: '0.5rem',
+                        backgroundImage: `url(${event.apartment.imageUrl ?? 'apartment_placeholder.svg'})`,
                         backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        marginRight: '1rem'
+                        backgroundPosition: 'center'
                     }}
                 >
                     <div
@@ -70,6 +71,7 @@ export function AlertEvent({
                             right: 0,
                             bottom: 0,
                             display: 'flex',
+                            padding: '0 .5rem',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
                             backgroundColor: 'rgba(255, 255, 255, 0.8)'
@@ -97,11 +99,20 @@ export function AlertEvent({
                             >
                                 {event.apartment.name ?? ''}
                             </Title>
-                            <Text fw={'bold'} size="0.8rem">
-                                {dayjs
-                                    .unix(event.startDate)
-                                    .format(conf.dateTimeFormat)}
-                            </Text>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <Text fw={'bold'} size="0.8rem">
+                                    {dayjs
+                                        .unix(event.startDate)
+                                        .format(conf.dateTimeFormat)}
+                                </Text>
+                                <Accordion.Chevron />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -109,35 +120,27 @@ export function AlertEvent({
                 <div
                     style={{
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1rem',
-                        marginRight: '1rem'
+                        gap: '0.5rem',
+                        padding: '.5rem .5rem',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
                     }}
                 >
                     <div
                         style={{
                             display: 'flex',
                             gap: '0.5rem',
-                            justifyContent: 'space-between',
                             alignItems: 'center'
                         }}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                gap: '0.5rem',
-                                alignItems: 'center'
-                            }}
-                        >
-                            <AlertIcon alertType={alertType} size={24} />
-                            <Text size="0.875rem" fw={'bold'} c={'dimmed'}>
-                                {alertMessage[alertType]}
-                            </Text>
-                        </div>
-                        <Text size="0.9rem" lineClamp={1}>
-                            {event.name}
+                        <AlertIcon alertType={alertType} size={24} />
+                        <Text size="0.875rem" fw={'bold'} c={'dimmed'}>
+                            {alertMessage[alertType]}
                         </Text>
                     </div>
+                    <Text size="0.9rem" lineClamp={1}>
+                        {event.name}
+                    </Text>
                 </div>
             </Accordion.Control>
             <Accordion.Panel

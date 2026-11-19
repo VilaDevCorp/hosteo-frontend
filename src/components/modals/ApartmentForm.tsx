@@ -110,7 +110,7 @@ export function ApartmentForm({
             return;
         }
         try {
-            await updateImage('apartment', id, image.file);
+            await updateImage('apartment', image.file, id);
         } catch (e) {
             // The apartment is already saved, so keep the flow going and just
             // report the image problem instead of inviting a duplicate create.
@@ -221,9 +221,7 @@ export function ApartmentForm({
                                 label="Show hidden"
                                 checked={showHiddenTasks}
                                 onChange={(e) =>
-                                    setShowHiddenTasks(
-                                        e.currentTarget.checked
-                                    )
+                                    setShowHiddenTasks(e.currentTarget.checked)
                                 }
                             />
                             <Button
