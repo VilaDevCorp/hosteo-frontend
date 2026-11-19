@@ -1,16 +1,6 @@
-import {
-    ActionIcon,
-    Button,
-    Group,
-    Loader,
-    Pagination,
-    Popover,
-    Table,
-    Text,
-    Title
-} from '@mantine/core';
+import { ActionIcon, Button, Popover, Text, Title } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
-import { IconCalendar, IconEdit, IconTrash, IconX } from '@tabler/icons-react';
+import { IconCalendar, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,7 +17,6 @@ import { useError } from '../hooks/useError';
 import { useScreen } from '../hooks/useScreen';
 import { Assignment, BalanceDto, Transaction } from '../types/entities';
 import { Page, TableStructure } from '../types/types';
-import { formatAmount } from '../utils/moneyUtils';
 import { showNotificationSuccess } from '../utils/notifUtils';
 import { conf } from '../../conf';
 import { BalanceBadge } from '../components/atoms/BalanceBadge';
@@ -70,7 +59,6 @@ export function FinancesScreen() {
 
     const {
         data: balances,
-        isLoading: isLoadingBalances,
         isError: balancesError,
         error: balancesErrorObject
     } = useQuery<BalanceDto[]>({

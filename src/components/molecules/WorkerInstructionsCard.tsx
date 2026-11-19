@@ -5,16 +5,9 @@ import {
     showNotificationError,
     showNotificationSuccess
 } from '../../utils/notifUtils';
-import { EntityImage } from '../atoms/EntityImage';
-import { useScreen } from '../../hooks/useScreen';
+import { Img } from '../atoms/Img';
 
-export function WorkerInstructionsCard({
-    item
-}: {
-    item: WorkerInstructions;
-}) {
-    const { isTablet } = useScreen();
-
+export function WorkerInstructionsCard({ item }: { item: WorkerInstructions }) {
     const copyToClipboard = async (text: string) => {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(text);
@@ -64,14 +57,14 @@ export function WorkerInstructionsCard({
                         flexShrink: 0
                     }}
                 >
-                    <EntityImage
+                    <Img
                         src={item.worker.imageUrl}
                         placeholder="/user_placeholder.svg"
-                        w={isTablet ? '6rem' : '4rem'}
-                        h={isTablet ? '6rem' : '4rem'}
-                        radius="50%"
+                        w={'3rem'}
+                        h={'3rem'}
+                        radius={'50%'}
                         fit="cover"
-                        alt={`${item.worker.name} picture`}
+                        alt="Worker picture"
                     />
                     <Title order={5} ta="center">
                         {item.worker.name}

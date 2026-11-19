@@ -1,8 +1,8 @@
-import { Button, Card, Text, Title } from '@mantine/core';
+import { Button, Card, Title } from '@mantine/core';
 import { Worker } from '../../types/entities';
-import { EntityImage } from '../atoms/EntityImage';
 import styles from '../styles/DataTable.module.css';
 import { BalanceBadge } from '../atoms/BalanceBadge';
+import { Img } from '../atoms/Img';
 
 export function BalanceCard({
     worker,
@@ -39,11 +39,12 @@ export function BalanceCard({
                     padding: '1rem'
                 }}
             >
-                <EntityImage
+                <Img
                     src={worker?.imageUrl}
                     placeholder="/user_placeholder.svg"
                     w={'3rem'}
                     h={'3rem'}
+                    radius={'50%'}
                     fit="cover"
                     alt="Worker picture"
                 />
