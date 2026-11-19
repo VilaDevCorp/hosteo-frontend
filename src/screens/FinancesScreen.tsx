@@ -4,12 +4,13 @@ import {
     Group,
     Loader,
     Pagination,
+    Popover,
     Table,
     Text,
     Title
 } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
-import { IconEdit, IconTrash, IconX } from '@tabler/icons-react';
+import { IconCalendar, IconEdit, IconTrash, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
@@ -24,11 +25,18 @@ import { useCrud } from '../hooks/useCrud';
 import { useEntityModal } from '../hooks/useEntityModal';
 import { useError } from '../hooks/useError';
 import { useScreen } from '../hooks/useScreen';
-import { BalanceDto, Transaction } from '../types/entities';
-import { Page } from '../types/types';
+import { Assignment, BalanceDto, Transaction } from '../types/entities';
+import { Page, TableStructure } from '../types/types';
 import { formatAmount } from '../utils/moneyUtils';
 import { showNotificationSuccess } from '../utils/notifUtils';
 import { conf } from '../../conf';
+import { BalanceBadge } from '../components/atoms/BalanceBadge';
+import { DataTable } from '../components/organism/DataTable';
+
+const getReason = (assignment?: Assignment): string =>
+    assignment
+        ? `${assignment.task.name} (${assignment.task.apartment.name})`
+        : 'Payment';
 
 export function FinancesScreen() {
     const { isTablet } = useScreen();
@@ -79,6 +87,17 @@ export function FinancesScreen() {
     const endDate = dateRange[1]
         ? String(dayjs(dateRange[1]).endOf('day').unix())
         : undefined;
+
+    const tableStructure: TableStructure<Transaction> = {
+        headers: ['Date', 'Worker', 'Amount', 'Reason', ''],
+        accesorMethods: [
+            (transaction) =>
+                dayjs.unix(transaction.createdAt).format(conf.dateTimeFormat),
+            (transaction) => transaction.worker?.name ?? 'Unknown worker',
+            (transaction) => <BalanceBadge balance={transaction.amount} />,
+            (transaction) => getReason(transaction.assignment)
+        ]
+    };
 
     const {
         data: transactionPage,
@@ -137,12 +156,12 @@ export function FinancesScreen() {
         onError: handleError
     });
 
-    const openDeletePaymentModal = (transaction: Transaction) =>
+    const openDeletePaymentModal = (id: string) =>
         openModal({
             title: 'Delete payment',
             message: 'Are you sure you want to delete this payment?',
             color: 'error',
-            onConfirm: () => deletePaymentMutation(transaction.id)
+            onConfirm: () => deletePaymentMutation(id)
         });
 
     return (
@@ -169,9 +188,8 @@ export function FinancesScreen() {
                     <Title order={3}>Balances</Title>
                     <div
                         style={{
-                            display: 'grid',
-                            gridTemplateColumns:
-                                'repeat(auto-fill, minmax(10rem, 1fr))',
+                            display: 'flex',
+                            flexWrap: 'wrap',
                             gap: '1rem',
                             rowGap: '1.5rem',
                             alignContent: 'start',
@@ -180,37 +198,28 @@ export function FinancesScreen() {
                             paddingRight: '0.4rem'
                         }}
                     >
-                        {isLoadingBalances ? (
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    gridColumn: '1 / -1',
-                                    padding: '2rem'
-                                }}
-                            >
-                                <Loader />
-                            </div>
-                        ) : (
-                            (balances ?? []).map((balance) => (
-                                <BalanceCard
-                                    key={balance.worker.id}
-                                    worker={balance.worker}
-                                    balance={balance.balance}
-                                    selected={
-                                        selectedWorkerId === balance.worker.id
+                        {(balances ?? []).map((balance) => (
+                            <BalanceCard
+                                key={balance.worker.id}
+                                worker={balance.worker}
+                                balance={balance.balance}
+                                selected={
+                                    selectedWorkerId === balance.worker.id
+                                }
+                                onSelect={(workerId: string) => {
+                                    setPageNumber(1);
+                                    if (selectedWorkerId === workerId) {
+                                        setSelectedWorkerId(undefined);
+                                        return;
                                     }
-                                    onSelect={() => {
-                                        setPageNumber(1);
-                                        setSelectedWorkerId(balance.worker.id);
-                                    }}
-                                    onPay={() => {
-                                        setPayBalance(balance);
-                                        onOpenPaymentModal();
-                                    }}
-                                />
-                            ))
-                        )}
+                                    setSelectedWorkerId(workerId);
+                                }}
+                                onPay={() => {
+                                    setPayBalance(balance);
+                                    onOpenPaymentModal();
+                                }}
+                            />
+                        ))}
                     </div>
                 </section>
 
@@ -229,158 +238,97 @@ export function FinancesScreen() {
                         style={{
                             display: 'flex',
                             alignItems: 'center',
+                            flexDirection: 'row',
                             justifyContent: 'space-between',
                             gap: '1rem'
                         }}
                     >
-                        <Title order={3}>
-                            {selectedBalance
-                                ? `${selectedBalance?.worker.name ?? 'Worker'} — ${formatAmount(selectedBalance.balance ?? 0)}`
-                                : 'Transactions'}
-                        </Title>
-                        {selectedWorkerId && (
-                            <Button
-                                variant="subtle"
-                                size="xs"
-                                leftSection={<IconX size={14} />}
-                                onClick={() => {
-                                    setPageNumber(1);
-                                    setSelectedWorkerId(undefined);
-                                }}
-                            >
-                                Deselect
-                            </Button>
-                        )}
-                    </div>
-
-                    <DatePicker
-                        type="range"
-                        value={dateRange}
-                        onChange={(value) => {
-                            setPageNumber(1);
-                            setDateRange(value as [Date | null, Date | null]);
-                        }}
-                        numberOfColumns={isTablet ? 2 : 1}
-                    />
-
-                    <div
-                        style={{
-                            overflow: isTablet ? 'auto' : 'visible',
-                            flex: 1
-                        }}
-                    >
-                        {isLoadingTransactions ? (
+                        {selectedBalance ? (
                             <div
                                 style={{
                                     display: 'flex',
-                                    justifyContent: 'center',
-                                    padding: '2rem'
+                                    flexDirection: 'row',
+                                    gap: '1rem',
+                                    alignItems: 'center'
                                 }}
                             >
-                                <Loader />
+                                <Title order={3}>
+                                    {selectedBalance.worker.name ?? 'Worker'}{' '}
+                                </Title>
+                                <span>
+                                    <BalanceBadge
+                                        balance={selectedBalance.balance}
+                                        textProps={{ size: 'lg' }}
+                                    />
+                                </span>
                             </div>
                         ) : (
-                            <Table>
-                                <Table.Thead>
-                                    <Table.Tr>
-                                        <Table.Th>Date</Table.Th>
-                                        <Table.Th>Worker</Table.Th>
-                                        <Table.Th>Amount</Table.Th>
-                                        <Table.Th>Reason</Table.Th>
-                                        <Table.Th></Table.Th>
-                                    </Table.Tr>
-                                </Table.Thead>
-                                <Table.Tbody>
-                                    {(transactionPage?.content ?? []).map(
-                                        (transaction) => {
-                                            const isPayment =
-                                                !transaction.assignment;
-                                            const amount = isPayment
-                                                ? -Math.abs(transaction.amount)
-                                                : Math.abs(transaction.amount);
-                                            const reason =
-                                                transaction.assignment
-                                                    ? `${transaction.assignment.task.name} (${transaction.assignment.task.apartment.name})`
-                                                    : 'Payment';
-
-                                            return (
-                                                <Table.Tr key={transaction.id}>
-                                                    <Table.Td>
-                                                        {dayjs(
-                                                            transaction.createdAt
-                                                        ).format(
-                                                            conf.dateFormat
-                                                        )}
-                                                    </Table.Td>
-                                                    <Table.Td>
-                                                        {
-                                                            transaction.worker
-                                                                .name
-                                                        }
-                                                    </Table.Td>
-                                                    <Table.Td>
-                                                        <Text
-                                                            c={
-                                                                isPayment
-                                                                    ? 'error'
-                                                                    : 'success'
-                                                            }
-                                                        >
-                                                            {formatAmount(
-                                                                amount
-                                                            )}
-                                                        </Text>
-                                                    </Table.Td>
-                                                    <Table.Td>
-                                                        {reason}
-                                                    </Table.Td>
-                                                    <Table.Td>
-                                                        {isPayment && (
-                                                            <Group
-                                                                gap="xs"
-                                                                wrap="nowrap"
-                                                            >
-                                                                <ActionIcon
-                                                                    variant="transparent"
-                                                                    onClick={() =>
-                                                                        onOpenPaymentModal(
-                                                                            transaction.id
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <IconEdit />
-                                                                </ActionIcon>
-                                                                <ActionIcon
-                                                                    variant="transparent"
-                                                                    color="error"
-                                                                    onClick={() =>
-                                                                        openDeletePaymentModal(
-                                                                            transaction
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <IconTrash />
-                                                                </ActionIcon>
-                                                            </Group>
-                                                        )}
-                                                    </Table.Td>
-                                                </Table.Tr>
-                                            );
-                                        }
-                                    )}
-                                </Table.Tbody>
-                            </Table>
+                            <Title order={3}>{'All workers'}</Title>
                         )}
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}
+                        >
+                            <Text size="md" c="dimmed">
+                                {(startDate || endDate) &&
+                                    `${startDate ? dayjs(dayjs.unix(Number(startDate))).format(conf.dateFormat) : ''} - ${endDate ? dayjs(dayjs.unix(Number(endDate))).format(conf.dateFormat) : 'Unset'}`}
+                            </Text>
+                            <Popover>
+                                <Popover.Target>
+                                    <ActionIcon variant="transparent">
+                                        <IconCalendar />
+                                    </ActionIcon>
+                                </Popover.Target>
+                                <Popover.Dropdown>
+                                    <DatePicker
+                                        type="range"
+                                        defaultDate={dateRange[0] ?? undefined}
+                                        value={dateRange}
+                                        onChange={(value) => {
+                                            setPageNumber(1);
+                                            setDateRange(
+                                                value as [
+                                                    Date | null,
+                                                    Date | null
+                                                ]
+                                            );
+                                        }}
+                                    />{' '}
+                                </Popover.Dropdown>
+                            </Popover>
+                            {(startDate || endDate) && (
+                                <Button
+                                    variant="subtle"
+                                    size="xs"
+                                    leftSection={<IconX size={14} />}
+                                    onClick={() => {
+                                        setPageNumber(1);
+                                        setDateRange([null, null]);
+                                    }}
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
                     </div>
-                    {transactionPage && transactionPage.totalPages > 1 && (
-                        <Pagination
-                            value={pageNumber}
-                            onChange={setPageNumber}
-                            total={transactionPage.totalPages}
-                            gap={'1rem'}
-                            style={{ alignSelf: 'center' }}
-                        />
-                    )}
+
+                    <DataTable
+                        cardViewMode={false}
+                        tableStructure={tableStructure}
+                        isLoading={isLoadingTransactions}
+                        page={transactionPage!}
+                        pageNumber={pageNumber}
+                        setPageNumber={setPageNumber}
+                        onEdit={onOpenPaymentModal}
+                        onDelete={openDeletePaymentModal}
+                        hideActionButtons={(item) =>
+                            item?.assignment !== undefined
+                        }
+                    />
                 </section>
             </div>
 

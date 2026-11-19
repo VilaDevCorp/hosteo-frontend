@@ -20,7 +20,7 @@ export interface Address {
 
 export interface BaseEntity {
     id: string;
-    createdAt: Date;
+    createdAt: number;
     createdBy?: User;
 }
 

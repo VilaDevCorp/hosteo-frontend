@@ -3,7 +3,8 @@ import {
     ModalCloseButton,
     ModalHeader,
     ModalTitle,
-    NumberInput
+    NumberInput,
+    Text
 } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -101,17 +102,24 @@ export function PaymentForm({
                 </ModalTitle>
                 <ModalCloseButton />
             </ModalHeader>
-            <NumberInput
-                label="Amount"
-                withAsterisk
-                value={amount}
-                onChange={(value) => setAmount(String(value))}
-                onBlur={() => activateDirty()}
-                error={error && dirty ? message : undefined}
-                min={0}
-                allowNegative={false}
-                decimalScale={2}
-            />
+            <span
+                style={{ display: 'flex', alignItems: 'end', gap: '0.5rem' }}
+            >
+                <NumberInput
+                    label="Amount"
+                    withAsterisk
+                    value={amount}
+                    onChange={(value) => setAmount(String(value))}
+                    onBlur={() => activateDirty()}
+                    error={error && dirty ? message : undefined}
+                    min={0}
+                    allowNegative={false}
+                    decimalScale={2}
+                />
+                <Text size="xl" color="dimmed">
+                    €
+                </Text>
+            </span>
             <ModalButtons>
                 <Button variant="outline" onClick={onClose}>
                     Cancel
