@@ -139,6 +139,16 @@ export interface AssignmentDto extends BaseEntity {
 }
 
 
+export interface WorkerAssignmentDto {
+    worker: Worker;
+    assignments: AssignmentDto[];
+}
+
+export interface WorkerInstructions {
+    worker: Worker;
+    instructions: string;
+}
+
 export interface EventSchedulerDto {
     id: string;
     type: EventType;

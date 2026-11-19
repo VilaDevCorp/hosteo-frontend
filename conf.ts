@@ -5,6 +5,7 @@ const dateInputFormat = 'YYYY-MM-DD HH:mm';
 const dateTimeWithWeekDay = 'ddd D/M/YY'
 const dateTimeWithWeekDayAndTime = 'ddd D/M/YY HH:mm'
 const dateWithSpaces = 'DD MMM YY'
+const dateWithShortWeekDay = 'ddd DD/MM'
 const timeFormat = 'HH:mm'
 
 
@@ -16,5 +17,6 @@ export const conf = {
     dateTimeWithWeekDay,
     dateTimeWithWeekDayAndTime,
     dateWithSpaces,
+    dateWithShortWeekDay,
     timeFormat
 };

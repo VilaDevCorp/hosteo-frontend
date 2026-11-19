@@ -7,7 +7,8 @@ import {
     ImportBatchResult,
     FailedImportedEvent,
     SchedulerInfo,
-    User
+    User,
+    WorkerAssignmentDto
 } from '../types/entities';
 import { ApiError, ApiResponse } from '../types/types';
 import { checkResponseException } from '../utils/utilFunctions';
@@ -43,6 +44,10 @@ export interface ApiContext {
         assignmentIds: string[]
     ) => Promise<BulkOperationResponse<AssignmentOperationError>>;
     searchSchedulerData: (date: string) => Promise<SchedulerInfo>;
+    getWorkerAssignments: (
+        startDate: string,
+        endDate: string
+    ) => Promise<WorkerAssignmentDto[]>;
     getAlertsInfo: () => Promise<AlertsInfo>;
     hide: (entity: string, id: string) => Promise<void>;
     unhide: (entity: string, id: string) => Promise<void>;
@@ -203,6 +208,27 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         };
         const res = await fetchWithAuth(url, options);
         const resObject: ApiResponse<SchedulerInfo> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
+    const getWorkerAssignments = async (
+        startDate: string,
+        endDate: string
+    ): Promise<WorkerAssignmentDto[]> => {
+        const params = new URLSearchParams({
+            startDate: dayjs(startDate).format(conf.dateUrlFormat),
+            endDate: dayjs(endDate).format(conf.dateUrlFormat)
+        });
+        const url = `${apiUrl}scheduler/assignments?${params.toString()}`;
+        const options: RequestInit = {
+            method: 'GET',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<WorkerAssignmentDto[]> = await res.json();
         checkResponseException(res, resObject);
         return resObject.data;
     };
@@ -371,6 +397,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         eventBulkDelete,
         assignmentBulkDelete,
         searchSchedulerData,
+        getWorkerAssignments,
         getAlertsInfo,
         hide,
         unhide,
