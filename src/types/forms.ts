@@ -217,6 +217,7 @@ export interface TaskCreateForm {
     duration: number;
     type: TaskType;
     steps: string[];
+    cost: number;
 }
 
 export interface TaskUpdateForm {
@@ -226,6 +227,7 @@ export interface TaskUpdateForm {
     duration: number;
     type: TaskType;
     steps: string[];
+    cost: number;
 }
 
 export interface TaskFormFields {
@@ -236,6 +238,7 @@ export interface TaskFormFields {
     duration: number;
     type: TaskType;
     steps: string[];
+    cost: number;
 }
 
 export const taskToForm = (task: Task | undefined, apartmentId?: string): TaskFormFields => {
@@ -249,7 +252,8 @@ export const taskToForm = (task: Task | undefined, apartmentId?: string): TaskFo
             category: CATEGORY_ENUM.CLEANING,
             duration: 0,
             type: TASK_TYPE.MANDATORY,
-            steps: []
+            steps: [],
+            cost: 0
         };
     }
     return {
@@ -258,7 +262,8 @@ export const taskToForm = (task: Task | undefined, apartmentId?: string): TaskFo
         category: task.category,
         duration: task.duration,
         type: task.type,
-        steps: task.steps
+        steps: task.steps,
+        cost: task.cost
     };
 }
 
@@ -272,7 +277,8 @@ export const formFieldsToCreateTaskForm = (formFields: TaskFormFields): TaskCrea
         category: formFields.category,
         duration: formFields.duration,
         type: formFields.type,
-        steps: formFields.steps
+        steps: formFields.steps,
+        cost: formFields.cost
     };
 }
 
@@ -287,6 +293,7 @@ export const formFieldsToUpdateTaskForm = (formFields: TaskFormFields): TaskUpda
         duration: formFields.duration,
         type: formFields.type,
         steps: formFields.steps,
+        cost: formFields.cost
     };
 }
 

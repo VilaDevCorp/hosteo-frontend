@@ -33,7 +33,7 @@ No technical knowledge is required to use Hosteo. This document covers:
 
 ### The main menu
 
-On the left you will always see the main navigation bar with five sections:
+On the left you will always see the main navigation bar with six sections:
 
 | Icon | Section | What it is for |
 |------|---------|----------------|
@@ -42,6 +42,7 @@ On the left you will always see the main navigation bar with five sections:
 | Home | **Apartments** | Your properties (apartments) and their cleaning tasks. |
 | People | **Workers** | The people who carry out the cleaning/maintenance work. |
 | Template | **Templates** | A library of reusable task checklists. |
+| Cash | **Finances** | Worker balances and payments — money owed and money paid. |
 
 ---
 

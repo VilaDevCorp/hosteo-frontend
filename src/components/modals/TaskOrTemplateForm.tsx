@@ -17,7 +17,11 @@ import { useCrud } from '../../hooks/useCrud';
 import { useMutation } from '@tanstack/react-query';
 import { showNotificationSuccess } from '../../utils/notifUtils';
 import { ModalButtons } from '../molecules/ModalButtons';
-import { notEmptyValidator, useValidator } from '../../hooks/useValidator';
+import {
+    nonNegativeNumberValidator,
+    notEmptyValidator,
+    useValidator
+} from '../../hooks/useValidator';
 import {
     TaskFormFields,
     TemplateFormFields,
@@ -100,6 +104,16 @@ export function TaskOrTemplateForm({
         validate: nameValidate
     } = useValidator(formFields.name, [notEmptyValidator]);
 
+    const {
+        dirty: costDirty,
+        activateDirty: setDirtyCost,
+        error: costError,
+        message: costMessage,
+        validate: costValidate
+    } = useValidator('cost' in formFields ? String(formFields.cost) : '0', [
+        nonNegativeNumberValidator
+    ]);
+
     const createEntity = async () => {
         if (IS_TASK) {
             await createTask(
@@ -152,7 +166,7 @@ export function TaskOrTemplateForm({
         });
 
     const onSubmit = () => {
-        if (!nameValidate()) return;
+        if (!(nameValidate() && costValidate())) return;
 
         if (entity) {
             updateEntityMutation();
@@ -171,7 +185,8 @@ export function TaskOrTemplateForm({
         setNewStepValue('');
     };
 
-    const disabledButton = isLoadingCreate || isLoadingUpdate || nameError;
+    const disabledButton =
+        isLoadingCreate || isLoadingUpdate || nameError || costError;
 
     return (
         <form
@@ -216,6 +231,23 @@ export function TaskOrTemplateForm({
                     }
                     min={0}
                 />
+
+                {IS_TASK && (
+                    <NumberInput
+                        label="Cost"
+                        value={'cost' in formFields ? formFields.cost : 0}
+                        onChange={(value) =>
+                            setFormFields({
+                                ...formFields,
+                                cost: Number(value)
+                            } as TaskFormFields)
+                        }
+                        min={0}
+                        allowNegative={false}
+                        onBlur={() => setDirtyCost()}
+                        error={costError && costDirty ? costMessage : undefined}
+                    />
+                )}
 
                 {'type' in formFields && (
                     <Select

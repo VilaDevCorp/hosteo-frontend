@@ -4,6 +4,7 @@ import { TaskOrTemplateDetailsSkeleton } from '../skeletons/TaskOrTemplateDetail
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
 import { useEntityModal } from '../../hooks/useEntityModal';
 import { TaskOrTemplateDetails } from '../modals/TaskOrTemplateDetails';
+import { formatAmount } from '../../utils/moneyUtils';
 
 export function useTaskOrTemplateDetailsModal(type: 'task' | 'template') {
     const { onOpen: onOpenDetailsModal, modalComponent: detailsModal } =
@@ -30,6 +31,11 @@ export function useTaskOrTemplateDetailsModal(type: 'task' | 'template') {
                         >
                             {entity.name}
                         </Title>
+                        {'cost' in entity && (
+                            <Text size="sm" c="dimmed">
+                                {formatAmount(entity.cost)}
+                            </Text>
+                        )}
                         <TaskCategoryBadge category={entity.category} />
                         <Text style={{ whiteSpace: 'nowrap' }}>
                             {entity.duration} min

@@ -7,7 +7,7 @@ import styles from '../styles/DataTable.module.css';
 
 interface DataTableProps<T extends BaseEntity> {
     cardViewMode: boolean;
-    CardComponent: ComponentType<Card<T>>;
+    CardComponent?: ComponentType<Card<T>>;
     cardMinWidth?: string;
     SkeletonComponent?: ComponentType;
     tableStructure: TableStructure<T>;
@@ -20,6 +20,7 @@ interface DataTableProps<T extends BaseEntity> {
     onDelete?: (id: string) => void;
     onToggleVisibility?: (id: string, visible: boolean) => void;
     isVisible?: (item: T) => boolean;
+    hideActionButtons?: (item: T) => boolean;
 }
 
 export function DataTable<T extends BaseEntity>({
@@ -36,9 +37,11 @@ export function DataTable<T extends BaseEntity>({
     onDelete,
     onEdit,
     onToggleVisibility,
-    isVisible
+    isVisible,
+    hideActionButtons
 }: DataTableProps<T>) {
     const printCardsBodyContent = () =>
+        CardComponent &&
         page?.content.map((item) => (
             <CardComponent
                 key={item.id}
@@ -106,54 +109,58 @@ export function DataTable<T extends BaseEntity>({
                                 </Table.Td>
                             )
                         )}
-                        <Table.Td
-                            style={{
-                                gap: '0.5rem',
-                                display: 'flex'
-                            }}
-                        >
-                            <ActionIcon
-                                variant="transparent"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEdit && onEdit(item.id);
+                        {!hideActionButtons?.(item) && (
+                            <Table.Td
+                                style={{
+                                    gap: '0.5rem',
+                                    display: 'flex'
                                 }}
                             >
-                                <IconEdit />
-                            </ActionIcon>
-                            {onToggleVisibility ? (
                                 <ActionIcon
                                     variant="transparent"
-                                    color={
-                                        isVisible?.(item) ? 'error' : undefined
-                                    }
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onToggleVisibility(
-                                            item.id,
-                                            isVisible?.(item) ?? true
-                                        );
+                                        onEdit && onEdit(item.id);
                                     }}
                                 >
-                                    {isVisible?.(item) ? (
-                                        <IconEyeOff />
-                                    ) : (
-                                        <IconEye />
-                                    )}
+                                    <IconEdit />
                                 </ActionIcon>
-                            ) : (
-                                <ActionIcon
-                                    variant="transparent"
-                                    color="error"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDelete && onDelete(item.id);
-                                    }}
-                                >
-                                    <IconTrash />
-                                </ActionIcon>
-                            )}
-                        </Table.Td>
+                                {onToggleVisibility ? (
+                                    <ActionIcon
+                                        variant="transparent"
+                                        color={
+                                            isVisible?.(item)
+                                                ? 'error'
+                                                : undefined
+                                        }
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onToggleVisibility(
+                                                item.id,
+                                                isVisible?.(item) ?? true
+                                            );
+                                        }}
+                                    >
+                                        {isVisible?.(item) ? (
+                                            <IconEyeOff />
+                                        ) : (
+                                            <IconEye />
+                                        )}
+                                    </ActionIcon>
+                                ) : (
+                                    <ActionIcon
+                                        variant="transparent"
+                                        color="error"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDelete && onDelete(item.id);
+                                        }}
+                                    >
+                                        <IconTrash />
+                                    </ActionIcon>
+                                )}
+                            </Table.Td>
+                        )}
                     </Table.Tr>
                 </Table.Tbody>
             ))}

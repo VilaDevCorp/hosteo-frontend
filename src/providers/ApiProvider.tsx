@@ -2,6 +2,7 @@ import { createContext, ReactNode } from 'react';
 import {
     AlertsInfo,
     AssignmentOperationError,
+    BalanceDto,
     BulkOperationResponse,
     EventOperationError,
     ImportBatchResult,
@@ -49,6 +50,7 @@ export interface ApiContext {
         endDate: string
     ) => Promise<WorkerAssignmentDto[]>;
     getAlertsInfo: () => Promise<AlertsInfo>;
+    getBalances: () => Promise<BalanceDto[]>;
     hide: (entity: string, id: string) => Promise<void>;
     unhide: (entity: string, id: string) => Promise<void>;
     updateImage: (
@@ -247,6 +249,20 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         return resObject.data;
     };
 
+    const getBalances = async (): Promise<BalanceDto[]> => {
+        const url = `${apiUrl}transactions/balances`;
+        const options: RequestInit = {
+            method: 'GET',
+            headers: new Headers({
+                'content-type': 'application/json'
+            })
+        };
+        const res = await fetchWithAuth(url, options);
+        const resObject: ApiResponse<BalanceDto[]> = await res.json();
+        checkResponseException(res, resObject);
+        return resObject.data;
+    };
+
     const hide = async (entity: string, id: string): Promise<void> => {
         const url = `${apiUrl}${entity}/${id}/hide`;
         const options: RequestInit = {
@@ -399,6 +415,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
         searchSchedulerData,
         getWorkerAssignments,
         getAlertsInfo,
+        getBalances,
         hide,
         unhide,
         updateImage,

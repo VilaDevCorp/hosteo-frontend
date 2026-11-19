@@ -3,6 +3,7 @@ import { CardControls } from '../atoms/CardControls';
 import { Template, Task } from '../../types/entities';
 import styles from '../styles/DataTable.module.css';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
+import { formatAmount } from '../../utils/moneyUtils';
 
 interface TaskOrTemplateCardProps {
     item: Template | Task;
@@ -66,6 +67,11 @@ export function TaskOrTemplateCard({
                     <Text size="sm" c="dimmed">
                         {item.duration} min
                     </Text>
+                    {'cost' in item && (
+                        <Text size="sm" c="dimmed">
+                            {formatAmount(item.cost)}
+                        </Text>
+                    )}
                     <TaskCategoryBadge category={item.category} />
                 </div>
                 <CardControls
