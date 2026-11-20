@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IconPlus, IconSearch } from '@tabler/icons-react'; // Removed IconLayoutGrid, IconLayoutList as layout is fixed
 import { useState, useEffect } from 'react';
 
-import { Layout } from '../components/organism/layout/Layout';
 import { TopControls } from '../components/molecules/TopControls';
 import { DataTable } from '../components/organism/DataTable';
 import { TaskOrTemplateCard } from '../components/molecules/TaskOrTemplateCard';
@@ -101,7 +100,7 @@ export function TemplatesScreen() {
         });
 
     return (
-        <Layout>
+        <>
             <TopControls
                 keywordFilter={
                     <TextInput
@@ -149,6 +148,6 @@ export function TemplatesScreen() {
             />
             {templateFormModal}
             {detailsModal}
-        </Layout>
+        </>
     );
 }

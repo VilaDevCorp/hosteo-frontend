@@ -1,5 +1,4 @@
 import { Button, Switch, TextInput } from '@mantine/core';
-import { Layout } from '../components/organism/layout/Layout';
 import { useEffect, useState } from 'react';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { useCrud } from '../hooks/useCrud';
@@ -105,7 +104,7 @@ export function WorkersScreen() {
     };
 
     return (
-        <Layout>
+        <>
             <TopControls
                 keywordFilter={
                     <TextInput
@@ -152,6 +151,6 @@ export function WorkersScreen() {
                 isVisible={(worker) => worker.visible}
             />
             {workerFormModal}
-        </Layout>
+        </>
     );
 }

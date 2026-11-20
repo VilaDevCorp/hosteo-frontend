@@ -11,7 +11,6 @@ import { ApiError } from '../types/types';
 import StatusCode from 'status-code-enum';
 import { useNavigate } from 'react-router-dom';
 import { PublicFormLayout } from '../components/organism/publicformlayout/PublicFormLayout';
-import { Layout } from '../components/organism/layout/Layout';
 import { useMutation } from '@tanstack/react-query';
 import { Button, TextInput } from '@mantine/core';
 import {
@@ -131,110 +130,96 @@ export function RegisterScreen() {
         usernameError;
 
     return (
-        <Layout isPublic>
-            <PublicFormLayout onSubmit={() => onRegister()} title={'Sign up'}>
-                <TextInput
-                    label="Username"
-                    variant="filled"
-                    value={username}
-                    onBlur={() => setDirtyUsername()}
-                    onChange={(e) => setUsername(e.target.value)}
-                    leftSection={<IconUser size={16} />}
-                    withAsterisk
-                    error={
-                        usernameError && usernameDirty
-                            ? usernameMessage
-                            : undefined
-                    }
-                />
-                <TextInput
-                    label="Email"
-                    variant="filled"
-                    value={email}
-                    onBlur={() => setDirtyEmail()}
-                    onChange={(e) => setEmail(e.target.value)}
-                    leftSection={<IconAt size={16} />}
-                    withAsterisk
-                    error={emailError && emailDirty ? emailMessage : undefined}
-                />
-                <TextInput
-                    label="Password"
-                    type={passwordVisible ? 'text' : 'password'}
-                    rightSection={
-                        passwordVisible ? (
-                            <IconEyeOff
-                                size={16}
-                                onClick={() =>
-                                    setPasswordVisible(!passwordVisible)
-                                }
-                            />
-                        ) : (
-                            <IconEye
-                                size={16}
-                                onClick={() =>
-                                    setPasswordVisible(!passwordVisible)
-                                }
-                            />
-                        )
-                    }
-                    variant="filled"
-                    value={password}
-                    onBlur={() => setDirtyPassword()}
-                    onChange={(e) => setPassword(e.target.value)}
-                    leftSection={<IconLock size={16} />}
-                    withAsterisk
-                    error={
-                        passwordError && passwordDirty
-                            ? passwordMessage
-                            : undefined
-                    }
-                />
+        <PublicFormLayout onSubmit={() => onRegister()} title={'Sign up'}>
+            <TextInput
+                label="Username"
+                variant="filled"
+                value={username}
+                onBlur={() => setDirtyUsername()}
+                onChange={(e) => setUsername(e.target.value)}
+                leftSection={<IconUser size={16} />}
+                withAsterisk
+                error={
+                    usernameError && usernameDirty ? usernameMessage : undefined
+                }
+            />
+            <TextInput
+                label="Email"
+                variant="filled"
+                value={email}
+                onBlur={() => setDirtyEmail()}
+                onChange={(e) => setEmail(e.target.value)}
+                leftSection={<IconAt size={16} />}
+                withAsterisk
+                error={emailError && emailDirty ? emailMessage : undefined}
+            />
+            <TextInput
+                label="Password"
+                type={passwordVisible ? 'text' : 'password'}
+                rightSection={
+                    passwordVisible ? (
+                        <IconEyeOff
+                            size={16}
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                        />
+                    ) : (
+                        <IconEye
+                            size={16}
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                        />
+                    )
+                }
+                variant="filled"
+                value={password}
+                onBlur={() => setDirtyPassword()}
+                onChange={(e) => setPassword(e.target.value)}
+                leftSection={<IconLock size={16} />}
+                withAsterisk
+                error={
+                    passwordError && passwordDirty ? passwordMessage : undefined
+                }
+            />
 
-                <TextInput
-                    label="Repeat password"
-                    type={repeatPasswordVisible ? 'text' : 'password'}
-                    rightSection={
-                        repeatPasswordVisible ? (
-                            <IconEyeOff
-                                size={16}
-                                onClick={() =>
-                                    setRepeatPasswordVisible(
-                                        !repeatPasswordVisible
-                                    )
-                                }
-                            />
-                        ) : (
-                            <IconEye
-                                size={16}
-                                onClick={() =>
-                                    setRepeatPasswordVisible(
-                                        !repeatPasswordVisible
-                                    )
-                                }
-                            />
-                        )
-                    }
-                    variant="filled"
-                    value={repeatPassword}
-                    onChange={(e) => setRepeatPassword(e.target.value)}
-                    leftSection={<IconLock size={16} />}
-                    withAsterisk
-                    error={
-                        passwordMatchError && passwordMatchDirty
-                            ? passwordMatchError
-                            : undefined
-                    }
-                />
-                <Button
-                    mt={isTablet ? '0.75rem' : 'auto'}
-                    w={'100%'}
-                    disabled={disabledButton}
-                    loading={isLoading}
-                    type="submit"
-                >
-                    {'Sign up'}
-                </Button>
-            </PublicFormLayout>
-        </Layout>
+            <TextInput
+                label="Repeat password"
+                type={repeatPasswordVisible ? 'text' : 'password'}
+                rightSection={
+                    repeatPasswordVisible ? (
+                        <IconEyeOff
+                            size={16}
+                            onClick={() =>
+                                setRepeatPasswordVisible(!repeatPasswordVisible)
+                            }
+                        />
+                    ) : (
+                        <IconEye
+                            size={16}
+                            onClick={() =>
+                                setRepeatPasswordVisible(!repeatPasswordVisible)
+                            }
+                        />
+                    )
+                }
+                variant="filled"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                leftSection={<IconLock size={16} />}
+                withAsterisk
+                error={
+                    passwordMatchError && passwordMatchDirty
+                        ? passwordMatchError
+                        : undefined
+                }
+            />
+            <Button
+                mt={isTablet ? '0.75rem' : 'auto'}
+                w={'100%'}
+                disabled={disabledButton}
+                loading={isLoading}
+                type="submit"
+            >
+                {'Sign up'}
+            </Button>
+        </PublicFormLayout>
     );
 }

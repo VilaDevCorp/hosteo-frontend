@@ -5,7 +5,6 @@ import { useValidator, notEmptyValidator } from '../hooks/useValidator';
 import { ApiError } from '../types/types';
 import { ERROR_CODE } from '../types/enums';
 import { PublicFormLayout } from '../components/organism/publicformlayout/PublicFormLayout';
-import { Layout } from '../components/organism/layout/Layout';
 import StatusCode from 'status-code-enum';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Checkbox, TextInput } from '@mantine/core';
@@ -69,53 +68,47 @@ export function LoginScreen() {
     const disabledButton = isLoading || usernameError || passwordError;
 
     return (
-        <Layout isPublic>
-            <PublicFormLayout onSubmit={() => onLogin()} title={'Sign in'}>
-                <TextInput
-                    label="Username"
-                    variant="filled"
-                    value={username}
-                    onBlur={() => setDirtyUsername()}
-                    onChange={(e) => setUsername(e.target.value)}
-                    withAsterisk
-                    error={
-                        usernameError && usernameDirty
-                            ? usernameMessage
-                            : undefined
-                    }
-                />
+        <PublicFormLayout onSubmit={() => onLogin()} title={'Sign in'}>
+            <TextInput
+                label="Username"
+                variant="filled"
+                value={username}
+                onBlur={() => setDirtyUsername()}
+                onChange={(e) => setUsername(e.target.value)}
+                withAsterisk
+                error={
+                    usernameError && usernameDirty ? usernameMessage : undefined
+                }
+            />
 
-                <TextInput
-                    label="Password"
-                    variant="filled"
-                    type="password"
-                    onBlur={() => setDirtyPassword()}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    withAsterisk
-                    error={
-                        passwordError && passwordDirty
-                            ? passwordMessage
-                            : undefined
-                    }
-                />
+            <TextInput
+                label="Password"
+                variant="filled"
+                type="password"
+                onBlur={() => setDirtyPassword()}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                withAsterisk
+                error={
+                    passwordError && passwordDirty ? passwordMessage : undefined
+                }
+            />
 
-                <Checkbox
-                    mt={'0.5rem'}
-                    label="Remember me"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <Button
-                    mt={'auto'}
-                    w={'100%'}
-                    type="submit"
-                    disabled={disabledButton}
-                    loading={isLoading}
-                >
-                    {'Sign in'}
-                </Button>
-            </PublicFormLayout>
-        </Layout>
+            <Checkbox
+                mt={'0.5rem'}
+                label="Remember me"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <Button
+                mt={'auto'}
+                w={'100%'}
+                type="submit"
+                disabled={disabledButton}
+                loading={isLoading}
+            >
+                {'Sign in'}
+            </Button>
+        </PublicFormLayout>
     );
 }

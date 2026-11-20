@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { BalanceCard } from '../components/molecules/BalanceCard';
 import { PaymentForm } from '../components/modals/PaymentForm';
 import { PaymentFormSkeleton } from '../components/skeletons/PaymentFormSkeleton';
-import { Layout } from '../components/organism/layout/Layout';
 import { useConfirmModalWithContext } from '../hooks/useConfirmModalWithContext';
 import { useApi } from '../hooks/useApi';
 import { useCrud } from '../hooks/useCrud';
@@ -153,7 +152,7 @@ export function FinancesScreen() {
         });
 
     return (
-        <Layout>
+        <>
             <div
                 style={{
                     display: 'flex',
@@ -321,6 +320,6 @@ export function FinancesScreen() {
             </div>
 
             {paymentModal}
-        </Layout>
+        </>
     );
 }

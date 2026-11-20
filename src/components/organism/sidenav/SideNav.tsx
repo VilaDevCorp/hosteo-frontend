@@ -40,11 +40,6 @@ const navItems = [
         tooltip: 'Workers'
     },
     {
-        icon: <IconTemplate size={26} stroke={2.25} />,
-        path: '/templates',
-        tooltip: 'Templates'
-    },
-    {
         icon: <IconCash size={26} stroke={2.25} />,
         path: '/finances',
         tooltip: 'Finances'

@@ -1,5 +1,4 @@
 import { Button, MultiSelect, Switch, TextInput, Title } from '@mantine/core';
-import { Layout } from '../components/organism/layout/Layout';
 import { ApartmentForm } from '../components/modals/ApartmentForm';
 import { useEffect, useState } from 'react';
 import {
@@ -204,7 +203,7 @@ export function ApartmentsScreen() {
     };
 
     return (
-        <Layout>
+        <>
             <TopControls
                 keywordFilter={
                     <TextInput
@@ -300,6 +299,6 @@ export function ApartmentsScreen() {
             />
             {apartmentFormModal}
             {apartmentDetailsModal}
-        </Layout>
+        </>
     );
 }

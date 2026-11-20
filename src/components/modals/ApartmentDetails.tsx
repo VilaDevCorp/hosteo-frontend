@@ -80,13 +80,12 @@ export function ApartmentDetails({
                 style={{
                     display: 'grid',
                     gridTemplateColumns:
-                        'repeat(auto-fill, minmax(15rem, 1fr))',
+                        'repeat(auto-fill, minmax(12rem, 1fr))',
                     justifyItems: 'center',
                     gap: '1rem',
                     rowGap: '2rem',
                     width: '100%',
                     overflowY: 'auto',
-                    height: '100%',
                     paddingRight: '0.4rem'
                 }}
             >

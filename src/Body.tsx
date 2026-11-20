@@ -1,14 +1,9 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { LoginScreen } from './screens/LoginScreen';
 import { Suspense, lazy } from 'react';
 import { LoadingScreen } from './screens/LoadingScreen';
-
-const LazyRegisterScreen = lazy(() =>
-    import('./screens/RegisterScreen').then((module) => ({
-        default: module.RegisterScreen
-    }))
-);
+import { Layout } from './components/organism/layout/Layout';
 
 const LazyApartmentsScreen = lazy(() =>
     import('./screens/ApartmentsScreen').then((module) => ({
@@ -28,12 +23,6 @@ const LazyEventsScreen = lazy(() =>
     }))
 );
 
-const LazyTemplatesScreen = lazy(() =>
-    import('./screens/TemplatesScreen').then((module) => ({
-        default: module.TemplatesScreen
-    }))
-);
-
 const LazySchedulerScreen = lazy(() =>
     import('./screens/SchedulerScreen').then((module) => ({
         default: module.SchedulerScreen
@@ -48,6 +37,11 @@ const LazyFinancesScreen = lazy(() =>
 
 function Body() {
     const authInfo = useAuth();
+    const { pathname } = useLocation();
+
+    // The scheduler needs a wider content area than the rest of the screens
+    const privateLayoutStyles =
+        pathname === '/' ? { maxWidth: '90rem' } : undefined;
 
     return authInfo.isLoadingUserInfo === false ? (
         <div
@@ -59,70 +53,62 @@ function Body() {
                 overflow: 'hidden'
             }}
         >
-            <Suspense fallback={<LoadingScreen />}>
-                <Routes>
-                    <Route path="/login" element={<LoginScreen />} />
-                    <Route
-                        path="/register"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyRegisterScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazySchedulerScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/apartments"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyApartmentsScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/workers"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyWorkersScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/events"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyEventsScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/templates"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyTemplatesScreen />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/finances"
-                        element={
-                            <Suspense fallback={<LoadingScreen />}>
-                                <LazyFinancesScreen />
-                            </Suspense>
-                        }
-                    />
-                </Routes>
-            </Suspense>
+            {authInfo.user === null ? (
+                <Layout isPublic>
+                    <Suspense fallback={<LoadingScreen showLogo />}>
+                        <LoginScreen />
+                    </Suspense>
+                </Layout>
+            ) : (
+                <Layout customStyles={privateLayoutStyles}>
+                    <Suspense fallback={<LoadingScreen />}>
+                        <Routes>
+                            <Route
+                                path="/login"
+                                element={<Navigate to="/" replace />}
+                            />
+                            <Route path="/" element={<LazySchedulerScreen />} />
+                            <Route
+                                path="/apartments"
+                                element={
+                                    <Suspense fallback={<LoadingScreen />}>
+                                        <LazyApartmentsScreen />
+                                    </Suspense>
+                                }
+                            />
+                            <Route
+                                path="/workers"
+                                element={
+                                    <Suspense fallback={<LoadingScreen />}>
+                                        <LazyWorkersScreen />
+                                    </Suspense>
+                                }
+                            />
+                            <Route
+                                path="/events"
+                                element={
+                                    <Suspense fallback={<LoadingScreen />}>
+                                        <LazyEventsScreen />
+                                    </Suspense>
+                                }
+                            />
+                            <Route
+                                path="/finances"
+                                element={
+                                    <Suspense fallback={<LoadingScreen />}>
+                                        <LazyFinancesScreen />
+                                    </Suspense>
+                                }
+                            />
+                        </Routes>
+                    </Suspense>
+                </Layout>
+            )}
         </div>
     ) : (
-        <LoadingScreen />
+        <Layout isPublic>
+            <LoadingScreen />
+        </Layout>
     );
 }
 

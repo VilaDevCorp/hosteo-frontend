@@ -1,5 +1,4 @@
 import { Button, MultiSelect, Switch, TextInput, Title } from '@mantine/core';
-import { Layout } from '../components/organism/layout/Layout';
 import { EventForm } from '../components/modals/EventForm';
 import { useEffect, useState } from 'react';
 import {
@@ -187,7 +186,7 @@ export function EventsScreen() {
         });
 
     return (
-        <Layout>
+        <>
             <TopControls
                 keywordFilter={
                     <TextInput
@@ -316,6 +315,6 @@ export function EventsScreen() {
             />
             {eventFormModal}
             {eventDetailsModal}
-        </Layout>
+        </>
     );
 }
