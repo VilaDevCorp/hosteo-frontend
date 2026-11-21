@@ -4,7 +4,6 @@ import { SchedulerEventCard } from './SchedulerEventCard';
 import { SchedulerItem } from '../../types/entities';
 import { SchedulerAssignmentCard } from './SchedulerAssignmentCard';
 import { IncompleteAssignmentCard } from './IncompleteAssignmentCard.tsx';
-import styles from './SchedulerDay.module.css';
 
 export function SchedulerDay({
     date,
@@ -81,7 +80,7 @@ export function SchedulerDay({
                     overflow: 'auto',
                     borderRadius: 'var(--mantine-radius-md)'
                 }}
-                className={styles.scrollContainer}
+                className={'thinScroll'}
             >
                 {items.map((item) => {
                     if (item.type === 'event') {

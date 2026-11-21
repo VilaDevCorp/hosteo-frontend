@@ -1,5 +1,5 @@
 import { Worker } from '../../types/entities';
-import { Card, Text, Title } from '@mantine/core';
+import { Card, Title } from '@mantine/core';
 import styles from '../styles/DataTable.module.css';
 import { CardControls } from '../atoms/CardControls';
 import { Flag } from '../atoms/Flag';
@@ -21,8 +21,12 @@ export function WorkerCard({
     return (
         <Card
             w={'100%'}
-            miw={'12rem'}
-            style={{ alignItems: 'center' }}
+            miw={'8rem'}
+            style={{
+                alignItems: 'center',
+                flexDirection: 'column',
+                justifyContent: 'center'
+            }}
             className={onClick ? styles.selectableCard : undefined}
             onClick={onClick && (() => onClick(item.id))}
         >
@@ -30,8 +34,8 @@ export function WorkerCard({
                 <Img
                     src={item.imageUrl}
                     placeholder="/user_placeholder.svg"
-                    w={'7.5rem'}
-                    h={'7.5rem'}
+                    w={'5rem'}
+                    h={'5rem'}
                     radius={'50%'}
                     fit="cover"
                     alt="Worker picture"
@@ -43,8 +47,7 @@ export function WorkerCard({
                     width: '100%',
                     paddingBottom: '1rem',
                     flexDirection: 'column',
-                    gap: '0.5rem',
-                    height: '5rem'
+                    gap: '0.5rem'
                 }}
             >
                 <div
@@ -55,9 +58,7 @@ export function WorkerCard({
                         alignItems: 'center'
                     }}
                 >
-                    <Text c="dimmed" size="sm">
-                        <Flag country={item.language} />
-                    </Text>
+                    <Flag country={item.language} />
                     <Title
                         order={4}
                         style={{
@@ -73,11 +74,7 @@ export function WorkerCard({
                 <div
                     style={{
                         display: 'flex',
-                        justifyContent:
-                            onEdit || onDelete || onToggleVisibility
-                                ? 'space-between'
-                                : 'center',
-                        alignItems: 'center'
+                        justifyContent: 'center'
                     }}
                 >
                     <CardControls

@@ -95,7 +95,7 @@ export function SelectWorkerModal({
                     pageNumber={pageNumber}
                     setPageNumber={setPageNumber}
                     onClick={onWorkerSelect}
-                    cardMinWidth="15rem"
+                    cardMinWidth="10rem"
                 />
             </div>
         </EntityModal>

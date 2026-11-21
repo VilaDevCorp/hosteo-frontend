@@ -140,7 +140,7 @@ export function WorkersScreen() {
             <DataTable
                 cardViewMode={true}
                 CardComponent={WorkerCard}
-                cardMinWidth="14rem"
+                cardMinWidth="12rem"
                 SkeletonComponent={WorkerCardSkeleton}
                 tableStructure={{ accesorMethods: [], headers: [] }}
                 isLoading={isLoading}
