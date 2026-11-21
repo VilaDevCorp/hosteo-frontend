@@ -1,5 +1,10 @@
-import { Button, Badge, Menu } from '@mantine/core';
-import { IconUpload, IconFileText, IconChevronDown } from '@tabler/icons-react';
+import { Button, Badge, Menu, TextInput } from '@mantine/core';
+import {
+    IconUpload,
+    IconFileText,
+    IconChevronDown,
+    IconSearch
+} from '@tabler/icons-react';
 import { AlertsIndicator } from '../atoms/AlertsIndicator';
 import { SchedulerActions } from './SchedulerActions';
 import { SchedulerDatePicker } from './SchedulerDatePicker';
@@ -19,7 +24,9 @@ export function SchedulerTopBar({
     setSelectedEventIds,
     selectedAssignmentIds,
     setSelectedAssignmentIds,
-    setOpenedDrawer
+    setOpenedDrawer,
+    apartmentSearchKey,
+    setApartmentSearchKey
 }: {
     startOfWeek: string;
     setStartOfWeek: React.Dispatch<React.SetStateAction<string>>;
@@ -28,6 +35,8 @@ export function SchedulerTopBar({
     selectedAssignmentIds: Set<string>;
     setSelectedAssignmentIds: React.Dispatch<React.SetStateAction<Set<string>>>;
     setOpenedDrawer: React.Dispatch<React.SetStateAction<boolean>>;
+    setApartmentSearchKey: React.Dispatch<React.SetStateAction<string>>;
+    apartmentSearchKey: string;
 }) {
     const [generateInstructionsOpened, setGenerateInstructionsOpened] =
         useState<boolean>(false);
@@ -97,20 +106,27 @@ export function SchedulerTopBar({
                         height: '3rem'
                     }}
                 >
-                    <SchedulerActions
-                        selectedEventIds={selectedEventIds}
-                        setSelectedEventIds={setSelectedEventIds}
-                        selectedAssignmentIds={selectedAssignmentIds}
-                        setSelectedAssignmentIds={setSelectedAssignmentIds}
-                    />
                     <div
                         style={{
                             display: 'flex',
-                            gap: '1rem',
-                            alignItems: 'center',
-                            marginLeft: 'auto'
+                            gap: '1rem'
                         }}
                     >
+                        <TextInput
+                            variant="outlined"
+                            style={{
+                                width: '15rem'
+                            }}
+                            placeholder="Filter by apartment"
+                            value={apartmentSearchKey}
+                            onChange={(e) => {
+                                setSelectedAssignmentIds(new Set());
+                                setSelectedEventIds(new Set());
+                                setApartmentSearchKey(e.target.value);
+                            }}
+                            leftSection={<IconSearch size={14} />}
+                        />
+
                         {failedImportedEvents &&
                             failedImportedEvents.length > 0 && (
                                 <Badge
@@ -131,7 +147,7 @@ export function SchedulerTopBar({
                             <Menu.Target>
                                 <Button
                                     variant=""
-                                    size="xs"
+                                    size="sm"
                                     leftSection={<IconChevronDown />}
                                 >
                                     Actions
@@ -156,6 +172,12 @@ export function SchedulerTopBar({
                             </Menu.Dropdown>
                         </Menu>
                     </div>
+                    <SchedulerActions
+                        selectedEventIds={selectedEventIds}
+                        setSelectedEventIds={setSelectedEventIds}
+                        selectedAssignmentIds={selectedAssignmentIds}
+                        setSelectedAssignmentIds={setSelectedAssignmentIds}
+                    />
                 </div>
             </div>
             <ImportModal

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Event } from '../../types/entities';
 import { getStartOfWeek } from '../../utils/utilFunctions';
@@ -40,6 +40,17 @@ export function Scheduler() {
     const [selectedAssignmentIds, setSelectedAssignmentIds] = useState<
         Set<string>
     >(new Set());
+
+    const [apartmentSearchKey, setApartmentSearchKey] = useState<string>('');
+    const [debouncedNameSearch, setDebouncedNameSearch] = useState<string>('');
+
+    useEffect(() => {
+        const timer = setTimeout(
+            () => setDebouncedNameSearch(apartmentSearchKey),
+            500
+        );
+        return () => clearTimeout(timer);
+    }, [apartmentSearchKey]);
 
     const onSelectEvent = (eventId: string) => {
         if (selectedAssignmentIds.size > 0) {
@@ -148,6 +159,8 @@ export function Scheduler() {
                 selectedAssignmentIds={selectedAssignmentIds}
                 setSelectedAssignmentIds={setSelectedAssignmentIds}
                 setOpenedDrawer={setOpenedDrawer}
+                apartmentSearchKey={apartmentSearchKey}
+                setApartmentSearchKey={setApartmentSearchKey}
             />
             <WeeklyCalendar
                 startOfWeek={startOfWeek}
@@ -159,6 +172,7 @@ export function Scheduler() {
                 onSelectAssignment={onSelectAssignment}
                 onEditAssignment={onUpdateAssignment}
                 onDeleteAssignment={onDeleteAssignment}
+                apartmentSearchKey={debouncedNameSearch}
             />
             <AlertsDrawer
                 opened={openedDrawer}

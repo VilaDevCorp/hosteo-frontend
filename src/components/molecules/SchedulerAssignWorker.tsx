@@ -15,7 +15,8 @@ export function SchedulerAssignWorker({
             style={{
                 display: 'flex',
                 gap: '1rem',
-                width: '100%'
+                width: '100%',
+                maxWidth: '10rem'
             }}
         >
             {assignedWorker ? (

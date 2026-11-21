@@ -15,7 +15,7 @@ import {
     getStartOfWeek
 } from '../../utils/utilFunctions';
 import { SchedulerDatePicker } from '../molecules/SchedulerDatePicker';
-import { Button, Select } from '@mantine/core';
+import { Button, Select, Switch } from '@mantine/core';
 import { SelectWorkerModal } from '../modals/SelectWorkerModal';
 import { SchedulerAssignWorker } from '../molecules/SchedulerAssignWorker';
 import {
@@ -60,6 +60,8 @@ export function AssignmentScheduler({
               ? eventAndTaskToAssignmentForm(event, task)
               : ({} as AssignmentFormFields)
     );
+
+    const [apartmentSearchKey, setApartmentSearchKey] = useState<string>('');
 
     useLayoutEffect(() => {
         setSelectedWorker(assignment?.worker);
@@ -171,10 +173,10 @@ export function AssignmentScheduler({
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1rem',
+                        gap: '2rem'
                     }}
                 >
-                    <div style={{display:'flex', gap: '2rem'}}>
+                    <div style={{ display: 'flex', gap: '2rem' }}>
                         <SchedulerAssignWorker
                             assignedWorker={selectedWorker}
                             setSelectWorkerModalOpened={
@@ -204,12 +206,37 @@ export function AssignmentScheduler({
                                     : undefined
                             }
                             allowDeselect={false}
+                            style={{ maxWidth: '10rem' }}
                         />
                     </div>
-                    <SchedulerDatePicker
-                        date={startOfWeek}
-                        setDate={setStartOfWeek}
-                    />
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '2rem',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <SchedulerDatePicker
+                            date={startOfWeek}
+                            setDate={setStartOfWeek}
+                        />
+                        <Switch
+                            label="Only this apartment"
+                            labelPosition="right"
+                            checked={
+                                apartmentSearchKey === event?.apartmentName!
+                            }
+                            onChange={() => {
+                                if (apartmentSearchKey) {
+                                    setApartmentSearchKey('');
+                                } else {
+                                    setApartmentSearchKey(
+                                        event?.apartmentName!
+                                    );
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
 
                 <div
@@ -245,6 +272,7 @@ export function AssignmentScheduler({
                         : event
                 }}
                 setFormFields={setFormFields}
+                apartmentSearchKey={apartmentSearchKey}
             />
             <div
                 style={{

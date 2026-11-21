@@ -18,11 +18,11 @@ import { AssignmentFormFields } from '../../types/forms';
 
 interface WeeklyCalendarProps {
     startOfWeek: string;
+    apartmentSearchKey: string;
     selectedEventIds?: Set<string>;
     onSelectEvent?: (eventId: string) => void;
     onEditEvent?: (eventId: string) => void;
     onDeleteEvent?: (eventId: string) => void;
-
     selectedAssignmentIds?: Set<string>;
     onSelectAssignment?: (assignmentId: string) => void;
     onEditAssignment?: (assignmentId: string) => void;
@@ -34,6 +34,7 @@ interface WeeklyCalendarProps {
 export function WeeklyCalendar(props: WeeklyCalendarProps) {
     const {
         startOfWeek,
+        apartmentSearchKey,
         selectedEventIds,
         onSelectEvent,
         onEditEvent,
@@ -69,7 +70,21 @@ export function WeeklyCalendar(props: WeeklyCalendarProps) {
         refetchOnWindowFocus: true,
         refetchOnReconnect: false,
         retry: false,
-        enabled: !!startOfWeek
+        enabled: !!startOfWeek,
+        select: (schedulerInfo) => {
+            return {
+                events: schedulerInfo.events.filter((event) =>
+                    event.apartmentName
+                        .toLowerCase()
+                        .includes(apartmentSearchKey.toLowerCase())
+                ),
+                assignments: schedulerInfo.assignments.filter((assignment) =>
+                    assignment.task.apartment.name
+                        .toLowerCase()
+                        .includes(apartmentSearchKey.toLowerCase())
+                )
+            };
+        }
     });
 
     const schedulerItemsByDate = useMemo(

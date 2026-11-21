@@ -30,9 +30,9 @@ export function SchedulerDatePicker({
         <div
             style={{
                 display: 'flex',
-                gap: '1rem',
+                gap: '0.5rem',
                 alignItems: 'center',
-                width: '25rem',
+                width: '22rem',
                 height: '2.5rem'
             }}
         >
@@ -47,7 +47,7 @@ export function SchedulerDatePicker({
                 style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1rem'
+                    gap: '0.5rem'
                 }}
             >
                 <ActionIcon
