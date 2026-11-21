@@ -41,7 +41,7 @@ export function EntityModal({
             }}
             styles={{
                 body: {
-                    height: isLaptop ? '40rem' : '100%',
+                    height: isLaptop ? 'auto' : '100%',
                     overflow: 'hidden'
                 }
             }}

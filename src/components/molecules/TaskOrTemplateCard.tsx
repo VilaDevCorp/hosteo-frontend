@@ -25,7 +25,6 @@ export function TaskOrTemplateCard({
         <Card
             w={'100%'}
             miw={'8rem'}
-            h={'8.125rem'}
             style={{
                 gap: '1rem',
                 flexDirection: 'column',
@@ -57,29 +56,46 @@ export function TaskOrTemplateCard({
                 <div
                     style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        justifyContent:
-                            onEdit || onDelete ? 'flex-start' : 'space-between',
                         width: '100%'
                     }}
                 >
-                    <Text size="sm" c="dimmed">
-                        {item.duration} min
-                    </Text>
-                    {'cost' in item && (
-                        <Text size="sm" c="dimmed">
-                            {formatAmount(item.cost)}
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            gap: '3rem',
+                            width: '100%'
+                        }}
+                    >
+                        {'cost' in item && (
+                            <Text size="md">{formatAmount(item.cost)}</Text>
+                        )}
+                        <Text size="md" c="dimmed">
+                            {item.duration} min
                         </Text>
-                    )}
-                    <TaskCategoryBadge category={item.category} />
+                    </div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: '100%',
+                            justifyContent: 'space-between'
+                        }}
+                    >
+                        <TaskCategoryBadge category={item.category} />
+                        <CardControls
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onToggleVisibility={onToggleVisibility}
+                            visible={
+                                'visible' in item ? item.visible : undefined
+                            }
+                        />
+                    </div>
                 </div>
-                <CardControls
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onToggleVisibility={onToggleVisibility}
-                    visible={'visible' in item ? item.visible : undefined}
-                />
             </div>
         </Card>
     );

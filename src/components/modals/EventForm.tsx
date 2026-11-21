@@ -221,7 +221,7 @@ export function EventForm({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
-                minHeight: '400px'
+                minHeight: step == 1 ? '400px' : '0px'
             }}
         >
             <ModalHeader style={{ padding: '0', minHeight: '30px' }}>

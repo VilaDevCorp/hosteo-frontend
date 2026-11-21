@@ -1,6 +1,7 @@
 import { Task } from '../../types/entities';
 import { Button, Card, Text, Title } from '@mantine/core';
 import { IconClockEdit } from '@tabler/icons-react';
+import { formatAmount } from '../../utils/moneyUtils';
 
 export function AlertTaskCard({
     task,
@@ -42,9 +43,19 @@ export function AlertTaskCard({
                 >
                     {task.name}
                 </Title>
-                <Text size="0.8rem" fw={'bold'}>
-                    {task.duration} min
-                </Text>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }}
+                >
+                    <Text size="md">{formatAmount(task.cost)}</Text>
+
+                    <Text size="0.8rem" c={'dimmed'}>
+                        {task.duration} min
+                    </Text>
+                </div>
             </Card.Section>
             <Card.Section
                 p="0.75rem"

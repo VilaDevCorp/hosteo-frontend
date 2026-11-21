@@ -269,46 +269,47 @@ export function TaskOrTemplateForm({
                     <Text size="sm" fw={500}>
                         Steps
                     </Text>
-                    {formFields.steps.length === 0 && (
+                    {formFields.steps.length === 0 ? (
                         <Text c="dimmed" size="sm" fs="italic">
                             No steps added yet.
                         </Text>
-                    )}
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem',
-                            overflowY: 'auto',
-                            padding: '0.25rem'
-                        }}
-                    >
-                        {formFields.steps.map((step, index) => (
-                            <TaskStep
-                                key={index}
-                                index={index}
-                                value={step}
-                                onEdit={(index, value) => {
-                                    setFormFields((oldValue) => {
-                                        const newVal = [...oldValue.steps];
-                                        newVal[index] = value;
-                                        return {
-                                            ...oldValue,
+                    ) : (
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '1rem',
+                                overflowY: 'auto',
+                                padding: '0.25rem'
+                            }}
+                        >
+                            {formFields.steps.map((step, index) => (
+                                <TaskStep
+                                    key={index}
+                                    index={index}
+                                    value={step}
+                                    onEdit={(index, value) => {
+                                        setFormFields((oldValue) => {
+                                            const newVal = [...oldValue.steps];
+                                            newVal[index] = value;
+                                            return {
+                                                ...oldValue,
+                                                steps: newVal
+                                            };
+                                        });
+                                    }}
+                                    onDelete={(index) => {
+                                        const newVal = [...formFields.steps];
+                                        newVal.splice(index, 1);
+                                        setFormFields({
+                                            ...formFields,
                                             steps: newVal
-                                        };
-                                    });
-                                }}
-                                onDelete={(index) => {
-                                    const newVal = [...formFields.steps];
-                                    newVal.splice(index, 1);
-                                    setFormFields({
-                                        ...formFields,
-                                        steps: newVal
-                                    });
-                                }}
-                            />
-                        ))}
-                    </div>
+                                        });
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     <Group align="flex-start" mt="md">
                         <Textarea
