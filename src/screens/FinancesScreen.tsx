@@ -79,7 +79,9 @@ export function FinancesScreen() {
         headers: ['Date', 'Worker', 'Amount', 'Reason', ''],
         accesorMethods: [
             (transaction) =>
-                dayjs.unix(transaction.assignment?.startDate!).format(conf.dateTimeFormat),
+                dayjs
+                    .unix(transaction.assignment?.startDate!)
+                    .format(conf.dateTimeFormat),
             (transaction) => transaction.worker?.name ?? 'Unknown worker',
             (transaction) => <BalanceBadge balance={transaction.amount} />,
             (transaction) => getReason(transaction.assignment)
@@ -184,7 +186,7 @@ export function FinancesScreen() {
                             flex: 1,
                             paddingRight: '0.4rem'
                         }}
-                        className={"thinScroll"}
+                        className={'thinScroll'}
                     >
                         {(balances ?? []).map((balance) => (
                             <BalanceCard
@@ -246,7 +248,7 @@ export function FinancesScreen() {
                                 <span>
                                     <BalanceBadge
                                         balance={selectedBalance.balance}
-                                        textProps={{ size: 'lg' }}
+                                        textProps={{ size: 'xl' }}
                                     />
                                 </span>
                             </div>

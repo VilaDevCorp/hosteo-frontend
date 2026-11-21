@@ -17,7 +17,12 @@ export function BalanceBadge({
               : 'dimmed';
 
     return (
-        <Text c={balanceColor} fw={700} {...textProps}>
+        <Text
+            c={balanceColor}
+            fw={700}
+            {...textProps}
+            style={{ textAlign: 'right' }}
+        >
             {formatAmount(balanceInverse)}
         </Text>
     );

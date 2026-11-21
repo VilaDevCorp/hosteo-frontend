@@ -23,27 +23,27 @@ export function BalanceCard({
             className={styles.selectableCard}
             data-selected={selected}
             onClick={() => onSelect(worker?.id ?? '')}
+            padding={'sm'}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                flex: '0 0 100%'
             }}
         >
             <Card.Section
-                w={'100%'}
+                p={'sm'}
                 style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    gap: '0.5rem',
-                    padding: '1rem'
+                    gap: '0.5rem'
                 }}
             >
                 <Img
                     src={worker?.imageUrl}
                     placeholder="/user_placeholder.svg"
-                    w={'3rem'}
-                    h={'3rem'}
+                    w={'2.5rem'}
+                    h={'2.5rem'}
                     radius={'50%'}
                     fit="cover"
                     alt="Worker picture"
@@ -53,6 +53,7 @@ export function BalanceCard({
                         display: 'flex',
                         flexDirection: 'row',
                         flex: 1,
+                        minWidth: 0,
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}
@@ -60,7 +61,10 @@ export function BalanceCard({
                     <Title order={5} style={{ textAlign: 'center' }}>
                         {worker?.name ?? 'Unknown worker'}
                     </Title>
-                    <BalanceBadge balance={balance} />
+                    <BalanceBadge
+                        balance={balance}
+                        textProps={{ size: 'xl' }}
+                    />
                 </div>
             </Card.Section>
             <Button
