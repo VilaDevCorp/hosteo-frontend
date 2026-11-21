@@ -33,7 +33,6 @@ import { AssignmentTimePicker } from '../atoms/AssignmentTimePicker.tsx';
 import { ASSIGNMENT_STATE, AssignmentState } from '../../types/enums.ts';
 import { AssignmentStateBadge } from '../atoms/AssignmentStateBadge.tsx';
 import { WeeklyCalendar } from './WeeklyCalendar.tsx';
-import { EventAndTaskInfo } from '../molecules/EventAndTaskInfo.tsx';
 
 export function AssignmentScheduler({
     onClose,
@@ -149,8 +148,6 @@ export function AssignmentScheduler({
         endDateError ||
         stateError;
 
-    const eventId = assignment?.event?.id || event?.id;
-
     return (
         <>
             <div
@@ -173,30 +170,48 @@ export function AssignmentScheduler({
                 <div
                     style={{
                         display: 'flex',
-                        gap: '3rem',
-                        alignItems: 'center'
+                        flexDirection: 'column',
+                        gap: '1rem',
                     }}
                 >
+                    <div style={{display:'flex', gap: '2rem'}}>
+                        <SchedulerAssignWorker
+                            assignedWorker={selectedWorker}
+                            setSelectWorkerModalOpened={
+                                setSelectWorkerModalOpened
+                            }
+                        />
+                        <Select
+                            value={formFields.state}
+                            onChange={(val) => {
+                                setFormFields({
+                                    ...formFields,
+                                    state: val as AssignmentState
+                                });
+                                setDirtyState();
+                            }}
+                            data={Object.values(ASSIGNMENT_STATE)}
+                            renderOption={(option) => (
+                                <AssignmentStateBadge
+                                    state={
+                                        option.option.value as AssignmentState
+                                    }
+                                />
+                            )}
+                            error={
+                                stateError && stateDirty
+                                    ? stateMessage
+                                    : undefined
+                            }
+                            allowDeselect={false}
+                        />
+                    </div>
                     <SchedulerDatePicker
                         date={startOfWeek}
                         setDate={setStartOfWeek}
                     />
-                    {eventId && (
-                        <EventAndTaskInfo
-                            eventId={eventId}
-                            task={assignment?.task || task}
-                            apartmentName={
-                                assignment?.event?.apartment?.name ||
-                                event?.apartmentName
-                            }
-                        />
-                    )}
                 </div>
-                <AssignmentTimePicker
-                    formFields={formFields}
-                    setFormFields={setFormFields}
-                    duration={assignment?.task?.duration || task?.duration || 0}
-                />
+
                 <div
                     style={{
                         display: 'flex',
@@ -206,29 +221,12 @@ export function AssignmentScheduler({
                         justifyContent: 'space-between'
                     }}
                 >
-                    <SchedulerAssignWorker
-                        assignedWorker={selectedWorker}
-                        setSelectWorkerModalOpened={setSelectWorkerModalOpened}
-                    />
-                    <Select
-                        value={formFields.state}
-                        onChange={(val) => {
-                            setFormFields({
-                                ...formFields,
-                                state: val as AssignmentState
-                            });
-                            setDirtyState();
-                        }}
-                        data={Object.values(ASSIGNMENT_STATE)}
-                        renderOption={(option) => (
-                            <AssignmentStateBadge
-                                state={option.option.value as AssignmentState}
-                            />
-                        )}
-                        error={
-                            stateError && stateDirty ? stateMessage : undefined
+                    <AssignmentTimePicker
+                        formFields={formFields}
+                        setFormFields={setFormFields}
+                        duration={
+                            assignment?.task?.duration || task?.duration || 0
                         }
-                        allowDeselect={false}
                     />
                 </div>
             </div>

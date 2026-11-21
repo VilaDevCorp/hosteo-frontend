@@ -32,7 +32,8 @@ export function SchedulerDatePicker({
                 display: 'flex',
                 gap: '1rem',
                 alignItems: 'center',
-                width: '25rem'
+                width: '25rem',
+                height: '2.5rem'
             }}
         >
             <Button

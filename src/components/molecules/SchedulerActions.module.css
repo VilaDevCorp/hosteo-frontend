@@ -1,6 +1,7 @@
 .schedulerActionsContainer {
-    background-color: var(--mantine-color-gray-0);
+    background-color: var(--mantine-color-gray-1);
     border-radius: 0.5rem;
+    padding: 0.5rem;
 }
 
 .deselectButton:hover {

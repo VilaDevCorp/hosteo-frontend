@@ -14,8 +14,6 @@ export function SchedulerAssignWorker({
         <div
             style={{
                 display: 'flex',
-                alignItems: 'center',
-                flexDirection: 'column',
                 gap: '1rem',
                 width: '100%'
             }}

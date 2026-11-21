@@ -9,6 +9,7 @@ import {
 import { useCrud } from './useCrud';
 import { Modal } from '@mantine/core';
 import { Z_INDEX } from '../utils/zIndex';
+import { EventAndTaskInfo } from '../components/molecules/EventAndTaskInfo';
 
 export interface IUseAssignmentScheduler {
     onCreateAssignment: (event: EventForAssignment, task: Task) => void;
@@ -53,7 +54,16 @@ export const useAssignmentScheduler = (): IUseAssignmentScheduler => {
         <Modal
             opened={opened}
             onClose={onClose}
-            title="Schedule task"
+            title={
+                <EventAndTaskInfo
+                    eventId={event?.id!}
+                    task={assignment?.task || task}
+                    apartmentName={
+                        assignment?.event?.apartment?.name ||
+                        event?.apartmentName
+                    }
+                />
+            }
             withCloseButton
             size={'xl'}
             zIndex={Z_INDEX.schedulerModal}

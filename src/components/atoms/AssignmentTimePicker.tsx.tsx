@@ -16,10 +16,9 @@ export function AssignmentTimePicker({
         <div
             style={{
                 display: 'flex',
-                alignItems: 'center',
                 flexDirection: 'column',
+                alignItems: 'center',
                 gap: '1rem',
-                width: '16rem'
             }}
         >
             <CustomTimePicker

@@ -1,4 +1,4 @@
-import { Text } from '@mantine/core';
+import { Text, Title } from '@mantine/core';
 import { TaskCategoryBadge } from '../atoms/TaskCategoryBadge';
 import { AlertsInfo, Task } from '../../types/entities';
 import { useQuery } from '@tanstack/react-query';
@@ -27,9 +27,7 @@ export function EventAndTaskInfo({
             style={{
                 height: '100%',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-                maxWidth: '25rem'
+                gap: '1rem'
             }}
         >
             <span
@@ -47,9 +45,10 @@ export function EventAndTaskInfo({
                         style={{ marginRight: '0.5rem' }}
                     />
                 )}
-                <Text c="dimmed" lineClamp={1}>
-                    {apartmentName ?? ''}
-                </Text>
+
+                <Title order={4} lineClamp={1}>
+                    {`${task?.name} (${apartmentName ?? ''})`}
+                </Title>
             </span>
             <div
                 style={{
@@ -59,7 +58,6 @@ export function EventAndTaskInfo({
                     height: '100%'
                 }}
             >
-                {task?.name && <Text lineClamp={1}>{task?.name}</Text>}
                 {task?.category && (
                     <TaskCategoryBadge category={task.category} />
                 )}

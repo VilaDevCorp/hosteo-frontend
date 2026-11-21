@@ -5,7 +5,6 @@ import {
     IconEdit,
     IconHome,
     IconLogout,
-    IconTemplate,
     IconUsers
 } from '@tabler/icons-react';
 import { useLocation, useNavigate } from 'react-router-dom';

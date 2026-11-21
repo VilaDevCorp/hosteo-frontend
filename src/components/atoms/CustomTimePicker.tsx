@@ -36,14 +36,15 @@ export function CustomTimePicker({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    width: '100%'
+                    width: '100%',
+                    gap: '1rem'
                 }}
             >
                 <div
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1rem'
+                        gap: '0.5rem'
                     }}
                 >
                     {isStart ? (
