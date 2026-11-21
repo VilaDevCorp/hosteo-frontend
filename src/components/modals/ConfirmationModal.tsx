@@ -1,4 +1,4 @@
-import { Button, Modal, Text } from '@mantine/core';
+import { Button, getThemeColor, Modal, Text, useMantineTheme } from '@mantine/core';
 import { ExtendedCustomColors } from '../../mantine';
 import { ModalButtons } from '../molecules/ModalButtons';
 import { IconAlertTriangle } from '@tabler/icons-react';
@@ -21,6 +21,7 @@ export const ConfirmationModal = ({
     onClose: () => void;
     confirmModalProperties: ConfirmModalProperties | undefined;
 }) => {
+    const theme = useMantineTheme();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const onConfirmAndClose = async () => {
@@ -56,14 +57,17 @@ export const ConfirmationModal = ({
                         alignItems: 'center'
                     }}
                 >
-                    <IconAlertTriangle color={color} size={24} />
+                    <IconAlertTriangle
+                        color={getThemeColor(color, theme)}
+                        size={24}
+                    />
                     <Text fw={700}>{title}</Text>
                 </div>
             }
             opened={opened}
             onClose={onClose}
         >
-            <Text size="sm">{message}</Text>
+            <Text size="sm" mb={'lg'}>{message}</Text>
             <ModalButtons>
                 <Button onClick={onClose} color={color} variant="outline">
                     Cancel

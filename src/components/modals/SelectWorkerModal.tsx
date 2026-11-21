@@ -65,7 +65,7 @@ export function SelectWorkerModal({
                     overflowX: 'hidden',
                     overflowY: 'auto',
                     width: 'auto',
-                    gap: '1rem'
+                    gap: '1rem',
                 }}
             >
                 <TopControls

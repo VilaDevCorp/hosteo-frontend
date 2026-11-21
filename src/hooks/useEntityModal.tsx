@@ -23,6 +23,7 @@ interface UseEntityModalProps<T extends BaseEntity> {
     removeHeader?: boolean;
     ModalBodyComponent: ComponentType<EntityModalBodyProps<T>>;
     ModalBodySkeleton: ComponentType;
+    modalSize?: 'sm' | 'md' | 'lg';
 }
 
 interface UseEntityModalReturn {
@@ -38,7 +39,8 @@ export const useEntityModal = <T extends BaseEntity>({
     relatedEntitySecondary,
     removeHeader,
     ModalBodyComponent,
-    ModalBodySkeleton
+    ModalBodySkeleton,
+    modalSize = 'lg'
 }: UseEntityModalProps<T>): UseEntityModalReturn => {
     const [entityId, setEntityId] = useState<string | undefined>(undefined);
 
@@ -87,6 +89,7 @@ export const useEntityModal = <T extends BaseEntity>({
                           : defaultTitle
                 }
                 removeHeader={removeHeader}
+                size={modalSize}
             >
                 {isLoading && entityId ? (
                     <ModalBodySkeleton />

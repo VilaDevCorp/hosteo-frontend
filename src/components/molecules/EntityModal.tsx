@@ -10,6 +10,7 @@ interface EntityModalProps {
     children: React.ReactNode;
     onExited?: () => void;
     removeHeader?: boolean;
+    size?: 'sm'| 'md' | 'lg';
 }
 
 export function EntityModal({
@@ -18,14 +19,15 @@ export function EntityModal({
     title,
     children,
     onExited,
-    removeHeader
+    removeHeader, 
+    size='lg'
 }: EntityModalProps) {
     const { isLaptop } = useScreen();
     return (
         <Modal
             opened={opened}
             onClose={onClose}
-            size={'lg'}
+            size={size}
             zIndex={Z_INDEX.entityModal}
             title={title}
             withCloseButton={!removeHeader}
@@ -42,7 +44,7 @@ export function EntityModal({
             styles={{
                 body: {
                     height: isLaptop ? 'auto' : '100%',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
                 }
             }}
         >

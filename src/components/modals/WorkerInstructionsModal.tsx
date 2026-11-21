@@ -31,6 +31,7 @@ export function WorkerInstructionsModal({
             }}
         >
             <ScrollArea
+                className='thinScroll'
                 style={{ height: isTablet ? '60vh' : '100%' }}
                 scrollbars="y"
             >

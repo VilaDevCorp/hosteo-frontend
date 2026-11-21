@@ -53,7 +53,8 @@ export function FinancesScreen() {
             removeHeader: true,
             relatedEntity: payBalance,
             ModalBodyComponent: PaymentForm,
-            ModalBodySkeleton: PaymentFormSkeleton
+            ModalBodySkeleton: PaymentFormSkeleton,
+            modalSize: 'sm'
         });
 
     const {
@@ -80,7 +81,7 @@ export function FinancesScreen() {
         accesorMethods: [
             (transaction) =>
                 dayjs
-                    .unix(transaction.assignment?.startDate!)
+                    .unix(transaction.assignment?.startDate ?? transaction.createdAt)
                     .format(conf.dateTimeFormat),
             (transaction) => transaction.worker?.name ?? 'Unknown worker',
             (transaction) => <BalanceBadge balance={transaction.amount} />,

@@ -1,4 +1,4 @@
-import { Button, Card, Group, Textarea, Title } from '@mantine/core';
+import { Button, Card, Textarea, Title } from '@mantine/core';
 import { IconCopy } from '@tabler/icons-react';
 import { WorkerInstructions } from '../../types/entities';
 import {
@@ -43,8 +43,7 @@ export function WorkerInstructionsCard({ item }: { item: WorkerInstructions }) {
             <div
                 style={{
                     display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'flex-start'
+                    gap: '1rem'
                 }}
             >
                 <div
@@ -69,6 +68,15 @@ export function WorkerInstructionsCard({ item }: { item: WorkerInstructions }) {
                     <Title order={5} ta="center">
                         {item.worker.name}
                     </Title>
+                    <Button
+                        variant="light"
+                        size="sm"
+                        style={{ marginTop: 'auto' }}
+                        leftSection={<IconCopy size={16} />}
+                        onClick={copyInstructions}
+                    >
+                        Copy
+                    </Button>
                 </div>
                 <div
                     style={{
@@ -81,10 +89,9 @@ export function WorkerInstructionsCard({ item }: { item: WorkerInstructions }) {
                 >
                     <Textarea
                         value={item.instructions}
-                        readOnly
                         autosize
-                        minRows={6}
-                        maxRows={12}
+                        minRows={2}
+                        maxRows={6}
                         styles={{
                             input: {
                                 fontFamily: 'monospace',
@@ -92,16 +99,6 @@ export function WorkerInstructionsCard({ item }: { item: WorkerInstructions }) {
                             }
                         }}
                     />
-                    <Group justify="flex-end">
-                        <Button
-                            variant="light"
-                            size="xs"
-                            leftSection={<IconCopy size={16} />}
-                            onClick={copyInstructions}
-                        >
-                            Copy
-                        </Button>
-                    </Group>
                 </div>
             </div>
         </Card>

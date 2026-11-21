@@ -150,6 +150,9 @@ export function AssignmentScheduler({
         endDateError ||
         stateError;
 
+    const apartmentName =
+        event?.apartmentName || assignment?.event.apartment.name;
+
     return (
         <>
             <div
@@ -223,16 +226,12 @@ export function AssignmentScheduler({
                         <Switch
                             label="Only this apartment"
                             labelPosition="right"
-                            checked={
-                                apartmentSearchKey === event?.apartmentName!
-                            }
+                            checked={apartmentSearchKey === apartmentName}
                             onChange={() => {
                                 if (apartmentSearchKey) {
                                     setApartmentSearchKey('');
                                 } else {
-                                    setApartmentSearchKey(
-                                        event?.apartmentName!
-                                    );
+                                    setApartmentSearchKey(apartmentName!);
                                 }
                             }}
                         />
