@@ -221,7 +221,7 @@ export function ApartmentsScreen() {
                         label={isTablet ? 'Search by name' : undefined}
                     />
                 }
-                filters={
+                firstTopRow={
                     <>
                         <MultiSelect
                             variant="outlined"
@@ -244,6 +244,27 @@ export function ApartmentsScreen() {
                                 />
                             )}
                         />
+                    </>
+                }
+                secondTopRow={
+                    <>
+                        <Switch
+                            variant="filled"
+                            onChange={() => setCardViewMode(!cardViewMode)}
+                            checked={cardViewMode}
+                            onLabel={
+                                <IconLayoutGrid
+                                    size={16}
+                                    color="var(--mantine-color-background-0)"
+                                />
+                            }
+                            offLabel={
+                                <IconLayoutList
+                                    size={16}
+                                    color="var(--mantine-color-background-0)"
+                                />
+                            }
+                        />
                         <Switch
                             label="Show hidden"
                             checked={showHidden}
@@ -253,25 +274,6 @@ export function ApartmentsScreen() {
                             }}
                         />
                     </>
-                }
-                cardViewModeComponent={
-                    <Switch
-                        variant="filled"
-                        onChange={() => setCardViewMode(!cardViewMode)}
-                        checked={cardViewMode}
-                        onLabel={
-                            <IconLayoutGrid
-                                size={16}
-                                color="var(--mantine-color-background-0)"
-                            />
-                        }
-                        offLabel={
-                            <IconLayoutList
-                                size={16}
-                                color="var(--mantine-color-background-0)"
-                            />
-                        }
-                    />
                 }
                 addButton={
                     <Button

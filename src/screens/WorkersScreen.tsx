@@ -108,6 +108,7 @@ export function WorkersScreen() {
             <TopControls
                 keywordFilter={
                     <TextInput
+                    style={{maxWidth: '20rem'}}
                         variant="outlined"
                         value={nameSearch}
                         placeholder={isTablet ? undefined : 'Search by name'}
@@ -119,7 +120,7 @@ export function WorkersScreen() {
                         label={isTablet ? 'Search by name' : undefined}
                     />
                 }
-                filters={
+                secondTopRow={
                     <Switch
                         label="Show hidden"
                         checked={showHidden}

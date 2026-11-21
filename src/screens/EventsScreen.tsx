@@ -206,7 +206,7 @@ export function EventsScreen() {
                         label={isTablet ? 'Search by apartment' : undefined}
                     />
                 }
-                filters={
+                firstTopRow={
                     <>
                         <MultiSelect
                             variant="outlined"
@@ -258,6 +258,27 @@ export function EventsScreen() {
                                 clearable
                             />
                         </div>
+                    </>
+                }
+                secondTopRow={
+                    <>
+                        <Switch
+                            variant="filled"
+                            onChange={() => setCardViewMode(!cardViewMode)}
+                            checked={cardViewMode}
+                            onLabel={
+                                <IconLayoutGrid
+                                    size={16}
+                                    color="var(--mantine-color-background-0)"
+                                />
+                            }
+                            offLabel={
+                                <IconLayoutList
+                                    size={16}
+                                    color="var(--mantine-color-background-0)"
+                                />
+                            }
+                        />
                         <Switch
                             label="Show hidden"
                             checked={showHidden}
@@ -268,25 +289,6 @@ export function EventsScreen() {
                         />
                     </>
                 }
-                cardViewModeComponent={
-                    <Switch
-                        variant="filled"
-                        onChange={() => setCardViewMode(!cardViewMode)}
-                        checked={cardViewMode}
-                        onLabel={
-                            <IconLayoutGrid
-                                size={16}
-                                color="var(--mantine-color-background-0)"
-                            />
-                        }
-                        offLabel={
-                            <IconLayoutList
-                                size={16}
-                                color="var(--mantine-color-background-0)"
-                            />
-                        }
-                    />
-                }
                 addButton={
                     <Button
                         leftSection={<IconPlus />}
@@ -296,7 +298,10 @@ export function EventsScreen() {
                     </Button>
                 }
                 filtersOnModalActivated={
-                    stateSearch.length > 0 || !!fromDate || !!toDate || showHidden
+                    stateSearch.length > 0 ||
+                    !!fromDate ||
+                    !!toDate ||
+                    showHidden
                 }
             />
             <DataTable

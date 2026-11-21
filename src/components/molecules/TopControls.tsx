@@ -6,16 +6,16 @@ import { FiltersModal } from '../modals/FiltersModal';
 
 interface TopControlsProps {
     keywordFilter?: React.ReactNode;
-    filters?: React.ReactNode;
-    cardViewModeComponent?: React.ReactNode;
+    firstTopRow?: React.ReactNode;
+    secondTopRow?: React.ReactNode;
     addButton?: React.ReactNode;
     filtersOnModalActivated?: boolean;
 }
 
 export function TopControls({
     keywordFilter,
-    filters,
-    cardViewModeComponent,
+    firstTopRow,
+    secondTopRow,
     addButton,
     filtersOnModalActivated
 }: TopControlsProps) {
@@ -47,18 +47,26 @@ export function TopControls({
                     }}
                 >
                     {keywordFilter}
-                    {filters}
+                    {firstTopRow}
                 </div>
                 {addButton}
             </div>
-            {cardViewModeComponent}
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    flex: 1
+                }}
+            >
+                {secondTopRow}
+            </div>
         </section>
     ) : (
         <section
             style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                {cardViewModeComponent}
+                {secondTopRow}
                 {addButton}
             </div>
             <div
@@ -69,7 +77,7 @@ export function TopControls({
                     alignItems: 'center'
                 }}
             >
-                {filters && (
+                {firstTopRow && (
                     <Indicator disabled={!filtersOnModalActivated}>
                         <ActionIcon
                             variant="light"
@@ -88,7 +96,7 @@ export function TopControls({
                     onClose={() => setFiltersOpened(false)}
                     title="Filters"
                 >
-                    {filters}
+                    {firstTopRow}
                 </FiltersModal>
             )}
         </section>

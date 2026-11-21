@@ -119,9 +119,9 @@ export function TemplatesScreen() {
                     />
                 }
                 // Only filter is search by name
-                filters={null}
+                firstTopRow={null}
                 // Card view only, so no switch needed. Passing null or empty fragment.
-                cardViewModeComponent={null}
+                secondTopRow={null}
                 addButton={
                     <Button
                         leftSection={<IconPlus />}
