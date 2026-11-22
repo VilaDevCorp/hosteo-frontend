@@ -34,7 +34,8 @@ export const ERROR_MSG: Record<ErrorCode, string> = {
         'The assignment cannot start before the event ends',
     [ERROR_CODE.ENTITY_FROZEN]:
         'The entity is frozen and cannot be modified',
-    [ERROR_CODE.UNEXPECTED_ERROR]: 'An internal error occurred'
+    [ERROR_CODE.UNEXPECTED_ERROR]: 'An internal error occurred',
+    [ERROR_CODE.INVALID_DATE_RANGE]: 'The dates cannot be equal and end date should be later than start date.'
 };
 
 export const getErrorMessage = (code?: string): string | undefined => {
